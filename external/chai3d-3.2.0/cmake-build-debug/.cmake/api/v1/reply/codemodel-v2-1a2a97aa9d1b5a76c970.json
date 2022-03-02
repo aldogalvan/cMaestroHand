@@ -1,0 +1,472 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						4
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						32
+					]
+				},
+				{
+					"build" : "extras/GLFW",
+					"jsonFile" : "directory-extras.GLFW-Debug-82c6b7d1cb2b6857bd57.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "extras/GLFW",
+					"targetIndexes" : 
+					[
+						35
+					]
+				},
+				{
+					"build" : "examples",
+					"childIndexes" : 
+					[
+						3
+					],
+					"jsonFile" : "directory-examples-Debug-1c8b83b621b6ef38a245.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "examples"
+				},
+				{
+					"build" : "examples/GLFW",
+					"jsonFile" : "directory-examples.GLFW-Debug-fe1a47643dc95f9aa445.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 0,
+					"source" : "examples/GLFW",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28,
+						29,
+						30
+					]
+				},
+				{
+					"build" : "utils",
+					"childIndexes" : 
+					[
+						5
+					],
+					"jsonFile" : "directory-utils-Debug-ecc62ddb27eede1f7ffa.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "utils"
+				},
+				{
+					"build" : "utils/CLI",
+					"jsonFile" : "directory-utils.CLI-Debug-1d299f46b14ebeab427d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 0,
+					"source" : "utils/CLI",
+					"targetIndexes" : 
+					[
+						31,
+						33,
+						34
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						2,
+						3,
+						4,
+						5
+					],
+					"name" : "CHAI3D",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28,
+						29,
+						30,
+						31,
+						32,
+						33,
+						34
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						35
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 3,
+					"id" : "01-mydevice::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-01-mydevice-Debug-8115d4585de29f5ce24a.json",
+					"name" : "01-mydevice",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "02-multi-devices::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-02-multi-devices-Debug-2d7f9bf6bffefd2ae545.json",
+					"name" : "02-multi-devices",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "03-analytics::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-03-analytics-Debug-9ae995bcd186c0133019.json",
+					"name" : "03-analytics",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "04-shapes::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-04-shapes-Debug-235eca84b10d8792142f.json",
+					"name" : "04-shapes",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "05-fonts::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-05-fonts-Debug-8a662a2569fb934b7e93.json",
+					"name" : "05-fonts",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "06-images::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-06-images-Debug-2d47dc8b1638ade2954a.json",
+					"name" : "06-images",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "07-mouse-select::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-07-mouse-select-Debug-71e646772a85f5587bb7.json",
+					"name" : "07-mouse-select",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "08-shaders::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-08-shaders-Debug-5f0ff23c5fb981714d29.json",
+					"name" : "08-shaders",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "09-magnets::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-09-magnets-Debug-8b6ba89ff73433c57244.json",
+					"name" : "09-magnets",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "10-oring::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-10-oring-Debug-cb520ae112b3dbe1621b.json",
+					"name" : "10-oring",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "11-effects::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-11-effects-Debug-743b1e8b2658f358a6b3.json",
+					"name" : "11-effects",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "12-polygons::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-12-polygons-Debug-d1ee840be071d99168e5.json",
+					"name" : "12-polygons",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "13-primitives::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-13-primitives-Debug-1ffbb8b450a2068166d5.json",
+					"name" : "13-primitives",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "14-textures::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-14-textures-Debug-4eb296c7809bd4df7a34.json",
+					"name" : "14-textures",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "15-paint::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-15-paint-Debug-b46a8d0c5662f5f8cf2d.json",
+					"name" : "15-paint",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "16-friction::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-16-friction-Debug-66b6ad0b256bc64c04e9.json",
+					"name" : "16-friction",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "17-shading::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-17-shading-Debug-9f0b1b70537f31249a59.json",
+					"name" : "17-shading",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "18-endoscope::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-18-endoscope-Debug-234fa75703a39841f2fe.json",
+					"name" : "18-endoscope",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "19-space::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-19-space-Debug-beccc5b138d2f01e7b31.json",
+					"name" : "19-space",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "20-map::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-20-map-Debug-e2b4c6b5e9eadb945dce.json",
+					"name" : "20-map",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "21-object::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-21-object-Debug-d6af46e529eafbec6389.json",
+					"name" : "21-object",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "22-chrome::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-22-chrome-Debug-66fe118054d0896c9018.json",
+					"name" : "22-chrome",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "23-tooth::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-23-tooth-Debug-c8b1e32fca98faffc747.json",
+					"name" : "23-tooth",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "24-turntable::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-24-turntable-Debug-63b0419dba6dfa85cebf.json",
+					"name" : "24-turntable",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "25-sounds::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-25-sounds-Debug-735a13ddd1f9534f9ed8.json",
+					"name" : "25-sounds",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "26-video::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-26-video-Debug-3a74625801d309466eb3.json",
+					"name" : "26-video",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "27-multiframes::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-27-multiframes-Debug-11667da274324e504471.json",
+					"name" : "27-multiframes",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "28-voxel-basic::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-28-voxel-basic-Debug-9c15633548dae51e86d2.json",
+					"name" : "28-voxel-basic",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "29-voxel-isosurface::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-29-voxel-isosurface-Debug-b5cf25a60e9977738138.json",
+					"name" : "29-voxel-isosurface",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "30-voxel-colormap::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-30-voxel-colormap-Debug-96779fdc26752da92d72.json",
+					"name" : "30-voxel-colormap",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "31-pointcloud::@f005895eb4a0eba602f4",
+					"jsonFile" : "target-31-pointcloud-Debug-ddcdd5f81b8693869566.json",
+					"name" : "31-pointcloud",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "cfont::@f095ec672d2395d99761",
+					"jsonFile" : "target-cfont-Debug-7ca91c30ba7e43fadc75.json",
+					"name" : "cfont",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "chai3d::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-chai3d-Debug-6d442d8322d95948232a.json",
+					"name" : "chai3d",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "cimage::@f095ec672d2395d99761",
+					"jsonFile" : "target-cimage-Debug-c0e50731ea85429f99a5.json",
+					"name" : "cimage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "cshader::@f095ec672d2395d99761",
+					"jsonFile" : "target-cshader-Debug-5ba27019d14884f00a9d.json",
+					"name" : "cshader",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "glfw::@315c9cf95d271d8f9050",
+					"jsonFile" : "target-glfw-Debug-8e30ac357001c067a46c.json",
+					"name" : "glfw",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/aldo/chai3d-3.2.0/cmake-build-debug",
+		"source" : "/home/aldo/chai3d-3.2.0"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

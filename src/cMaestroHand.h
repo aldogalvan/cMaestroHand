@@ -12,7 +12,7 @@
 #ifndef MAESTRO_CHAI3D_CMAESTROHAND_H
 #define MAESTRO_CHAI3D_CMAESTROHAND_H
 
-namespace chai3d {
+using namespace chai3d;
 
     class cMaestroHand{
 
@@ -23,7 +23,7 @@ namespace chai3d {
         //--------------------------------------------------------------------------
 
         //! Constructor for hMaestroHand
-        cMaestroHand();
+        cMaestroHand(cWorld * a_world);
 
         //! Destructor for hMaestroHand
         ~cMaestroHand() {
@@ -42,9 +42,6 @@ namespace chai3d {
         // PRIVATE METHODS
         //--------------------------------------------------------------------------
 
-        // This function creates the palm for the visualizer
-        void createPalm(void);
-
         // This function creates a index finger object
         void createIndexFinger(void);
 
@@ -54,21 +51,33 @@ namespace chai3d {
         // This function creates a thumb object
         void createThumb(void);
 
-        // Updates the joint angle values from the Maestro
-        double *updateJointAngles(void);
 
         // Commands the desired joint torque to the Maestro
         bool commandJointTorque(void);
 
+        // Compute parameters
+        double* M3KL1(const double A1, const double B1, const double C1,
+                     const double PHI1, const double PHI3);
+
+        // Smooths the sensor values with a running avg
+        double** smoothSensorValues(double* noisy);
+
+    public:
+
+        // This function updates the cHand visualizer with new coordinates
+        std::vector<cVector3d*> updateCHandAngles(double* idx_finger = 0, double* middle_finger = 0, double* thumb = 0);
+
     public:
 
         //--------------------------------------------------------------------------
-        // PUBLIC METHODS
+        // PUBLIC METHOD
         //--------------------------------------------------------------------------
 
-        // This function updates the cHand visualizer with new coordinates
-        void updateKinematics(void);
+        void commandFingertipForce(const cVector3d & force_idx = 0, const cVector3d & force_mid = 0,
+                                   const cVector3d& force_thumb = 0);
 
+        // Updates the joint angle values from the Maestro
+        void updateJointAngles(std::vector<cVector3d*>& a_pos);
 
 
     public:
@@ -100,14 +109,23 @@ namespace chai3d {
 
         // Index finger chai3d
         cMaestroDigit *h_index;
+        bool use_idx = 0;
 
         // Middle finger chai3d
         cMaestroDigit *h_middle;
+        bool use_middle = 0;
 
         // Thumb chai3d
         cMaestroThumb *h_thumb;
+        bool use_thumb;
 
+        // Running Average
+        double run_avg[16];
+        int num_sensors = 16;
+        int count = 10;
+
+    private:
+        cWorld* m_world;
     };
 
 #endif //MAESTRO_CHAI3D_CMAESTROHAND_H
-}

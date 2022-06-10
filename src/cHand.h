@@ -48,6 +48,7 @@
 //------------------------------------------------------------------------------
 //#include <fstream>
 //#include <string>
+#include <variant>
 #include "world/CGenericObject.h"
 #include "world/CMultiMesh.h"
 #include "world/CShapeSphere.h"
@@ -81,6 +82,8 @@ namespace chai3d {
 	This class implements a hand visualizer.
 */
 //==============================================================================
+
+
 	class cHand : public cGenericObject
 	{
 
@@ -90,7 +93,7 @@ namespace chai3d {
 		//--------------------------------------------------------------------------
 
 		//! Constructor of cHand.
-		cHand();
+		cHand(cWorld* a_world);
 
 		//! Destructor of cHand.
 		virtual ~cHand();
@@ -120,6 +123,9 @@ namespace chai3d {
 		//! get positions of all center of rotations plus fingertips
 		std::vector<std::vector<cVector3d*>> getHandCenters();
 
+        //! get positions of the fingertips
+        std::vector<cVector3d*> getFingertipCenters();
+
 		//! initialization for both transforms and graphics (uses the primitive-based initialization) 
 		void initialize(const std::vector<std::vector<cTransform>>&, bool hasarcpalm = false);
 
@@ -145,14 +151,14 @@ namespace chai3d {
 		//! Access number of degrees of freedom for one finger
 		inline int getdof_finger(int id) { return this->ndof_finger[id]; }
 
-
-
 		//! function to print a cTransform
 		void printcTransform(cTransform T, std::string Tname);
 		//! function to print a cMatrix3d
 		void printcMatrix3d(cMatrix3d M, std::string Mname);
 		//! function to print a cVector3d
 		void printcVector3d(cVector3d V, std::string Vname);
+
+
 
 	//--------------------------------------------------------------------------
 	// PROTECTED METHODS:
@@ -198,7 +204,8 @@ protected:
 	//! stores all the graphics
 	std::vector<std::vector<cMultiMesh*>> graphics_container;
 	//! graphics for axes of rotation
-	std::vector<std::vector<cMesh*>> axesArrows; // 
+	std::vector<std::vector<cMesh*>> axesArrows; //
+
 	//! contains graphics for visualization of the palm
 	cMultiMesh* palm_graphic_container;
 
@@ -207,6 +214,9 @@ protected:
 
 	//! Pi, needed for forward kinematics
 	double Pi = 3.14159;
+
+private:
+        cWorld* m_world;
 
 public:
 	//! default cTransform collection for the Tkach hand model
@@ -388,6 +398,7 @@ public:
 	};
 
 };
+
 
 //------------------------------------------------------------------------------
 } // namespace chai3d

@@ -94,6 +94,7 @@ public:
     bool run(double time);
     bool updateJointAngles(double* joint_angles);
     bool commandJointTorque(double *joint_torques,double* desired_angle, double* actual_torque);
+    void smoothSensorData(void);
 
     bool ExitManager();
     int kbhit();

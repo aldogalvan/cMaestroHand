@@ -7,85 +7,6 @@
 //------------------------------------------------------------------------------
 using namespace chai3d;
 using namespace std;
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// CHAND MEASUREMENTS
-//------------------------------------------------------------------------------
-
-// Pi
-double Pi = 3.14159;
-
-// Initial hand pose
-std::vector<double> vecstart{
-        0 * 30 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), -0 * 10 * (Pi / 180), -0 * 10 * (Pi / 180),
-        0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-        0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-        0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-        0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180)
-};
-
-// First principal component (used to drive the hand shape from one sensor)
-std::vector<double> PC1{
-        0.03445656, 0.191433, -0.0310968, -0.07660658, -0.11885343,
-        0.00317037, 0.22895402, 0.00754185, 0.31359066, 0.21799484,
-        -0.00417658, 0.2861582, 0.00334999, 0.35693029, 0.27684938,
-        -0.01066, 0.28191222, 0.00776594, 0.35906561, 0.23993875,
-        -0.03012474, 0.25982226, 0.00517352, 0.27148087, 0.2919739
-};
-
-
-
-// Hand geometry (phalanxes lenght)
-std::vector<std::vector<cVector3d>> fingertransl =
-        {
-                /********************************************************/
-                // Thumb
-                {
-                        cVector3d(-0.060f, 0.040f, -0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.04622f),
-                        cVector3d(0.03157f, 0.0f, 0.0f),
-                },
-                /********************************************************/
-                // Index
-                {
-                        cVector3d(0.0f, 0.025f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.0f, 0.0f, 0.03978f),
-                        cVector3d(0.02238f, 0.0f, 0.0f)
-                },
-                /********************************************************/
-                // Middle
-                {
-                        cVector3d(0.0f, 0.0f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.0f, 0.0f, 0.04463f),
-                        cVector3d(0.02633f, 0.0f, 0.0f)
-                },
-                /********************************************************/
-                // Ring
-                {
-                        cVector3d(0.0f, -0.025f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.0f, 0.0f, 0.04137f),
-                        cVector3d(0.02565f, 0.0f, 0.0f)
-                },
-                /********************************************************/
-                // Little
-                {
-                        cVector3d(0.0f, -0.05f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.00f, 0.0f, 0.0f),
-                        cVector3d(0.0f, 0.0f, 0.03274f),
-                        cVector3d(0.01811f, 0.0f, 0.0f)
-                }
-        };
-
 
 //------------------------------------------------------------------------------
 // GENERAL SETTINGS
@@ -105,6 +26,7 @@ bool fullscreen = false;
 
 // mirrored display
 bool mirroredDisplay = false;
+//! ==================================================================
 
 
 //------------------------------------------------------------------------------
@@ -146,6 +68,8 @@ cThread* hapticsThread;
 
 // a handle to window display context
 GLFWwindow* window = NULL;
+
+cShapeBox* box;
 
 // current width of window
 int width  = 0;
@@ -265,6 +189,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+
     // get width and height of window
     glfwGetWindowSize(window, &width, &height);
 
@@ -294,6 +219,7 @@ int main(int argc, char* argv[])
 #endif
 
 
+
     //--------------------------------------------------------------------------
     // WORLD - CAMERA - LIGHTING
     //--------------------------------------------------------------------------
@@ -309,7 +235,7 @@ int main(int argc, char* argv[])
     world->addChild(camera);
 
     // position and orient the camera
-    camera->set( cVector3d (0.5, 0.0, 0.0),    // camera position (eye)
+    camera->set( cVector3d (0.25, 0.3, 0.05),    // camera position (eye)
                  cVector3d (0.0, 0.0, 0.0),    // look at position (target)
                  cVector3d (0.0, 0.0, 1.0));   // direction of the (up) vector
 
@@ -342,7 +268,13 @@ int main(int argc, char* argv[])
     hand = new cMaestroHand(world);
 
     // insert cursor inside world
-    world->addChild(hand);
+    world->addChild(hand->h_hand);
+
+    box = new cShapeBox(.05,.05,.05);
+    world->addChild(box);
+    box->setLocalPos(.1,0.05,-.05);
+
+
 
     //--------------------------------------------------------------------------
     // WIDGETS
@@ -534,13 +466,19 @@ void updateHaptics(void)
     simulationRunning  = true;
     simulationFinished = false;
 
+    //! vector of haptic points
+    std::vector<cVector3d*> goal_pos;
+    std::vector<cVector3d*> proxy_pos;
+
     // main haptic simulation loop
     while(simulationRunning)
     {
         /////////////////////////////////////////////////////////////////////
         // READ HAPTIC DEVICE
         /////////////////////////////////////////////////////////////////////
-
+        std::vector<cVector3d*> goal_pos;
+        auto ret = hand->updateCHandAngles();
+        //std::cout << "good" << std::endl;
 
 
         /////////////////////////////////////////////////////////////////////
@@ -572,4 +510,4 @@ void updateHaptics(void)
 
 //! ==================================================================
 //! MAESTRO INVERSE/FORWARD KINEMATICS/DYNAMICS FUNCTIONS
-//! ==================================================================
+

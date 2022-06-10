@@ -76,6 +76,7 @@ target_link_libraries(maestro3 esmacat soem)
 
 #CHAI-3D
 # include Chai3d
+include_directories(include/chai3d-3.2.0)
 # -- this is required by Chai3d to pick the correct path for OpenGL headers
 FIND_PACKAGE(CHAI3D REQUIRED)
 ADD_DEFINITIONS(${CHAI3D_DEFINITIONS})
@@ -99,14 +100,17 @@ FIND_PACKAGE(Eigen3 REQUIRED)
 #
 
 # header search path
-include_directories (src)
+include_directories(src)
 
 # static library source files
 file (GLOB MAESTRO_HAPTICS_SOURCES src/*.cpp src/*.h)
 
 # static library
-add_library (maestro_chai3d STATIC ${MAESTRO_HAPTICS_SOURCES} src/cMaestroThumb.cpp src/cMaestroThumb.h)
+add_library (maestro_chai3d STATIC ${MAESTRO_HAPTICS_SOURCES})
 
 # Link to libraries
-target_link_libraries(maestro_chai3d CHAI3D maestro3 Eigen3::Eigen)
+target_link_libraries(maestro_chai3d maestro3 ${CHAI3D_LIBRARIES} Eigen3::Eigen glfw)
+
+# build examples
+add_subdirectory(examples)
 

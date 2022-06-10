@@ -12,13 +12,13 @@
 //------------------------------------------------------------------------------
 class cMaestroDigit;
 //------------------------------------------------------------------------------
-
+using namespace chai3d;
 //==============================================================================
 
 #ifndef MAESTRO_CHAI3D_CMAESTRODIGIT_H
 #define MAESTRO_CHAI3D_CMAESTRODIGIT_H
 
-class cMaestroDigit : public chai3d::cGenericObject
+class cMaestroDigit : public cGenericObject
 {
 
 public:
@@ -27,10 +27,10 @@ public:
     //--------------------------------------------------------------------------
 
     //! Constructor of cPhantomDevice.
-    cMaestroDigit(chai3d::cHand* a_hand);
+    cMaestroDigit(){};
 
     //! Destructor of cPhantomDevice.
-    virtual ~cMaestroDigit();
+    virtual ~cMaestroDigit(){};
 
 public:
 
@@ -46,6 +46,9 @@ public:
 
     // compute fake angles for finger exoskeleton (use for debugin)
     void pseudoComputeJointAnglesFinger(double joint_angle_sensor_MCP, double joint_angle_sensor_PIP);
+
+    // This method sets the desired force at the fingertip
+    void commandFingertipForce(Eigen::Vector3d a_force);
 
     // return the vector of finger angles
     double* getJointAngles(void);
@@ -70,8 +73,6 @@ public:
     void AssignIndexOfExoJointAngleSensorArrayHWInterface(int index_exo_joint_angle_sensor_MCP_abd, int index_exo_joint_angle_sensor_MCP_SEA, int index_exo_joint_angle_sensor_btw_SEAs, int index_exo_joint_angle_sensor_PIP_SEA, int index_exo_joint_angle_sensor_DIP_flex);
     void AssignIndexOfExoMotorArrayHWInterface(int index_exo_motor_for_MCP_SEA, int index_exo_motor_for_PIP_SEA);
 
-    //! This method updates the graphics
-    void updateGraphics();
 
 public:
 
@@ -119,16 +120,6 @@ protected:
 
     // finger joint angles
     double joint_angles[4];
-
-private:
-
-    //--------------------------------------------------------------------------
-    // PRIVATE MEMBERS
-    //--------------------------------------------------------------------------
-
-    // Pointer to cHand pointer
-    chai3d::cHand** h_hand;
-
 
 
 };

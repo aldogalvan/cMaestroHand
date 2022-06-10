@@ -390,9 +390,10 @@ bool HWInterface_Esmacat::homeMotors_but_eight(){
 
 
 bool HWInterface_Esmacat::calibrateSEAJointSensors(){
-
+    return true;
 }
 
 bool HWInterface_Esmacat::calibrateObserverJointSensors(){
     //TODO: Add code to calibrate scale and offset values of non-sea sensors
+    return true;
 }

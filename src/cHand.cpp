@@ -1,45 +1,3 @@
-//==============================================================================
-/*
-    Software License Agreement (BSD License)
-    Copyright (c) 2003-2016, CHAI3D.
-    (www.chai3d.org)
-
-    All rights reserved.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
-
-    * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    * Neither the name of CHAI3D nor the names of its contributors may
-    be used to endorse or promote products derived from this software
-    without specific prior written permission.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE. 
-
-    \author    <http://www.chai3d.org>
-    \author    Francois Conti
-	\version   3.2.0 $Rev: 1869 $
-*/
-//==============================================================================
 
 // cHand authored by Edoardo Battaglia
 
@@ -55,9 +13,9 @@
 namespace chai3d {
 //------------------------------------------------------------------------------
 
-cHand::cHand()
+cHand::cHand(cWorld* a_world)
 {
-
+    m_world = a_world;
 }
 
 cHand::~cHand()
@@ -186,7 +144,7 @@ void cHand::initialize_graphics(cColorf joints_color, cColorf links_color, cColo
 			{
 				joint_transforms_container[fingerid][fingerndofcounter]->addChild(graphics_container[fingerid][fingerndofcounter]);
 				joint_transforms_container[fingerid][fingerndofcounter]->addChild(axesArrows[fingerid][fingerndofcounter]);
-				
+
 				graphics_container[fingerid][fingerndofcounter]->addMesh(new cMesh);
 				// spheres are used to draw joints locations
 				cCreateSphere(graphics_container[fingerid][fingerndofcounter]->getMesh(0), sphradius);
@@ -232,8 +190,9 @@ void cHand::initialize_graphics(cColorf joints_color, cColorf links_color, cColo
 			graphics_container[fingerid][ndof_finger[fingerid] - 1]->getMesh(1)->setLocalRot(RotAtoB(cVector3d(0, 0, 1), curdir));
 
 			// add an extra sphere for the fingertip
-			graphics_container[fingerid][ndof_finger[fingerid] - 1]->addMesh(new cMesh);
-			
+			graphics_container[fingerid][ndof_finger[fingerid] - 1]->addMesh(
+                    reinterpret_cast<cMesh *>(new cMesh));
+
 			cCreateSphere(graphics_container[fingerid][ndof_finger[fingerid] - 1]->getMesh(2),
 				sphradius);
 			graphics_container[fingerid][ndof_finger[fingerid] - 1]->getMesh(2)->setVertexColor(joints_color);
@@ -243,6 +202,7 @@ void cHand::initialize_graphics(cColorf joints_color, cColorf links_color, cColo
 				setLocalPos(fingerratios[fingerid] *
 						joint_transforms_container[fingerid][ndof_finger[fingerid] - 1]->getLocalTransform().
 						getLocalPos().length());
+
 		}
 
 		// create palm automatically (note: no arcpalm in the primitive-based visualization)
@@ -430,6 +390,23 @@ std::vector<std::vector<cVector3d*>> cHand::getHandCenters()
 	}
 
 	return(centerPos);
+}
+
+
+std::vector<cVector3d*> cHand::getFingertipCenters()
+{
+    std::vector<cVector3d*> tip_pos;
+
+
+    for (int fingerid = 0; fingerid < n_fingers; fingerid++)
+    {
+        tip_pos.push_back(new cVector3d);
+        *tip_pos[fingerid] = graphics_container[fingerid][ndof_finger[fingerid] - 1]->getMesh(2)->getGlobalPos();
+        //std::cout << *tip_pos[fingerid] << std::endl;
+    }
+
+    return tip_pos;
+
 }
 
 void cHand::updateAngles(const std::vector<double> newangles)

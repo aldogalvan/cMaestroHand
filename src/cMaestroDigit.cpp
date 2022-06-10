@@ -4,34 +4,6 @@
 
 #include "cMaestroDigit.h"
 
-//==============================================================================
-/*!
-    Constructor of cMaestroDigit.
-*/
-//==============================================================================
-
-cMaestroDigit::cMaestroDigit(chai3d::cHand* a_hand)
-{
-    // parameters
-    double a_radius = 1.0;
-    chai3d::cMaterialPtr a_material;
-
-    // set cHand pointer to pointer
-    *h_hand = a_hand;
-
-}
-
-//==============================================================================
-/*!
-    Destructor of cMaestroDigit.
-*/
-//==============================================================================
-
-cMaestroDigit::~cMaestroDigit()
-{
-
-}
-
 
 //! ROBOT CLASS!!!!!!!!!!
 void cMaestroDigit::pseudoComputeJointAnglesFinger( double joint_angle_sensor_MCP, double joint_angle_sensor_MCP_PIP)
@@ -313,9 +285,5 @@ void cMaestroDigit::commandExoTorqueFinger(double exo_torque_MCP, double exo_tor
     exo_desired_torque_PIP = exo_torque_PIP;
 }
 
-//! Updates the visualizer of hand
-void cMaestroDigit::updateGraphics()
-{
 
-}
 

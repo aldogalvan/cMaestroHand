@@ -13,9 +13,9 @@
 namespace chai3d {
 //------------------------------------------------------------------------------
 
-cHand::cHand(cWorld* a_world)
+cHand::cHand()
 {
-    m_world = a_world;
+
 }
 
 cHand::~cHand()
@@ -33,6 +33,8 @@ void cHand::initialize(const std::vector<std::vector<cTransform>>& T, bool hasar
 {
 	initialize_transforms(T, hasarcpalm);
 	initialize_graphics();
+
+
 }
 
 void cHand::initialize_transforms(const std::vector<std::vector<cTransform>>& T, bool hasarcpalm)
@@ -396,7 +398,6 @@ std::vector<std::vector<cVector3d*>> cHand::getHandCenters()
 std::vector<cVector3d*> cHand::getFingertipCenters()
 {
     std::vector<cVector3d*> tip_pos;
-
 
     for (int fingerid = 0; fingerid < n_fingers; fingerid++)
     {

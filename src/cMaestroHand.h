@@ -23,16 +23,17 @@ using namespace chai3d;
         //--------------------------------------------------------------------------
 
         //! Constructor for hMaestroHand
-        cMaestroHand(cWorld * a_world);
+        cMaestroHand();
 
         //! Destructor for hMaestroHand
-        ~cMaestroHand() {
+        ~cMaestroHand()
+        {
+            // Application closing
+            std::cout << "Application closing!" << endl;
+            std::cout.flush();
 
-            delete h_hand;
-            /*
-            application->stop();
-            delete application;
-             */
+            //application->stop();
+            // delete application;
         };
 
 
@@ -52,20 +53,24 @@ using namespace chai3d;
         void createThumb(void);
 
 
-        // Commands the desired joint torque to the Maestro
-        bool commandJointTorque(void);
-
-        // Compute parameters
-        double* M3KL1(const double A1, const double B1, const double C1,
-                     const double PHI1, const double PHI3);
-
         // Smooths the sensor values with a running avg
         double** smoothSensorValues(double* noisy);
+
 
     public:
 
         // This function updates the cHand visualizer with new coordinates
-        std::vector<cVector3d*> updateCHandAngles(double* idx_finger = 0, double* middle_finger = 0, double* thumb = 0);
+        void updateCHandAngles(void);
+
+        // Updates the joint angle values from the Maestro
+        void updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos, cVector3d& a_midPos,
+                               cVector3d a_globalPos);
+
+        // Commands the desired joint torque to the Maestro
+        bool commandJointTorque(double a_stiffness, double a_damping);
+
+        // this is a test trajectory
+        std::vector<cVector3d*> testTrajectory(vector<double> vec);
 
     public:
 
@@ -73,11 +78,12 @@ using namespace chai3d;
         // PUBLIC METHOD
         //--------------------------------------------------------------------------
 
-        void commandFingertipForce(const cVector3d & force_idx = 0, const cVector3d & force_mid = 0,
-                                   const cVector3d& force_thumb = 0);
 
-        // Updates the joint angle values from the Maestro
-        void updateJointAngles(std::vector<cVector3d*>& a_pos);
+        // computes a collision between each digit and a generic object
+        bool computeCollisions(cGenericObject* a_object);
+
+        // calculates the new proxy location
+        void calculateProxy(double radius , cVector3d proxyPos , cVector3d curPos);
 
 
     public:
@@ -89,14 +95,6 @@ using namespace chai3d;
         // cHand
         cHand *h_hand;
 
-        // Array of index finger angles
-        double index_angles[5];
-
-        // Array of middle finger angles
-        double middle_angles[5];
-
-        // Array of thumb angles
-        double thumb_angles[6];
 
     private:
 
@@ -124,8 +122,12 @@ using namespace chai3d;
         int num_sensors = 16;
         int count = 10;
 
+        //
+
     private:
-        cWorld* m_world;
+
+        // trhe vector of joint angles for the whole hand
+        vector<double> h_angles;
     };
 
 #endif //MAESTRO_CHAI3D_CMAESTROHAND_H

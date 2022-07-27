@@ -52,7 +52,7 @@ build cmake_object_order_depends_target_soem: phony || CMakeFiles/soem.dir
 build CMakeFiles/soem.dir/include/soem_include/soem/ethercatbase.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem/ethercatbase.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/soem/ethercatbase.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/soem
@@ -60,7 +60,7 @@ build CMakeFiles/soem.dir/include/soem_include/soem/ethercatbase.c.o: C_COMPILER
 build CMakeFiles/soem.dir/include/soem_include/soem/ethercatcoe.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem/ethercatcoe.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/soem/ethercatcoe.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/soem
@@ -68,7 +68,7 @@ build CMakeFiles/soem.dir/include/soem_include/soem/ethercatcoe.c.o: C_COMPILER_
 build CMakeFiles/soem.dir/include/soem_include/soem/ethercatconfig.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem/ethercatconfig.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/soem/ethercatconfig.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/soem
@@ -76,7 +76,7 @@ build CMakeFiles/soem.dir/include/soem_include/soem/ethercatconfig.c.o: C_COMPIL
 build CMakeFiles/soem.dir/include/soem_include/soem/ethercatdc.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem/ethercatdc.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/soem/ethercatdc.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/soem
@@ -84,7 +84,7 @@ build CMakeFiles/soem.dir/include/soem_include/soem/ethercatdc.c.o: C_COMPILER__
 build CMakeFiles/soem.dir/include/soem_include/soem/ethercatfoe.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem/ethercatfoe.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/soem/ethercatfoe.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/soem
@@ -92,7 +92,7 @@ build CMakeFiles/soem.dir/include/soem_include/soem/ethercatfoe.c.o: C_COMPILER_
 build CMakeFiles/soem.dir/include/soem_include/soem/ethercatmain.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem/ethercatmain.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/soem/ethercatmain.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/soem
@@ -100,7 +100,7 @@ build CMakeFiles/soem.dir/include/soem_include/soem/ethercatmain.c.o: C_COMPILER
 build CMakeFiles/soem.dir/include/soem_include/soem/ethercatprint.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem/ethercatprint.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/soem/ethercatprint.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/soem
@@ -108,7 +108,7 @@ build CMakeFiles/soem.dir/include/soem_include/soem/ethercatprint.c.o: C_COMPILE
 build CMakeFiles/soem.dir/include/soem_include/soem/ethercatsoe.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem/ethercatsoe.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/soem/ethercatsoe.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/soem
@@ -116,7 +116,7 @@ build CMakeFiles/soem.dir/include/soem_include/soem/ethercatsoe.c.o: C_COMPILER_
 build CMakeFiles/soem.dir/include/soem_include/osal/linux/osal.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux/osal.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/osal/linux/osal.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/osal/linux
@@ -124,7 +124,7 @@ build CMakeFiles/soem.dir/include/soem_include/osal/linux/osal.c.o: C_COMPILER__
 build CMakeFiles/soem.dir/include/soem_include/oshw/linux/nicdrv.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux/nicdrv.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/oshw/linux/nicdrv.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/oshw/linux
@@ -132,7 +132,7 @@ build CMakeFiles/soem.dir/include/soem_include/oshw/linux/nicdrv.c.o: C_COMPILER
 build CMakeFiles/soem.dir/include/soem_include/oshw/linux/oshw.c.o: C_COMPILER__soem_Release /home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux/oshw.c || cmake_object_order_depends_target_soem
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/soem.dir/include/soem_include/oshw/linux/oshw.c.o.d
-  FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src
   OBJECT_DIR = CMakeFiles/soem.dir
   OBJECT_FILE_DIR = CMakeFiles/soem.dir/include/soem_include/oshw/linux
@@ -146,7 +146,7 @@ build CMakeFiles/soem.dir/include/soem_include/oshw/linux/oshw.c.o: C_COMPILER__
 # Link the static library libsoem.a
 
 build libsoem.a: C_STATIC_LIBRARY_LINKER__soem_Release CMakeFiles/soem.dir/include/soem_include/soem/ethercatbase.c.o CMakeFiles/soem.dir/include/soem_include/soem/ethercatcoe.c.o CMakeFiles/soem.dir/include/soem_include/soem/ethercatconfig.c.o CMakeFiles/soem.dir/include/soem_include/soem/ethercatdc.c.o CMakeFiles/soem.dir/include/soem_include/soem/ethercatfoe.c.o CMakeFiles/soem.dir/include/soem_include/soem/ethercatmain.c.o CMakeFiles/soem.dir/include/soem_include/soem/ethercatprint.c.o CMakeFiles/soem.dir/include/soem_include/soem/ethercatsoe.c.o CMakeFiles/soem.dir/include/soem_include/osal/linux/osal.c.o CMakeFiles/soem.dir/include/soem_include/oshw/linux/nicdrv.c.o CMakeFiles/soem.dir/include/soem_include/oshw/linux/oshw.c.o
-  LANGUAGE_COMPILE_FLAGS = -Wall -Wextra -Werror -O3 -DNDEBUG
+  LANGUAGE_COMPILE_FLAGS = -Wextra -Wno-error=stringop-overflow -O3 -DNDEBUG
   OBJECT_DIR = CMakeFiles/soem.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -332,6 +332,14 @@ build CMakeFiles/maestro_chai3d.dir/src/cHand.cpp.o: CXX_COMPILER__maestro_chai3
   OBJECT_DIR = CMakeFiles/maestro_chai3d.dir
   OBJECT_FILE_DIR = CMakeFiles/maestro_chai3d.dir/src
 
+build CMakeFiles/maestro_chai3d.dir/src/cJointOptimization.cpp.o: CXX_COMPILER__maestro_chai3d_Release /home/aldo/CLionProjects/maestro_chai3d/src/cJointOptimization.cpp || cmake_object_order_depends_target_maestro_chai3d
+  DEFINES = -DLINUX -D_LINUX
+  DEP_FILE = CMakeFiles/maestro_chai3d.dir/src/cJointOptimization.cpp.o.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++14
+  INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src -isystem /usr/include/eigen3
+  OBJECT_DIR = CMakeFiles/maestro_chai3d.dir
+  OBJECT_FILE_DIR = CMakeFiles/maestro_chai3d.dir/src
+
 build CMakeFiles/maestro_chai3d.dir/src/cMaestroDigit.cpp.o: CXX_COMPILER__maestro_chai3d_Release /home/aldo/CLionProjects/maestro_chai3d/src/cMaestroDigit.cpp || cmake_object_order_depends_target_maestro_chai3d
   DEFINES = -DLINUX -D_LINUX
   DEP_FILE = CMakeFiles/maestro_chai3d.dir/src/cMaestroDigit.cpp.o.d
@@ -372,7 +380,7 @@ build CMakeFiles/maestro_chai3d.dir/src/my_app.cpp.o: CXX_COMPILER__maestro_chai
 #############################################
 # Link the static library libmaestro_chai3d.a
 
-build libmaestro_chai3d.a: CXX_STATIC_LIBRARY_LINKER__maestro_chai3d_Release CMakeFiles/maestro_chai3d.dir/src/cHand.cpp.o CMakeFiles/maestro_chai3d.dir/src/cMaestroDigit.cpp.o CMakeFiles/maestro_chai3d.dir/src/cMaestroHand.cpp.o CMakeFiles/maestro_chai3d.dir/src/cMaestroThumb.cpp.o CMakeFiles/maestro_chai3d.dir/src/my_app.cpp.o || libesmacat.a libmaestro3.a libsoem.a
+build libmaestro_chai3d.a: CXX_STATIC_LIBRARY_LINKER__maestro_chai3d_Release CMakeFiles/maestro_chai3d.dir/src/cHand.cpp.o CMakeFiles/maestro_chai3d.dir/src/cJointOptimization.cpp.o CMakeFiles/maestro_chai3d.dir/src/cMaestroDigit.cpp.o CMakeFiles/maestro_chai3d.dir/src/cMaestroHand.cpp.o CMakeFiles/maestro_chai3d.dir/src/cMaestroThumb.cpp.o CMakeFiles/maestro_chai3d.dir/src/my_app.cpp.o || libesmacat.a libmaestro3.a libsoem.a
   LANGUAGE_COMPILE_FLAGS = -O3 -DNDEBUG
   OBJECT_DIR = CMakeFiles/maestro_chai3d.dir
   POST_BUILD = :
@@ -385,7 +393,7 @@ build libmaestro_chai3d.a: CXX_STATIC_LIBRARY_LINKER__maestro_chai3d_Release CMa
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release && /snap/clion/193/bin/cmake/linux/bin/ccmake -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
+  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release && /snap/clion/198/bin/cmake/linux/bin/ccmake -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -397,7 +405,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release && /snap/clion/193/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
+  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release && /snap/clion/198/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -432,16 +440,16 @@ build examples/CMakeFiles/example-01.dir/example-01/main.cpp.o: CXX_COMPILER__ex
 
 
 #############################################
-# Link the executable examples/example-01
+# Link the executable ../bin/linux-/example-01
 
-build examples/example-01: CXX_EXECUTABLE_LINKER__example-01_Release examples/CMakeFiles/example-01.dir/example-01/main.cpp.o | libmaestro_chai3d.a libmaestro3.a libesmacat.a libsoem.a /home/aldo/chai3d-3.2.0/build/libchai3d.a /usr/lib/x86_64-linux-gnu/libGL.so /usr/lib/x86_64-linux-gnu/libGLU.so || libesmacat.a libmaestro3.a libmaestro_chai3d.a libsoem.a
+build ../bin/linux-/example-01: CXX_EXECUTABLE_LINKER__example-01_Release examples/CMakeFiles/example-01.dir/example-01/main.cpp.o | libmaestro_chai3d.a libmaestro3.a libesmacat.a libsoem.a /home/aldo/chai3d-3.2.0/build/libchai3d.a /usr/lib/x86_64-linux-gnu/libGL.so /usr/lib/x86_64-linux-gnu/libGLU.so || libesmacat.a libmaestro3.a libmaestro_chai3d.a libsoem.a
   FLAGS = -O3 -DNDEBUG
   LINK_LIBRARIES = -Wl,-rpath,/home/aldo/chai3d-3.2.0/external/DHD/lib/lin-x86_64  libmaestro_chai3d.a  libmaestro3.a  libesmacat.a  libsoem.a  /home/aldo/chai3d-3.2.0/build/libchai3d.a  /usr/lib/x86_64-linux-gnu/libGL.so  /usr/lib/x86_64-linux-gnu/libGLU.so  -ldrd  -lusb-1.0  -lrt  -lpthread  -ldl  -lglfw
   LINK_PATH = -L/home/aldo/chai3d-3.2.0/external/DHD/lib/lin-x86_64
   OBJECT_DIR = examples/CMakeFiles/example-01.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = examples/example-01
+  TARGET_FILE = ../bin/linux-/example-01
   TARGET_PDB = example-01.dbg
 
 
@@ -449,7 +457,7 @@ build examples/example-01: CXX_EXECUTABLE_LINKER__example-01_Release examples/CM
 # Utility command for edit_cache
 
 build examples/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/examples && /snap/clion/193/bin/cmake/linux/bin/ccmake -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
+  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/examples && /snap/clion/198/bin/cmake/linux/bin/ccmake -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -461,7 +469,7 @@ build examples/edit_cache: phony examples/CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build examples/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/examples && /snap/clion/193/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
+  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/examples && /snap/clion/198/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -469,11 +477,77 @@ build examples/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
 build examples/rebuild_cache: phony examples/CMakeFiles/rebuild_cache.util
 
 # =============================================================================
+# Write statements declared in CMakeLists.txt:
+# /home/aldo/CLionProjects/maestro_chai3d/CMakeLists.txt
+# =============================================================================
+
+# =============================================================================
+# Object build statements for EXECUTABLE target experiment-joint-haptics
+
+
+#############################################
+# Order-only phony target for experiment-joint-haptics
+
+build cmake_object_order_depends_target_experiment-joint-haptics: phony || cmake_object_order_depends_target_esmacat cmake_object_order_depends_target_maestro3 cmake_object_order_depends_target_maestro_chai3d cmake_object_order_depends_target_soem
+
+build experiments/CMakeFiles/experiment-joint-haptics.dir/experiment-joint-haptics/experiment-joint-haptics.cpp.o: CXX_COMPILER__experiment-joint-haptics_Release /home/aldo/CLionProjects/maestro_chai3d/experiments/experiment-joint-haptics/experiment-joint-haptics.cpp || cmake_object_order_depends_target_experiment-joint-haptics
+  DEFINES = -DLINUX -D_LINUX
+  DEP_FILE = experiments/CMakeFiles/experiment-joint-haptics.dir/experiment-joint-haptics/experiment-joint-haptics.cpp.o.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++14
+  INCLUDES = -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/soem -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/osal/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/soem_include/oshw/linux -I/home/aldo/CLionProjects/maestro_chai3d/include/esmacat_server -I/home/aldo/CLionProjects/maestro_chai3d/include/maestro3 -I/home/aldo/CLionProjects/maestro_chai3d/include/chai3d-3.2.0 -I/home/aldo/chai3d-3.2.0/src -I/home/aldo/chai3d-3.2.0/external/glew/include -I/home/aldo/CLionProjects/maestro_chai3d/src -isystem /usr/include/eigen3
+  OBJECT_DIR = experiments/CMakeFiles/experiment-joint-haptics.dir
+  OBJECT_FILE_DIR = experiments/CMakeFiles/experiment-joint-haptics.dir/experiment-joint-haptics
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target experiment-joint-haptics
+
+
+#############################################
+# Link the executable ../bin/linux-/experiment-joint-haptics
+
+build ../bin/linux-/experiment-joint-haptics: CXX_EXECUTABLE_LINKER__experiment-joint-haptics_Release experiments/CMakeFiles/experiment-joint-haptics.dir/experiment-joint-haptics/experiment-joint-haptics.cpp.o | libmaestro_chai3d.a libmaestro3.a libesmacat.a libsoem.a /home/aldo/chai3d-3.2.0/build/libchai3d.a /usr/lib/x86_64-linux-gnu/libGL.so /usr/lib/x86_64-linux-gnu/libGLU.so || libesmacat.a libmaestro3.a libmaestro_chai3d.a libsoem.a
+  FLAGS = -O3 -DNDEBUG
+  LINK_LIBRARIES = -Wl,-rpath,/home/aldo/chai3d-3.2.0/external/DHD/lib/lin-x86_64  libmaestro_chai3d.a  libmaestro3.a  libesmacat.a  libsoem.a  /home/aldo/chai3d-3.2.0/build/libchai3d.a  /usr/lib/x86_64-linux-gnu/libGL.so  /usr/lib/x86_64-linux-gnu/libGLU.so  -ldrd  -lusb-1.0  -lrt  -lpthread  -ldl  -lglfw
+  LINK_PATH = -L/home/aldo/chai3d-3.2.0/external/DHD/lib/lin-x86_64
+  OBJECT_DIR = experiments/CMakeFiles/experiment-joint-haptics.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = ../bin/linux-/experiment-joint-haptics
+  TARGET_PDB = experiment-joint-haptics.dbg
+
+
+#############################################
+# Utility command for edit_cache
+
+build experiments/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/experiments && /snap/clion/198/bin/cmake/linux/bin/ccmake -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
+  DESC = Running CMake cache editor...
+  pool = console
+  restat = 1
+
+build experiments/edit_cache: phony experiments/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build experiments/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/experiments && /snap/clion/198/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/aldo/CLionProjects/maestro_chai3d -B/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build experiments/rebuild_cache: phony experiments/CMakeFiles/rebuild_cache.util
+
+# =============================================================================
 # Target aliases.
 
 build esmacat: phony libesmacat.a
 
-build example-01: phony examples/example-01
+build example-01: phony ../bin/linux-/example-01
+
+build experiment-joint-haptics: phony ../bin/linux-/experiment-joint-haptics
 
 build maestro3: phony libmaestro3.a
 
@@ -489,14 +563,21 @@ build soem: phony libsoem.a
 #############################################
 # Folder: /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
 
-build all: phony libsoem.a libesmacat.a libmaestro3.a libmaestro_chai3d.a examples/all
+build all: phony libsoem.a libesmacat.a libmaestro3.a libmaestro_chai3d.a examples/all experiments/all
 
 # =============================================================================
 
 #############################################
 # Folder: /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/examples
 
-build examples/all: phony examples/example-01
+build examples/all: phony ../bin/linux-/example-01
+
+# =============================================================================
+
+#############################################
+# Folder: /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/experiments
+
+build experiments/all: phony ../bin/linux-/experiment-joint-haptics
 
 # =============================================================================
 # Built-in targets
@@ -505,14 +586,14 @@ build examples/all: phony examples/example-01
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../examples/CMakeLists.txt /home/aldo/chai3d-3.2.0/build/CHAI3DConfig.cmake /home/aldo/chai3d-3.2.0/build/CHAI3DConfigVersion.cmake /home/aldo/chai3d-3.2.0/build/CHAI3DTargets.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCInformation.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCXXInformation.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCommonLanguageInclude.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeGenericSystem.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeInitializeConfigs.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeLanguageInformation.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeSystemSpecificInformation.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeSystemSpecificInitialize.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU-C.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU-CXX.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU-C.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU-CXX.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/UnixPaths.cmake /usr/lib/cmake/eigen3/Eigen3Config.cmake /usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake /usr/lib/cmake/eigen3/Eigen3Targets.cmake CMakeCache.txt CMakeFiles/3.22.3/CMakeCCompiler.cmake CMakeFiles/3.22.3/CMakeCXXCompiler.cmake CMakeFiles/3.22.3/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../examples/CMakeLists.txt ../experiments/CMakeLists.txt /home/aldo/chai3d-3.2.0/build/CHAI3DConfig.cmake /home/aldo/chai3d-3.2.0/build/CHAI3DConfigVersion.cmake /home/aldo/chai3d-3.2.0/build/CHAI3DTargets.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCInformation.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCXXInformation.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCommonLanguageInclude.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeGenericSystem.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeInitializeConfigs.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeLanguageInformation.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeSystemSpecificInformation.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeSystemSpecificInitialize.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU-C.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU-CXX.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU-C.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU-CXX.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/UnixPaths.cmake /usr/lib/cmake/eigen3/Eigen3Config.cmake /usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake /usr/lib/cmake/eigen3/Eigen3Targets.cmake CMakeCache.txt CMakeFiles/3.22.3/CMakeCCompiler.cmake CMakeFiles/3.22.3/CMakeCXXCompiler.cmake CMakeFiles/3.22.3/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build ../CMakeLists.txt ../examples/CMakeLists.txt /home/aldo/chai3d-3.2.0/build/CHAI3DConfig.cmake /home/aldo/chai3d-3.2.0/build/CHAI3DConfigVersion.cmake /home/aldo/chai3d-3.2.0/build/CHAI3DTargets.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCInformation.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCXXInformation.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCommonLanguageInclude.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeGenericSystem.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeInitializeConfigs.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeLanguageInformation.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeSystemSpecificInformation.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/CMakeSystemSpecificInitialize.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU-C.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU-CXX.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU-C.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU-CXX.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux.cmake /snap/clion/193/bin/cmake/linux/share/cmake-3.22/Modules/Platform/UnixPaths.cmake /usr/lib/cmake/eigen3/Eigen3Config.cmake /usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake /usr/lib/cmake/eigen3/Eigen3Targets.cmake CMakeCache.txt CMakeFiles/3.22.3/CMakeCCompiler.cmake CMakeFiles/3.22.3/CMakeCXXCompiler.cmake CMakeFiles/3.22.3/CMakeSystem.cmake: phony
+build ../CMakeLists.txt ../examples/CMakeLists.txt ../experiments/CMakeLists.txt /home/aldo/chai3d-3.2.0/build/CHAI3DConfig.cmake /home/aldo/chai3d-3.2.0/build/CHAI3DConfigVersion.cmake /home/aldo/chai3d-3.2.0/build/CHAI3DTargets.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCInformation.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCXXInformation.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeCommonLanguageInclude.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeGenericSystem.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeInitializeConfigs.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeLanguageInformation.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeSystemSpecificInformation.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/CMakeSystemSpecificInitialize.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU-C.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU-CXX.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Compiler/GNU.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU-C.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU-CXX.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux-GNU.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/Linux.cmake /snap/clion/198/bin/cmake/linux/share/cmake-3.22/Modules/Platform/UnixPaths.cmake /usr/lib/cmake/eigen3/Eigen3Config.cmake /usr/lib/cmake/eigen3/Eigen3ConfigVersion.cmake /usr/lib/cmake/eigen3/Eigen3Targets.cmake CMakeCache.txt CMakeFiles/3.22.3/CMakeCCompiler.cmake CMakeFiles/3.22.3/CMakeCXXCompiler.cmake CMakeFiles/3.22.3/CMakeSystem.cmake: phony
 
 
 #############################################

@@ -4,139 +4,51 @@
 
 #include "cMaestroDigit.h"
 
-
-//! ROBOT CLASS!!!!!!!!!!
-void cMaestroDigit::pseudoComputeJointAnglesFinger( double joint_angle_sensor_MCP, double joint_angle_sensor_MCP_PIP)
+void cMaestroDigit::computeOptimization(const Eigen::Vector3d a_goalPos, const int a_maxIts , const double ep)
 {
-    double offset_MCP  = 0*M_PI/180; // [rad]
-    double offset_PIP  = 0*M_PI/180; // [rad]
-    double DIP_PIP_ratio = 0.77;
+    // first generate the desired transformation to proxy in space frame
+    Eigen::Matrix4d Tsd;
+    // set current rotation as desired rotation
+    Tsd.block<3,3>(0,0) = M_T4.block<3,3>(0,0);
+    Tsd.block<3,1>(0,3) = a_goalPos;
+    Tsd.block<1,4>(3,0) << 0 , 0 , 0 , 1;
+    auto J_alpha = j_s.block<3,5>(0,0);
+    auto J_ep = j_s.block<3,5>(3,0);
 
-    double MCP = 2*(joint_angle_sensor_MCP + offset_MCP);
-    double PIP = joint_angle_sensor_MCP_PIP + offset_PIP;
-    double DIP = DIP_PIP_ratio*PIP;
+    int i = 0;
 
-    joint_angles[0] = 0;
-    joint_angles[1] = MCP;
-    joint_angles[2] = PIP;
-    joint_angles[3] = DIP;
+    double D = (a_goalPos - tip_pos).squaredNorm();
 
+    if (D <= pow(ep,2))
+        return;
+
+    computeJacobian(ang_MCP_fe,ang_MCP_abad,ang_PIP,ang_DIP);
+    do
+    {
+
+        computeForwardKinematics(ang_MCP_fe,ang_MCP_abad,ang_PIP,ang_DIP);
+
+        computeJacobian(ang_MCP_fe,ang_MCP_abad,ang_PIP,ang_DIP);
+
+        D = (a_goalPos - proxy_pos).squaredNorm();
+
+        double er;
+        if ( D <= pow(ep,2))
+        {
+            return;
+        }
+        i++;
+    } while(i < a_maxIts);
 }
 
-// Function to compute finger joint angles, inputs are in radians
-Eigen::Vector4d cMaestroDigit::computeJointAnglesFinger(double joint_angle_sensor_MCP_abad, double joint_angle_sensor_MCP_fe, double joint_angle_sensor_MCP_PIP)
+void cMaestroDigit::stayOnPointVF(Eigen::MatrixXd &A, Eigen::VectorXd &b, int n, int m, Eigen::Vector3d pos_des,
+                                       Eigen::Vector3d pos_cur, Eigen::Vector3d dir_des, Eigen::Vector3d dir_cur)
 {
 
-    // These values vary depending on the finger and the adjustment of sensor
-    double offset_MCP_fe  = -90*M_PI/180; // [rad]
-    double offset_MCP_PIP =  45*M_PI/180; // [rad]
-
-
-    // This value is constant but dependent on the finger
-    double DIP_PIP_ratio = 0.77; // coupling factor between PIP  (index finger 0.77, middle finger 0.75) []
-
-
-    // User Finger Constants, depend on the subject and finger (inter-subject & intra-subject variability)
-
-    // Subject dependent constants for first kinematic loop (crank-slider 4-bar)
-    double theta_MGB= 120*M_PI/180; // metacarpal ground to base link a1 angle  [rad]
-
-    double a1 = 40; // Crank-Slider Link a length [mm]
-    double b1 = 73; // Crank-Slider Link b length [mm]
-    double c1 = 15; // Crank-Slider Link c length [mm]
-
-    double l1= 45; // Proximal Phalanx Length [mm]
-
-    // Subject dependent constants for second kinematic loop (standard 4-bar)
-    double a2 = 47; // 4-bar Link a length [mm]
-    double b2 = 42; // 4-bar Link b length [mm]
-    double c2 = 20; // 4-bar Link c length [mm]
-
-    //! I don't know why but the equations below kind of work but they are definitely wrong lol (to be used as last resource)
-    /*
-    double theta_3_cs = asin((a1*( M_PI - joint_angle_sensor_MCP_fe - offset_MCP_fe - theta_MGB) - c1)/(a1 - b1))  ;
-    double theta_2_cs = asin( ( (b1*sin(theta_3_cs ) + c1) / a1 ) ) ; // [rad] cross circuit
-    double d1 =  -(a1*cos(theta_2_cs) - b1*cos(theta_3_cs));
-    double joint_angle_FE_MCP =  theta_MGB - theta_2_cs;
-    */
-    // First kinematic loop  Variables (Cross Circuit Crank Slider)
-
-    double theta_in = joint_angle_sensor_MCP_fe + offset_MCP_fe - M_PI;
-
-    double Z1 = (-b1 + (a1/cos(theta_in)) );
-    double Z2 = (tan(theta_in)*a1)/Z1;
-    double Z3 = c1/Z1;
-
-    double A1 = pow(a1,2)/pow(Z2,2) + pow(b1,2);
-    double B1 = 2*b1*c1 -2*pow(a1,2)*Z3/pow(Z2,2) ;
-    double C1 = pow(a1,2)*pow(Z3,2)/pow(Z2,2) - pow(a1,2) + pow(c1,2);
-
-    //! Crank-slider angle 3 [rad]
-    // double theta_3_cs = asin(- B1 - sqrt(pow(B1,2)-4*A1*C1) / (2*A1));
-    // double theta_3_cs = asin(- B1 + sqrt(pow(B1,2)-4*A1*C1) / (2*A1)); // other solution
-    double theta_3_cs = (- B1 - sqrt(pow(B1,2)-4*A1*C1) / (2*A1));
-
-    // Crank-slider angle 2 [rad]
-    // double theta_2_cs = asin(-1*((b1*sin(theta_3_cs-M_PI)+c1)/a1)); // [rad] crossed circuit
-    double theta_2_cs = asin(-1*((b1*sin(theta_3_cs-M_PI)+c1)/a1));
-
-    // Slider position [mm]
-    double d1 =  a1*cos(theta_2_cs) - b1*cos(theta_3_cs);
-
-
-    // Second Kinematic loop
-    // Variable ground offset angle [rad]
-    double theta_1_std = atan(c1/(l1-d1));
-
-    // Variable ground Linkage Length [mm]
-    double d2 = (l1 - d1)/cos(theta_1_std);
-
-    // angle 2 of standard 4-bar
-    double theta_2_std =  theta_1_std + theta_3_cs + joint_angle_sensor_MCP_PIP + offset_MCP_PIP;
-
-    //  Open circuit equations for standard
-    double k1 = d2/a2; double k2 = d2/c2; double k3 = (pow(a2,2) - pow(b2,2) + pow(c2,2) + pow(d2,2))/(2*a2*c2);
-
-    double A2 = cos(theta_2_std) - k1 - k2*cos(theta_2_std) + k3;
-    double B2 = -2*sin(theta_2_std);
-    double C2 = k1 - (k2 + 1)*cos(theta_2_std) + k3;
-
-    double theta_4_std = 2*atan((- B2 - sqrt(pow(B2,2)-4*A2*C2) ) / (2*A2));
-
-
-    // Compute Joint Angles
-    double joint_angle_FE_MCP =  theta_MGB - theta_2_cs;
-    double joint_angle_FE_PIP = theta_4_std - theta_1_std;
-    double joint_angle_FE_DIP = DIP_PIP_ratio*joint_angle_FE_PIP ;
-
-    Eigen::Vector4d joint_angles;
-    joint_angles = Eigen::Vector4d(0,joint_angle_FE_MCP,joint_angle_FE_PIP,joint_angle_FE_DIP);
-
-    // std::cout << (joint_angle_sensor_MCP_fe + offset_MCP_fe)*180/M_PI << endl; // Value should be zero when proximal and metacarpal interfaces align
-    // std::cout << theta_in*180/M_PI<< endl; // should read -180 when finger extended
-    // std::cout << Z1 << ',' << Z2 << ','<< Z3 << ',' << endl;
-    // std::cout << theta_3_cs << endl;  // value becomes nan only when crossing singularity
-    // std::cout << theta_3_cs*180/M_PI << ',' << theta_2_cs*180/M_PI << ','<< d1 << ',' << joint_angle_FE_MCP*180/M_PI << endl;
-    // std::cout << joint_angle_FE_MCP*180/M_PI<< endl;
-    // std::cout << joint_angles << endl;
-    //
-    // std::cout.flush();
-
-    return joint_angles;
 }
-
-/*
-// Function to compute actual joint angles
-Eigen::Vector4d hMaestroHand::computeJointAnglesThumb(double joint_angle_sensor_MCP, double joint_angle_sensor_CMC_MCP)
-{
-    Eigen::Vector4d joint_angles;
-
-    return joint_angles;
-}
- */
 
 // Function to update the hand joint angles
-void cMaestroDigit::updateJointAngles(double* joint_angles)
+ Eigen::Vector3d cMaestroDigit::updateJointAngles(double *robot_angles ,  Eigen::Vector3d a_global_pos)
 {
 
     /*
@@ -148,142 +60,168 @@ void cMaestroDigit::updateJointAngles(double* joint_angles)
     ang_sensor_DIP = exo_joint_angle_sensor_DIP.GetExoJointAngleRad();
     */
 
-    ang_sensor_MCP_abad = joint_angles[0];
-    ang_sensor_MCP_fe = joint_angles[1];
-    ang_sensor_MCP_PIP = joint_angles[2];
-    ang_sensor_PIP = joint_angles[3];
-    ang_sensor_DIP = joint_angles[4];
+    global_pos = a_global_pos;
 
-    // computeJointAnglesFinger();
-    pseudoComputeJointAnglesFinger(0,0);
+    ang_sensor_MCP_abad = robot_angles[0];
+    ang_sensor_MCP_fe = robot_angles[1];
+    ang_sensor_MCP_PIP = robot_angles[2];
+    ang_sensor_PIP = robot_angles[3];
+    ang_sensor_DIP = robot_angles[4];
+
+    /*
+    auto joint_angles = M3KL1(ang_sensor_MCP_abad, ang_sensor_MCP_fe, ang_sensor_MCP_PIP,
+                              ang_sensor_PIP, ang_sensor_DIP);
+    */
+
+    ang_MCP_fe = 100 * 10 * (3.14 / 180) ;//joint_angles[0];
+    ang_PIP = 100 * 10 * (3.14 / 180) ;//joint_angles[1];
+    ang_DIP = 100 * 10 * (3.14 / 180) ; //ang_PIP*0.67;
+
+    auto ret = computeForwardKinematics(ang_MCP_fe,
+                                        ang_MCP_abad,ang_PIP,ang_DIP);
+
+    return tip_pos;
 
 }
 
-double* cMaestroDigit::getJointAngles()
+Eigen::Matrix4d cMaestroDigit::computeForwardKinematics(double a_ang_MCP_fe, double a_ang_MCP_abad,
+                                                double a_ang_PIP, double a_ang_DIP)
 {
-    return joint_angles;
+
+    // transformation from hand to mcp (always angle zero)
+    M = SE3(aa2rot(Eigen::Vector3d(0,0,1),a_ang_MCP_abad),Eigen::Vector3d(0,MCP,0));
+
+    // transformation for MCP abad (always zero too)
+    T1 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_MCP_fe),Eigen::Vector3d(0,0,0));
+
+    // transformation for MCP fe
+    T2 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_PIP),Eigen::Vector3d(MCP_PIP,0,0));
+
+    // transformation for abad (always zero too)
+    T3 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_DIP),Eigen::Vector3d(PIP_DIP,0,0));
+
+    // transformation for DIP fe
+    T4 = SE3(aa2rot(Eigen::Vector3d(0,0,0),0),Eigen::Vector3d(DIP_TIP,0,0));
+
+    // transformation from M to T1
+    M_T1 = computeTransformAtoB(M,T1);
+
+    // transformation from M to T2
+    M_T2 = computeTransformAtoB(M_T1,T2);
+
+    // transformation from M to T3
+    M_T3 = computeTransformAtoB(M_T2,T3);
+
+    // transformation from M to T3
+    M_T4 = computeTransformAtoB(M_T3,T4);
+
+    return M_T4;
 }
 
-bool cMaestroDigit::commandJointTorque(double *joint_torque)
+inline void cMaestroDigit::computeJacobian(double a_ang_MCP_fe, double a_ang_MCP_abad,
+                                    double a_ang_PIP, double a_ang_DIP)
 {
+
+
+    j_s.col(0) = screw.col(0);
+    j_s.col(1) = adjointRepresentation(M)*screw.col(1);
+    j_s.col(2) = adjointRepresentation(M_T1)*screw.col(2);
+    j_s.col(3) = adjointRepresentation(M_T2)*screw.col(3);
+    j_s.col(4) = adjointRepresentation(M_T3)*screw.col(4);
+
+}
+
+
+void cMaestroDigit::getJointAngles(double* joint_angles)
+{
+    joint_angles[0] = ang_MCP_fe;
+    joint_angles[1] = ang_PIP;
+    joint_angles[2] = ang_DIP;
+}
+
+double* cMaestroDigit::commandJointTorque(double K ,  double B)
+{
+
+    double joint_torque[2];
+
     joint_torque[0] = exo_desired_torque_MCP;
     joint_torque[1] = exo_desired_torque_PIP;
 
-    return true;
+    return joint_torque;
 }
 
+double* cMaestroDigit::M3KL1(const double A1, const double B1, const double C1, const double PHI1, const double PHI3)
+{
+    double t2 = cos(PHI1); double t3 = pow(A1,2); double t4 = pow(B1,2);
+    double t5 = pow(C1,2); double t8 = PHI3/2.0; double t6 = pow(t2,2);
+    double t7 = pow(A1,t2); double t9 = -t5; double t10 = tan(t8); double t11 = -t7;
+    double t12 = B1*t7*2.0; double t14 = pow(t10,2); double t15 = B1*t10*2.0;
+    double t16 = t3*t6*2.0; double t20 = B1*t7*t10*4.0; double t13 = -t12;
+    double t17 = t14+1.0; double t18 = C1*t14; double t19 = t7*t14; double t21 = t4*t14;
+    double t22 = t5*t14; double t23 = -t20; double t24 = t11*t14; double t25 = t12*t14;
+    double t26 = t9*t14; double t27 = t14*t16; double t28 = C1+t11+t15+t18+t24;
+    double t30 = t4+t9+t13+t16+t21+t23+t25+t26+t27; double t29 = 1.0/t28;
+    double t31 = t17*t30; double t32 = sqrt(t31);
+    double KL1[2];
+    KL1[0] = atan(t29*(-B1+t7+t19+B1*t14)-t29*t32)*2.0;
+    KL1[1] = t32/t17;
+    return KL1;
+}
 
-// Function to compute forward kinematics (finger joints to finger tip)
-void cMaestroDigit::computeForwardKinematicsFinger(void)
+inline Eigen::Matrix4d cMaestroDigit::SE3(Eigen::Matrix3d a_rot, Eigen::Vector3d a_tr)
+{
+    Eigen::Matrix4d ret;
+    ret.block<3,3>(0,0) = a_rot;
+    ret.block<3,1>(0,3) = a_tr;
+    ret.block<1,4>(3,0) << 0 , 0 , 0 , 1;
+    return ret;
+}
+
+inline Eigen::Matrix3d cMaestroDigit::aa2rot(const Eigen::Vector3d a_axis, const double a_angle)
+{
+    Eigen::Matrix3d skew;
+    skew = vec2skew(a_axis);
+
+    Eigen::Matrix3d ret = Eigen::Matrix3d().setIdentity() + sin(a_angle)*skew + (1-cos(a_angle))*skew*skew;
+
+    return ret;
+}
+
+inline Eigen::Matrix3d cMaestroDigit::vec2skew(const Eigen::Vector3d a_axis)
+{
+    Eigen::Matrix3d ret;
+    ret << 0 , -a_axis(2), a_axis(1),
+            a_axis(2), 0, -a_axis(0),
+            -a_axis(1), a_axis(0), 0;
+
+    return ret;
+}
+
+inline Eigen::Matrix4d cMaestroDigit::computeTransformAtoB(const Eigen::Matrix4d A , const Eigen::Matrix4d B)
+{
+    Eigen::Matrix4d ret;
+    //rotation
+    ret.block<3,3>(0,0) = A.block<3,3>(0,0)*B.block<3,3>(0,0);
+    //translation
+    ret.block<3,1>(0,3) = A.block<3,3>(0,0)*B.block<3,1>(0,3) + A.block<3,1>(0,3);
+    // bottom
+    ret.block<1,4>(3,0) << 0 , 0 , 0 , 1;
+
+    return ret;
+}
+
+inline Eigen::Matrix4d cMaestroDigit::twist2mat(const Eigen::VectorXd& a_twist)
 {
 
-    /*
-    // User finger Parameters
-    double l1 = hIdxSegLengths(0); // 45 [mm]
-    double l2 = hIdxSegLengths(1); // 25 [mm]
-    double l3 = hIdxSegLengths(2); // 20 [mm]
-
-    // Finger joint angles
-    double joint_angle_abad_MCP = hIdxJointAngles(0);
-    double joint_angle_fe_MCP   = hIdxJointAngles(1);
-    double joint_angle_PIP      = hIdxJointAngles(2);
-    double joint_angle_DIP      = hIdxJointAngles(3);
-
-    //! change to matrix operations when integrating MCP abduction and adduction
-    // P0: MCP coordinates w.r.t world frame
-    double xMCP = cursor_MCP->getGlobalPos().x();
-    double yMCP = cursor_MCP->getGlobalPos().y();
-    double zMCP = cursor_MCP->getGlobalPos().z();
-
-    // P1: PIP coordinates w.r.t world frame
-    double xPIP = xMCP + l1*sin(joint_angle_fe_MCP) ;
-    double yPIP = yMCP + l1*cos(joint_angle_fe_MCP) ;
-    double zPIP = zMCP ;
-
-    // P2: DIP coordinates with respect to  P0
-    double xDIP = xPIP + l2*sin( joint_angle_fe_MCP + joint_angle_PIP) ;
-    double yDIP = yPIP + l2*cos( joint_angle_fe_MCP + joint_angle_PIP) ;
-    double zDIP = zPIP + 0 ;
-
-    // P3: Finger tip coordinates with respect to  P0
-    double xft = xDIP +l3*sin(joint_angle_fe_MCP + joint_angle_PIP + joint_angle_DIP ) ;
-    double yft = yDIP +l3*cos(joint_angle_fe_MCP + joint_angle_PIP + joint_angle_DIP ) ;
-    double zft = zDIP + 0 ;
-
-
-    cursor_PIP->setLocalPos(chai3d::cVector3d(xPIP,yPIP,zPIP))  ; // PIP joint position w.r.t World Frame
-    cursor_DIP->setLocalPos(chai3d::cVector3d(xDIP,yDIP,zDIP) ); // DIP joint position w.r.t World Frame
-    cursor_TIP->setLocalPos(chai3d::cVector3d(xft,yft,zft)) ; // Finger-tip position w.r.t World Frame
-
-    //hIdxFingerVel = (hIdxFingerPos + hIdxLastPos);
-
-    // std::cout << hIdxMCPpos <<endl; std::cout <<'-'<< endl;
-    // std::cout << joint_angle_fe_MCP <<','<<joint_angle_PIP<<','<< joint_angle_DIP << endl;
-    // std::cout << xPIP <<','<< yPIP<<','<< zPIP << endl;
-    // std::cout << xDIP <<','<< yDIP<<','<< zDIP << endl;
-    // std::cout << xft <<','<< yft<<','<< zft << endl;
-    // std::cout.flush();
-    */
 }
 
-
-// Function to computer inverse dynamics
-Eigen::Vector2d cMaestroDigit::computeInverseDynamics_Finger(Eigen::Vector3d force)
+inline Eigen::MatrixXd cMaestroDigit::adjointRepresentation(const Eigen::MatrixXd a_T)
 {
-    /*
-    Eigen::Vector3d P0(cursor_MCP->getLocalPos().x(),
-                       cursor_MCP->getLocalPos().y(),
-                       cursor_MCP->getLocalPos().z());
-    Eigen::Vector3d P1(cursor_PIP->getLocalPos().x(),
-                       cursor_PIP->getLocalPos().y(),
-                       cursor_PIP->getLocalPos().z());
-    Eigen::Vector3d P2(cursor_DIP->getLocalPos().x(),
-                       cursor_DIP->getLocalPos().y(),
-                       cursor_DIP->getLocalPos().z());
-    Eigen::Vector3d P3(cursor_TIP->getLocalPos().x(),
-                       cursor_TIP->getLocalPos().y(),
-                       cursor_TIP->getLocalPos().z());
+    Eigen::MatrixXd ret(6,6);
 
-    Eigen::Vector3d L3 = P3 - P2 ;
-    Eigen::Vector3d L2 = P2 - P1 ;
-    Eigen::Vector3d L1 = P1 - P0 ;
+    ret.block<3,3>(0,0) = a_T.block<3,3>(0,0);
+    ret.block<3,3>(0,3) = Eigen::Matrix3d().setZero();
+    ret.block<3,3>(3,0) = vec2skew(a_T.block<3,1>(0,4))*a_T.block<3,3>(0,0);
+    ret.block<3,3>(0,3) = a_T.block<3,3>(0,0);
 
-    // to do: dot product to extract torques only in the z axis
-    Eigen::Vector3d torques_P2 = L3.cross(force) ;  // + torques_P3 when generalizing
-    Eigen::Vector3d torques_P1 = L2.cross(force) + torques_P2 ;
-    Eigen::Vector3d torques_P0 = L1.cross(force) + torques_P1 ;
-
-    //
-    double joint_torque_MCP = 0.001*torques_P0.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
-    double joint_torque_PIP = 0.001*torques_P1.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
-    double joint_torque_DIP = 0.001*torques_P2.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
-
-    // std::cout << force(0)<<','<<force(1)<<','<<force(2)<< endl;
-    // std::cout << L3(0)<<','<< L3(1)<<','<< L3(2) << endl;
-    // std::cout << joint_torque_DIP(0)<<','<<joint_torque_DIP(1)<<','<<joint_torque_DIP(2)<< endl;
-    // std::cout << joint_torque_DIP << endl;
-    // std::cout << joint_torque_PIP << endl;
-    // std::cout << joint_torque_MCP << endl;
-    //std::cout << joint_torque_MCP<<','<< joint_torque_PIP << endl;
-    //std::cout.flush();
-
-
-
-    // compute exo joint torques
-    double exo_torque_MCP = joint_torque_MCP;
-    double exo_torque_PIP = -joint_torque_PIP;
-
-    return Eigen::Vector2d (exo_torque_MCP, exo_torque_PIP);
-    */
 }
-
-
-//! Command the desired exo torque back to esmacat finger class
-void cMaestroDigit::commandExoTorqueFinger(double exo_torque_MCP, double exo_torque_PIP)
-{
-    exo_desired_torque_MCP = exo_torque_MCP;
-    exo_desired_torque_PIP = exo_torque_PIP;
-}
-
-
-

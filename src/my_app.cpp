@@ -233,7 +233,7 @@ void my_app::loop(){
     else if(run_flag){
 
         running_cnt++;
-        //	cout << "manager running..." << endl;
+        cout << "manager running..." << endl;
 
         // Updates the sensor data
         pHW_interface->UpdateAllSensorData();

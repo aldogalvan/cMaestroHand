@@ -1,3 +1,6 @@
+//
+// Created by aldo on 7/27/22.
+//
 
 //------------------------------------------------------------------------------
 #include "chai3d.h"
@@ -117,6 +120,12 @@ int height = 0;
 // swap interval for the display context (vertical synchronization)
 int swapInterval = 1;
 
+//------------------------------------------------------------------------------
+// EXPERIMENT VARIABLES
+//------------------------------------------------------------------------------
+
+// subject number
+int  subject_number;
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -192,17 +201,15 @@ int main(int argc, char* argv[])
 
     cout << endl;
     cout << "-----------------------------------" << endl;
-    cout << "CHAI3D" << endl;
-    cout << "Demo: 01-MaestroHand" << endl;
-    cout << "Copyright 2003-2016" << endl;
-    cout << "-----------------------------------" << endl << endl << endl;
-    cout << "Keyboard Options:" << endl << endl;
-    cout << "[1] - Enable/Disable potential field" << endl;
-    cout << "[2] - Enable/Disable damping" << endl;
-    cout << "[f] - Enable/Disable full screen mode" << endl;
-    cout << "[m] - Enable/Disable vertical mirroring" << endl;
+    cout << "Experiment Joint Level Haptics" << endl;
+    cout << "-----------------------------------" << endl;
     cout << "[q] - Exit application" << endl;
     cout << endl << endl;
+
+    cout << "Please input the subject number:" << endl;
+    cin >> subject_number;
+    cout << "Please input subject hand dimensions" << endl;
+    cout << "Please input R or L" << std::endl;
 
 
     //--------------------------------------------------------------------------
@@ -741,9 +748,9 @@ bool computeProxyWithConstraints0(cVector3d& proxy , const cVector3d& goal)
     // and the environment.
     collisionRecorder.clear();
     bool hit = box->computeCollisionDetection(proxy,
-                                                  targetPos,
-                                                  collisionRecorder,
-                                                  collisionSettings);
+                                              targetPos,
+                                              collisionRecorder,
+                                              collisionSettings);
 
     // check if collision occurred between proxy and goal positions.
     double collisionDistance;
@@ -865,9 +872,9 @@ void jointOptimization(Eigen::VectorXd & joint_angles, Eigen::Vector3d curPos, c
     // The home Matrix
     Eigen::Matrix4d M;
     M << 1 , 0 , 0 , 0,
-         0 , 0 , -1 , 0.025,
-         0 , 1 , 0 , 0,
-         0 , 0 , 0 , 1;
+            0 , 0 , -1 , 0.025,
+            0 , 1 , 0 , 0,
+            0 , 0 , 0 , 1;
 
     Eigen::Matrix4d T1;
     T1 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
@@ -912,10 +919,10 @@ void jointOptimization(Eigen::VectorXd & joint_angles, Eigen::Vector3d curPos, c
 
     Eigen::VectorXd theta_loop = joint_angles;
 
-     do
-     {
+    do
+    {
 
-     } while ((curPos - desPos).squaredNorm() <= pow(er,2));
+    } while ((curPos - desPos).squaredNorm() <= pow(er,2));
 }
 
 
@@ -961,4 +968,3 @@ bool goalAchieved(const cVector3d& a_proxy, const cVector3d& a_goal)
 {
     return (a_proxy.distance(a_goal) < (epsilonBaseValue));
 }
-

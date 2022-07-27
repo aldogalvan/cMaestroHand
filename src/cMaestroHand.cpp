@@ -28,7 +28,7 @@ using namespace chai3d;
             -0.03012474, 0.25982226, 0.00517352, 0.27148087, 0.2919739
     };
 
-// Hand geometry (phalanxes lenght)
+    // Hand geometry (phalanxes lenght)
     std::vector<std::vector<cVector3d>> fingertransl =
             {
                     /********************************************************/
@@ -86,22 +86,21 @@ using namespace chai3d;
 
 
     //!Constructor
-    cMaestroHand::cMaestroHand(cWorld *a_world) {
+    cMaestroHand::cMaestroHand() {
 
-        m_world = a_world;
         createIndexFinger();
         //createMiddleFinger();
         //createThumb();
 
-        /*
+
         // Initialize esmacat application first
-        application = new my_app();
-        application->set_ethercat_adapter_name_through_terminal();
-        application->start();
-         */
+        //application = new my_app();
+        //application->set_ethercat_adapter_name_through_terminal();
+        //application->start();
+
 
         // create cHand
-        h_hand = new chai3d::cHand(a_world);
+        h_hand = new chai3d::cHand();
 
         std::vector<std::vector<cTransform>> newT = h_hand->t_default_Tkach25Dof;
 
@@ -149,15 +148,17 @@ using namespace chai3d;
         // h_thumb = new cMaestroThumb(h_hand);
     }
 
+    // this method updates the join angle values
+    void cMaestroHand::updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos, cVector3d& a_midPos ,
+                                         cVector3d a_globalPos)
+    {
 
-    void cMaestroHand::updateJointAngles(std::vector<cVector3d*>& a_pos) {
 
         // Updates array with angles
-        double joint_angles[16];
-        application->updateJointAngles(joint_angles);
+        //double robot_angles[16];
+        //application->updateJointAngles(robot_angles);
 
-
-
+        // TODO: SMOOTH SENSOR VALUES
         /*
         for(int i = 0; i < count; i++){
             newAvg = movingAvg(arrNumbers, &sum, pos, len, joint_angles);
@@ -169,41 +170,49 @@ using namespace chai3d;
         }
          */
 
-        // Updates index finger
-        auto index_angles = M3KL1(joint_angles[0],joint_angles[1],joint_angles[2],
-                                  joint_angles[3],joint_angles[4]);
+        // Updates thumb
+        /*
+        double thumb_robot_angles[6];
+        thumb_robot_angles[0] = robot_angles[10]; thumb_robot_angles[1] = robot_angles[11]; thumb_robot_angles[2] = robot_angles[12];
+        thumb_robot_angles[3] = robot_angles[13]; thumb_robot_angles[4] = robot_angles[14]; thumb_robot_angles[5] = robot_angles[15];
+        Eigen::Vector3d thumb_pos = h_thumb->updateJointAngles(thumb_robot_angles);
+        a_thumbPos = cVector3d(thumb_pos);
+        */
 
-        h_index->updateJointAngles(index_angles);
+        // Updates index
+        /*
+        double idx_robot_angles[5];
+        idx_robot_angles[0] = robot_angles[0]; idx_robot_angles[1] = robot_angles[1]; idx_robot_angles[2] = robot_angles[2];
+        idx_robot_angles[3] = robot_angles[3]; idx_robot_angles[4] = robot_angles[4];
+        Eigen::Vector3d idx_pos = h_index->updateJointAngles(idx_robot_angles , a_globalPos.eigen());
+        a_idxPos = cVector3d(idx_pos);
 
         // Updates middle finger
-        auto middle_angles = M3KL1(joint_angles[5],joint_angles[6],joint_angles[7],
-                                  joint_angles[8],joint_angles[9]);
+        double mid_robot_angles[5];
+        mid_robot_angles[0] = robot_angles[5]; mid_robot_angles[1] = robot_angles[6]; mid_robot_angles[2] = robot_angles[7];
+        mid_robot_angles[3] = robot_angles[8]; mid_robot_angles[4] = robot_angles[9];
+        Eigen::Vector3d mid_pos = h_index->updateJointAngles(mid_robot_angles , a_globalPos.eigen());
+        a_midPos = cVector3d(mid_pos);
+         */
 
-        h_middle->updateJointAngles(middle_angles);
+        double idx_robot_angles[5];
+        idx_robot_angles[0] = 0; idx_robot_angles[1] = 0; idx_robot_angles[2] = 0; idx_robot_angles[3] = 0;
+        idx_robot_angles[4] = 0;
+        Eigen::Vector3d idx_pos = h_index->updateJointAngles(idx_robot_angles , a_globalPos.eigen());
 
-        double thumb_angles[6];
-        thumb_angles[0] = joint_angles[10];
-        thumb_angles[1] = joint_angles[11];
-        thumb_angles[2] = joint_angles[12];
-        thumb_angles[3] = joint_angles[13];
-        thumb_angles[4] = joint_angles[14];
-        thumb_angles[5] = joint_angles[15];
 
-        //h_thumb->updateJointAngles(thumb_angles);
 
-        a_pos = updateCHandAngles(index_angles,middle_angles,thumb_angles);
     }
 
-    bool cMaestroHand::commandJointTorque(void) {
-
+    bool cMaestroHand::commandJointTorque(double a_stiffness,double a_damping) {
 
         double index_torque[2];
         if (use_idx)
-            h_index->commandJointTorque(index_torque);
+            h_index->commandJointTorque(a_stiffness,a_damping);
 
         double middle_torque[2];
         if (use_middle)
-            h_middle->commandJointTorque(middle_torque);
+            h_middle->commandJointTorque(a_stiffness,a_damping);
 
         double thumb_torque[4];
 
@@ -226,7 +235,10 @@ using namespace chai3d;
 
     }
 
-std::vector<cVector3d*> cMaestroHand::updateCHandAngles(double* idx_finger, double* middle_finger, double* thumb) {
+void cMaestroHand::updateCHandAngles(void) {
+
+
+        double thumb_angles;
 
         // TODO: MODIFY JOINT ANGLES OF RING AND PINKY BASED ON OTHER VALUES
         std::vector<double> vec;
@@ -237,10 +249,10 @@ std::vector<cVector3d*> cMaestroHand::updateCHandAngles(double* idx_finger, doub
         //}
         //else {
             vec = std::vector<double>{
-                    0 * 30 * (Pi / 180), 2 * 10 * (Pi / 180), -2 * 10 * (Pi / 180), -0 * 10 * (Pi / 180),
+                    0 * 30 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
                     -0 * 10 * (Pi / 180),
-                    -2 * 10 * (Pi / 180), 1 * 10 * (Pi / 180), 0.5 * 10 * (Pi / 180), .5 * 10 * (Pi / 180),
-                    0 * 10 * (Pi / 180),
+                    0 * 10 * (Pi / 180), 100 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 100 * 10 * (Pi / 180),
+                    100 * 10 * (Pi / 180),
                     0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
                     0 * 10 * (Pi / 180),
                     0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
@@ -257,31 +269,20 @@ std::vector<cVector3d*> cMaestroHand::updateCHandAngles(double* idx_finger, doub
         // TODO: FIX THIS
         auto tip_pos = h_hand->getFingertipCenters();
 
-        return tip_pos;
     }
 
-    void commandFingertipForce(const cVector3d & force_idx , const cVector3d & force_mid,
-                               const cVector3d& force_thumb)
-    {
+std::vector<cVector3d*> cMaestroHand::testTrajectory(vector<double> vec) {
 
-    }
-    double* cMaestroHand::M3KL1(const double A1, const double B1, const double C1, const double PHI1, const double PHI3)
-    {
-        double t2 = cos(PHI1); double t3 = pow(A1,2); double t4 = pow(B1,2);
-        double t5 = pow(C1,2); double t8 = PHI3/2.0; double t6 = pow(t2,2);
-        double t7 = pow(A1,t2); double t9 = -t5; double t10 = tan(t8); double t11 = -t7;
-        double t12 = B1*t7*2.0; double t14 = pow(t10,2); double t15 = B1*t10*2.0;
-        double t16 = t3*t6*2.0; double t20 = B1*t7*t10*4.0; double t13 = -t12;
-        double t17 = t14+1.0; double t18 = C1*t14; double t19 = t7*t14; double t21 = t4*t14;
-        double t22 = t5*t14; double t23 = -t20; double t24 = t11*t14; double t25 = t12*t14;
-        double t26 = t9*t14; double t27 = t14*t16; double t28 = C1+t11+t15+t18+t24;
-        double t30 = t4+t9+t13+t16+t21+t23+t25+t26+t27; double t29 = 1.0/t28;
-        double t31 = t17*t30; double t32 = sqrt(t31);
-        double KL1[2];
-        KL1[0] = atan(t29*(-B1+t7+t19+B1*t14)-t29*t32)*2.0;
-        KL1[1] = t32/t17;
-        return KL1;
-    }
+    // update hand model kinematics
+    h_hand->updateAngles(vec);
+    h_hand->updateKinematics();
+
+    // update chand and get fingertip pos
+    auto tip_pos = h_hand->getFingertipCenters();
+
+    return tip_pos;
+}
+
     /*
     int movingAvg(int *ptrArrNumbers, double*& ptrSum, int pos, int len, double* nextNum)
     {

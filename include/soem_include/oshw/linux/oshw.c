@@ -76,6 +76,7 @@ ec_adaptert * oshw_find_adapters(void)
       if (ids[i].if_name)
       {
           string_len = strlen(ids[i].if_name);
+
           if (string_len > (EC_MAXLEN_ADAPTERNAME - 1))
           {
              string_len = EC_MAXLEN_ADAPTERNAME - 1;
@@ -106,7 +107,8 @@ ec_adaptert * oshw_find_adapters(void)
 void oshw_free_adapters(ec_adaptert * adapter)
 {
    ec_adaptert * next_adapter;
-   /* Iterate the linked list and free all elemnts holding
+   /*
+    * Iterate the linked list and free all elemnts holding
     * adapter information
     */
    if(adapter)

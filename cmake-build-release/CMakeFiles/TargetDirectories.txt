@@ -7,3 +7,6 @@
 /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-01.dir
 /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/examples/CMakeFiles/edit_cache.dir
 /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/examples/CMakeFiles/rebuild_cache.dir
+/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/experiments/CMakeFiles/experiment-joint-haptics.dir
+/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/experiments/CMakeFiles/edit_cache.dir
+/home/aldo/CLionProjects/maestro_chai3d/cmake-build-release/experiments/CMakeFiles/rebuild_cache.dir

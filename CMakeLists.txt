@@ -14,7 +14,8 @@ if(WIN32)
     set(OS_LIBS wpcap.lib Packet.lib Ws2_32.lib Winmm.lib)
 elseif(UNIX)
     set(OS "linux")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror")
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wno-error=stringop-overflow")
     set(OS_LIBS pthread rt)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "rt-kernel")
     set(OS "rtk")
@@ -23,7 +24,7 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "rt-kernel")
     include_directories(include/soem_include/oshw/${OS}/${ARCH})
     file(GLOB OSHW_EXTRA_SOURCES include/soem_include/oshw/${OS}/${ARCH}/*.c)
     set(OSHW_SOURCES "${OS_HW_SOURCES} ${OSHW_ARCHSOURCES}" src/cMaestroHand.cpp src/cMaestroHand.h)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-error ")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-but-set-variable")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-function")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-format")
@@ -55,6 +56,13 @@ include_directories(include/soem_include/osal/${OS})
 include_directories(include/soem_include/oshw/${OS})
 include_directories(include/esmacat_server)
 include_directories(include/maestro3)
+
+# output location
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY                ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG          ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE        ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
 
 #Generate the shared library from the sources
 add_library(soem STATIC
@@ -113,4 +121,7 @@ target_link_libraries(maestro_chai3d maestro3 ${CHAI3D_LIBRARIES} Eigen3::Eigen 
 
 # build examples
 add_subdirectory(examples)
+
+# build the experiment directory
+add_subdirectory(experiments)
 

@@ -93,7 +93,7 @@ namespace chai3d {
 		//--------------------------------------------------------------------------
 
 		//! Constructor of cHand.
-		cHand(cWorld* a_world);
+		cHand();
 
 		//! Destructor of cHand.
 		virtual ~cHand();
@@ -101,9 +101,11 @@ namespace chai3d {
 		//--------------------------------------------------------------------------
 		// PUBLIC METHODS:
 		//--------------------------------------------------------------------------
-		//void LoadFromFile();
-		//
+
 	public:
+
+        //! This function simply returns the radius
+        double radius(){return sphradius;}
 
 		//! build a collection of transforms from a plain .txt file. Assumes a plain txt file where every row has 4 matrix components.
 		std::vector<std::vector<cTransform>>  makeTFromFile(std::string filename, std::vector<int> dof_list);
@@ -160,6 +162,8 @@ namespace chai3d {
 
 
 
+
+
 	//--------------------------------------------------------------------------
 	// PROTECTED METHODS:
 	//--------------------------------------------------------------------------
@@ -194,7 +198,8 @@ protected:
 	//! finger thickness.
 	int finger_thickness = 10;
 
-	//! parameters for joint visualization
+	//! pa
+	//! 5grameters for joint visualization
 	double sphradius = 0.9*0.01;
 	double cylradius = 0.9*0.0065;
 
@@ -212,11 +217,19 @@ protected:
 	//! container for transforms describing joints relative pose in the zero pose.
 	std::vector<std::vector<cTransform>> t_vector_zero;
 
+    //! contains the actual positions of the fingertips
+    std::vector<cVector3d*> m_positions;
+
+    //! contains the proxy positions of the fingertips
+    std::vector<cVector3d*> m_proxypositions;
+
 	//! Pi, needed for forward kinematics
 	double Pi = 3.14159;
 
 private:
+
         cWorld* m_world;
+
 
 public:
 	//! default cTransform collection for the Tkach hand model

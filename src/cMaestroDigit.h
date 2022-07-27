@@ -26,10 +26,21 @@ public:
     // CONSTRUCTOR & DESTRUCTOR:
     //--------------------------------------------------------------------------
 
-    //! Constructor of cPhantomDevice.
-    cMaestroDigit(){};
+    //! Constructor of cMaestroDigit
+    cMaestroDigit()
+    {
 
-    //! Destructor of cPhantomDevice.
+        screw << 0 , 0 , 0 , 0 , 0,
+                0 , 1 , 1 , 1 , 0,
+                1 , 0 , 0 , 0 , 0,
+                MCP , 0 , MCP_PIP, MCP_PIP + PIP_DIP ,  MCP_PIP + PIP_DIP + DIP_TIP,
+                0 , 0 , 0 , 0 , 0,
+                0 , 0 , 0 , 0 , 0;
+
+
+    };
+
+    //! Destructor of cMaestroDigit
     virtual ~cMaestroDigit(){};
 
 public:
@@ -38,41 +49,54 @@ public:
     // PUBLIC METHODS:
     //--------------------------------------------------------------------------
 
-    //! This method updates the data from the Maestro class
-    void updateJointAngles(double* joint_angles);
+    // this function creates a stay on point virtual fixture
+    void stayOnPointVF(Eigen::MatrixXd& A ,Eigen::VectorXd& b, int n , int m , Eigen::Vector3d pos_des,
+                                      Eigen::Vector3d pos_cur , Eigen::Vector3d dir_des, Eigen::Vector3d dir_cur);
 
-    //! This method commands the desired joint torque
-    bool commandJointTorque(double* joint_torque);
+    // this function creates a virtual wall virtual fixture
+    void virtualWallVF(Eigen::MatrixXd& A, Eigen::VectorXd& b );
 
-    // compute fake angles for finger exoskeleton (use for debugin)
-    void pseudoComputeJointAnglesFinger(double joint_angle_sensor_MCP, double joint_angle_sensor_PIP);
+    // this function computes the forward kinematics and returns fingertip pos
+    Eigen::Vector3d updateJointAngles(double* robot_angles , Eigen::Vector3d a_global_pos);
 
-    // This method sets the desired force at the fingertip
-    void commandFingertipForce(Eigen::Vector3d a_force);
+    // this function computes the forward kinematics
+    Eigen::Matrix4d computeForwardKinematics(double a_ang_MCP_fe, double a_ang_MCP_abad,
+                                     double a_ang_PIP, double a_ang_DIP);
+
+    // this function computes the jacobian
+    void computeJacobian(double a_ang_MCP_fe, double a_ang_MCP_abad,
+                                        double a_ang_PIP, double a_ang_DIP);
+
+    // this method computes an optimization problem to find desired angular displacement
+    void computeOptimization(const Eigen::Vector3d a_goalPos, const int a_maxIts = 10, const double ep = 0.001);
+
+    // this method commands a new joint torque
+    double* commandJointTorque(double K , double B);
 
     // return the vector of finger angles
-    double* getJointAngles(void);
+    void getJointAngles(double* joint_angles);
 
-    //! This method computes the actual joint angles from finger exoskeleton angles
-    Eigen::Vector4d computeJointAnglesFinger(double joint_angle_sensor_MCP_abad, double joint_angle_sensor_MCP_fe, double joint_angle_sensor_MCP_PIP);
+    // Compute parameters
+    double* M3KL1(const double A1, const double B1, const double C1,
+                  const double PHI1, const double PHI3);
 
-    /*
-    //! This method computes the actual joint angles from thumb exoskeleton angles
-    Eigen::Vector2d computeJointAnglesThumb(double joint_angle_sensor_MCP, double joint_angle_sensor_CMC_MCP);
-    */
+    // this method makes the special euclidean matrix
+    Eigen::Matrix4d SE3(Eigen::Matrix3d a_rot, Eigen::Vector3d a_tr);
 
-    //! This method computes the fingertip position from joint angles
-    void computeForwardKinematicsFinger(void);
+    // axis angle to rotation
+    Eigen::Matrix3d aa2rot(const Eigen::Vector3d a_axis, const double a_angle);
 
-    //! This method computes the inverse dynamics for the finger
-    Eigen::Vector2d computeInverseDynamics_Finger(Eigen::Vector3d force);
+    // vector to skew symmetric form
+    Eigen::Matrix3d vec2skew(const Eigen::Vector3d);
 
-    //! This method commands the desired torque back to esmacat finger class
-    void commandExoTorqueFinger(double exo_torque_MCP, double exo_torque_PIP);
+    // this method commands a new joint torque
+    Eigen::Matrix4d computeTransformAtoB(const Eigen::Matrix4d A , const Eigen::Matrix4d B);
 
-    void AssignIndexOfExoJointAngleSensorArrayHWInterface(int index_exo_joint_angle_sensor_MCP_abd, int index_exo_joint_angle_sensor_MCP_SEA, int index_exo_joint_angle_sensor_btw_SEAs, int index_exo_joint_angle_sensor_PIP_SEA, int index_exo_joint_angle_sensor_DIP_flex);
-    void AssignIndexOfExoMotorArrayHWInterface(int index_exo_motor_for_MCP_SEA, int index_exo_motor_for_PIP_SEA);
+    // this method changes twist vector to matrix represenation
+    Eigen::Matrix4d twist2mat(const Eigen::VectorXd& a_twist);
 
+    // homogeneous transformation to ajoint representation
+    Eigen::MatrixXd adjointRepresentation(const Eigen::MatrixXd a_T);
 
 public:
 
@@ -80,26 +104,15 @@ public:
     // PUBLIC MEMBERS
     //--------------------------------------------------------------------------
 
-    //! Tool object represnting the tip
-    Eigen::Vector3d cursor_TIP;
+    // the global position of the hand
+    Eigen::Vector3d global_pos;
 
-    //! Tool object representing the DIP
-    Eigen::Vector3d cursor_DIP;
+    // position of the tool tip
+    Eigen::Vector3d tip_pos;
 
-    //! Tool object represeting the PIP
-    Eigen::Vector3d cursor_PIP;
+    // position of the proxy
+    Eigen::Vector3d proxy_pos;
 
-    //! Tool object representing the MCP
-    Eigen::Vector3d cursor_MCP;
-
-    //! Joint angles for each finger in radians
-    Eigen::Vector4d hIdxJointAngles;
-
-    //! Segment lengths for each finger
-    Eigen::Vector3d hIdxSegLengths;
-
-    //! Virtual Joint torques for each digit
-    Eigen::Vector3d hIdxJointTorques;
 
 protected:
 
@@ -118,8 +131,67 @@ protected:
     double ang_sensor_PIP;
     double ang_sensor_DIP;
 
-    // finger joint angles
-    double joint_angles[4];
+    // actual joint angles
+    double ang_MCP_abad = 0;
+    double ang_MCP_fe;
+    double ang_PIP;
+    double ang_DIP;
+
+    // proxy angles
+    Eigen::VectorXd theta_loop;
+
+    // base transformation
+    Eigen::Matrix4d M;
+
+    // transformation base
+    Eigen::Matrix4d T1 ;
+
+    // transformation PIP
+    Eigen::Matrix4d T2;
+
+    // transformation DIP
+    Eigen::Matrix4d T3;
+
+    // transformation TIP
+    Eigen::Matrix4d T4;
+
+    // transformation
+    Eigen::Matrix4d M_T1;
+
+    //transformation
+    Eigen::Matrix4d M_T2;
+
+    // transofrmation
+    Eigen::Matrix4d M_T3;
+
+    // transofrmation
+    Eigen::Matrix4d M_T4;
+
+    // segment length from center of hand to MCP index
+    double MCP = 0.025;
+
+    // segment from MCP to PIP
+    double MCP_PIP = 0.03978;
+
+    //segment from PIP to DIP
+    double PIP_DIP = 0.02238;
+
+    //segment from DIP to TIP
+    double DIP_TIP = 0.01566;
+
+    // jacobian matrix in space frame
+    Eigen::MatrixXd j_s;
+
+    // screw axis
+    Eigen::MatrixXd screw;
+
+    // body twist
+    Eigen::MatrixXd twist_b;
+
+    // space twist
+    Eigen::MatrixXd twist_s;
+
+
 
 
 };

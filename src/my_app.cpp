@@ -24,29 +24,73 @@ bool my_app::updateJointAngles(double *joint_angles)
     bool flag = false;
 
     //! Update the index finger
-    joint_angles[0] = indexFinger.exo_joint_angle_sensor_MCP_abad.GetExoJointAngleRad();
-    joint_angles[1] = indexFinger.exo_joint_angle_sensor_MCP_fe.GetExoJointAngleRad();
-    joint_angles[2] = indexFinger.exo_joint_angle_sensor_MCP_PIP.GetExoJointAngleRad();
-    joint_angles[3] = indexFinger.exo_joint_angle_sensor_PIP.GetExoJointAngleRad();
-    joint_angles[4] = indexFinger.exo_joint_angle_sensor_DIP.GetExoJointAngleRad();
+    joint_angles[0] = indexFinger.smoothed_sensor_values[0];
+    joint_angles[1] = indexFinger.smoothed_sensor_values[1];
+    joint_angles[2] = indexFinger.smoothed_sensor_values[2];
+    joint_angles[3] = indexFinger.smoothed_sensor_values[3];
+    joint_angles[4] = indexFinger.smoothed_sensor_values[4];
 
     //! Update the middle finger
-    joint_angles[5] = middleFinger.exo_joint_angle_sensor_MCP_abad.GetExoJointAngleRad();
-    joint_angles[6] = middleFinger.exo_joint_angle_sensor_MCP_fe.GetExoJointAngleRad();
-    joint_angles[7] = middleFinger.exo_joint_angle_sensor_MCP_PIP.GetExoJointAngleRad();
-    joint_angles[8] = middleFinger.exo_joint_angle_sensor_PIP.GetExoJointAngleRad();
-    joint_angles[9] = middleFinger.exo_joint_angle_sensor_DIP.GetExoJointAngleRad();
+    joint_angles[5] = middleFinger.smoothed_sensor_values[5];
+    joint_angles[6] = middleFinger.smoothed_sensor_values[6];
+    joint_angles[7] = middleFinger.smoothed_sensor_values[7];
+    joint_angles[8] = middleFinger.smoothed_sensor_values[8];
+    joint_angles[9] = middleFinger.smoothed_sensor_values[9];
 
     //! Update the thumb
-    joint_angles[10] = thumb.exo_joint_angle_sensor_CMC_abad.GetExoJointAngleRad(); // [deg]
-    joint_angles[11] = thumb.exo_joint_angle_sensor_CMC_fe.GetExoJointAngleRad();     // [deg]
-    joint_angles[12] = thumb.exo_joint_angle_sensor_CMC_MCP.GetExoJointAngleRad();   // [deg]
-    joint_angles[13] = thumb.exo_joint_angle_sensor_MCP.GetExoJointAngleRad();           // [deg]
-    joint_angles[14] = thumb.exo_joint_angle_sensor_MCP_IP.GetExoJointAngleRad();     // [deg]
-    joint_angles[15] = thumb.exo_joint_angle_sensor_IP.GetExoJointAngleRad();
+    joint_angles[10] = thumb.smoothed_sensor_values[10]; // [deg]
+    joint_angles[11] = thumb.smoothed_sensor_values[11];     // [deg]
+    joint_angles[12] = thumb.smoothed_sensor_values[12];   // [deg]
+    joint_angles[13] = thumb.smoothed_sensor_values[13];           // [deg]
+    joint_angles[14] = thumb.smoothed_sensor_values[14];     // [deg]
+    joint_angles[15] = thumb.smoothed_sensor_values[15];
 
     flag = true;
     return flag;
+}
+
+void my_app::smoothSensorData(const int N)
+{
+    //! Smooth the index finger
+    indexFinger.smoothed_sensor_values[0] -= indexFinger.smoothed_sensor_values[0] / N;
+    indexFinger.smoothed_sensor_values[1] -= indexFinger.smoothed_sensor_values[1] / N;
+    indexFinger.smoothed_sensor_values[2] -= indexFinger.smoothed_sensor_values[2] / N;
+    indexFinger.smoothed_sensor_values[3] -= indexFinger.smoothed_sensor_values[3] / N;
+    indexFinger.smoothed_sensor_values[4] -= indexFinger.smoothed_sensor_values[4] / N;
+
+    indexFinger.smoothed_sensor_values[0] += indexFinger.exo_joint_angle_sensor_MCP_abad.GetExoJointAngleRad() / N;
+    indexFinger.smoothed_sensor_values[1] += indexFinger.exo_joint_angle_sensor_MCP_fe.GetExoJointAngleRad() / N;
+    indexFinger.smoothed_sensor_values[2] += indexFinger.exo_joint_angle_sensor_MCP_PIP.GetExoJointAngleRad() / N;
+    indexFinger.smoothed_sensor_values[3] += indexFinger.exo_joint_angle_sensor_PIP.GetExoJointAngleRad() / N;
+    indexFinger.smoothed_sensor_values[4] += indexFinger.exo_joint_angle_sensor_DIP.GetExoJointAngleRad() / N;
+
+    //! Update the middle finger
+    middleFinger.smoothed_sensor_values[0] -= middleFinger.smoothed_sensor_values[0] / N;
+    middleFinger.smoothed_sensor_values[1] -= middleFinger.smoothed_sensor_values[1] / N;
+    middleFinger.smoothed_sensor_values[2] -= middleFinger.smoothed_sensor_values[2] / N;
+    middleFinger.smoothed_sensor_values[3] -= middleFinger.smoothed_sensor_values[3] / N;
+    middleFinger.smoothed_sensor_values[4] -= middleFinger.smoothed_sensor_values[4] / N;
+
+    middleFinger.smoothed_sensor_values[0] += middleFinger.exo_joint_angle_sensor_MCP_abad.GetExoJointAngleRad() / N;
+    middleFinger.smoothed_sensor_values[1] += middleFinger.exo_joint_angle_sensor_MCP_fe.GetExoJointAngleRad() / N;
+    middleFinger.smoothed_sensor_values[2] += middleFinger.exo_joint_angle_sensor_MCP_PIP.GetExoJointAngleRad() / N;
+    middleFinger.smoothed_sensor_values[3] += middleFinger.exo_joint_angle_sensor_PIP.GetExoJointAngleRad() / N;
+    middleFinger.smoothed_sensor_values[4] += middleFinger.exo_joint_angle_sensor_DIP.GetExoJointAngleRad() / N;
+
+    //! Update the thumb
+    thumb.smoothed_sensor_values[0] -= thumb.smoothed_sensor_values[0] / N; // [deg]
+    thumb.smoothed_sensor_values[1] -= thumb.smoothed_sensor_values[1] / N;     // [deg]
+    thumb.smoothed_sensor_values[2] -= thumb.smoothed_sensor_values[2] / N;   // [deg]
+    thumb.smoothed_sensor_values[3] -= thumb.smoothed_sensor_values[3] / N;           // [deg]
+    thumb.smoothed_sensor_values[4] -= thumb.smoothed_sensor_values[4] / N;     // [deg]
+    thumb.smoothed_sensor_values[5] -= thumb.smoothed_sensor_values[5] / N;
+
+    thumb.smoothed_sensor_values[0] += thumb.exo_joint_angle_sensor_CMC_abad.GetExoJointAngleRad() / N; // [deg]
+    thumb.smoothed_sensor_values[1] += thumb.exo_joint_angle_sensor_CMC_fe.GetExoJointAngleRad() / N;     // [deg]
+    thumb.smoothed_sensor_values[2] += thumb.exo_joint_angle_sensor_CMC_MCP.GetExoJointAngleRad() / N;   // [deg]
+    thumb.smoothed_sensor_values[3] += thumb.exo_joint_angle_sensor_MCP.GetExoJointAngleRad() / N;           // [deg]
+    thumb.smoothed_sensor_values[4] += thumb.exo_joint_angle_sensor_MCP_IP.GetExoJointAngleRad() / N;     // [deg]
+    thumb.smoothed_sensor_values[5] += thumb.exo_joint_angle_sensor_IP.GetExoJointAngleRad() / N;
 }
 
 bool my_app::commandJointTorque(double *joint_torques,double* desired_angle, double* actual_torque)
@@ -237,6 +281,9 @@ void my_app::loop(){
 
         // Updates the sensor data
         pHW_interface->UpdateAllSensorData();
+
+        // smooth sensor data
+        smoothSensorData(10);
 
         // commands the output
         pHW_interface->UpdateAllOutputData();

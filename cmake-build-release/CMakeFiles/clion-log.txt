@@ -1,5 +1,5 @@
-/snap/clion/198/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/snap/clion/198/bin/ninja/linux/ninja -G Ninja -S /home/aldo/CLionProjects/maestro_chai3d -B /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
+/snap/clion/203/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" -S /home/agalvan-admin/maestro_chai3d -B /home/agalvan-admin/maestro_chai3d/cmake-build-release
 OS is linux
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/aldo/CLionProjects/maestro_chai3d/cmake-build-release
+-- Build files have been written to: /home/agalvan-admin/maestro_chai3d/cmake-build-release

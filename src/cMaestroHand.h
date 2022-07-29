@@ -53,9 +53,6 @@ using namespace chai3d;
         void createThumb(void);
 
 
-        // Smooths the sensor values with a running avg
-        double** smoothSensorValues(double* noisy);
-
 
     public:
 
@@ -66,25 +63,19 @@ using namespace chai3d;
         void updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos, cVector3d& a_midPos,
                                cVector3d a_globalPos);
 
-        // Commands the desired joint torque to the Maestro
-        bool commandJointTorque(double a_stiffness, double a_damping);
+        // Commands the desired joint torque to the Maestro using the proxy algorithm
+        // the stiffnesses are angular stiffness to be used for joint control
+        bool torqueControlProxy(double a_stiffness, double a_damping);
+
+        // Commands the desired joint torque using an inverse kinematics algorithm
+        bool torqueControlInverseDynamics( cVector3d a_thumbForce,  cVector3d a_idxForce,
+                                             cVector3d a_midForce);
+
+        // commands the desired joint position
+        bool positionalControl();
 
         // this is a test trajectory
         std::vector<cVector3d*> testTrajectory(vector<double> vec);
-
-    public:
-
-        //--------------------------------------------------------------------------
-        // PUBLIC METHOD
-        //--------------------------------------------------------------------------
-
-
-        // computes a collision between each digit and a generic object
-        bool computeCollisions(cGenericObject* a_object);
-
-        // calculates the new proxy location
-        void calculateProxy(double radius , cVector3d proxyPos , cVector3d curPos);
-
 
     public:
 

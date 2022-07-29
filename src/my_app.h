@@ -42,6 +42,9 @@ private:
 
     struct Index_Finger
     {
+        // Mayble use later if want a cleaner code
+        // vector<ExoJointAngleSensor*> sensor_array;
+
         ExoJointAngleSensor exo_joint_angle_sensor_MCP_abad;
         ExoJointAngleSensor exo_joint_angle_sensor_MCP_fe;
         ExoJointAngleSensor exo_joint_angle_sensor_MCP_PIP;
@@ -49,11 +52,16 @@ private:
         ExoJointAngleSensor exo_joint_angle_sensor_DIP;
         ExoSEA exo_sea_MCP;
         ExoSEA exo_sea_PIP;
+
+        // smoothed sensor values
+        double smoothed_sensor_values[5] = {0,0,0,0,0};
     } indexFinger;
 
 
     struct Middle_Finger
     {
+        //vector<ExoJointAngleSensor*> sensor_array;
+
         ExoJointAngleSensor exo_joint_angle_sensor_MCP_abad;
         ExoJointAngleSensor exo_joint_angle_sensor_MCP_fe;
         ExoJointAngleSensor exo_joint_angle_sensor_MCP_PIP;
@@ -61,10 +69,16 @@ private:
         ExoJointAngleSensor exo_joint_angle_sensor_DIP;
         ExoSEA exo_sea_MCP;
         ExoSEA exo_sea_PIP;
+
+        // smoothed sensor values
+        double smoothed_sensor_values[5] = {0,0,0,0,0};
+
     } middleFinger;
 
     struct Thumb
     {
+        // vector<ExoJointAngleSensor>
+
         ExoJointAngleSensor exo_joint_angle_sensor_CMC_abad;
         ExoJointAngleSensor exo_joint_angle_sensor_CMC_fe;
         ExoJointAngleSensor exo_joint_angle_sensor_CMC_MCP;
@@ -75,6 +89,10 @@ private:
         ExoSEA exo_sea_CMC_abad;
         ExoSEA exo_sea_MCP;
         ExoSEA exo_sea_IP;
+
+        // smoothed sensor values
+        double smoothed_sensor_values[6] = {0,0,0,0,0,0};
+
     } thumb;
 
     ofstream myfile;
@@ -94,7 +112,7 @@ public:
     bool run(double time);
     bool updateJointAngles(double* joint_angles);
     bool commandJointTorque(double *joint_torques,double* desired_angle, double* actual_torque);
-    void smoothSensorData(void);
+    void smoothSensorData(const int N);
 
     bool ExitManager();
     int kbhit();

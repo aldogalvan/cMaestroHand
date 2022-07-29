@@ -125,7 +125,6 @@ using namespace chai3d;
 
         h_hand->initialize(newT);
 
-
         for (int i = 0; i < h_hand->getdof(); i++)
         {
             inputname.push_back("Joint " + std::to_string(i + 1));
@@ -200,11 +199,9 @@ using namespace chai3d;
         idx_robot_angles[4] = 0;
         Eigen::Vector3d idx_pos = h_index->updateJointAngles(idx_robot_angles , a_globalPos.eigen());
 
-
-
     }
 
-    bool cMaestroHand::commandJointTorque(double a_stiffness,double a_damping) {
+    bool cMaestroHand::torqueControlProxy(double a_stiffness,double a_damping) {
 
         double index_torque[2];
         if (use_idx)
@@ -234,6 +231,21 @@ using namespace chai3d;
         application->commandJointTorque(command_torque, desired_angle, actual_torque);
 
     }
+
+bool cMaestroHand::torqueControlInverseDynamics( cVector3d a_thumbForce,  cVector3d a_idxForce,
+                                     cVector3d a_midForce)
+{
+    double* idx_torque;
+    if (use_idx)
+        idx_torque = h_index->computeInverseDynamics(a_idxForce.eigen());
+
+    double* mid_torque;
+    if(use_middle)
+        mid_torque = h_middle->computeInverseDynamics(a_midForce.eigen());
+
+
+
+}
 
 void cMaestroHand::updateCHandAngles(void) {
 
@@ -282,18 +294,3 @@ std::vector<cVector3d*> cMaestroHand::testTrajectory(vector<double> vec) {
 
     return tip_pos;
 }
-
-    /*
-    int movingAvg(int *ptrArrNumbers, double*& ptrSum, int pos, int len, double* nextNum)
-    {
-        for (int i = 0 ; i < 16 ; i++)
-        {
-            //Subtract the oldest number from the prev sum, add the new number
-            *ptrSum = *ptrSum - ptrArrNumbers[pos] + nextNum;
-            //Assign the nextNum to the position in the array
-            ptrArrNumbers[pos] = nextNum;
-            //return the average
-            return *ptrSum / len;
-        }
-    }
-     */

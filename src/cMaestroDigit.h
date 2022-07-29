@@ -29,6 +29,8 @@ public:
     //! Constructor of cMaestroDigit
     cMaestroDigit()
     {
+        // create the twist matrix
+        screw.resize(6,5);
 
         screw << 0 , 0 , 0 , 0 , 0,
                 0 , 1 , 1 , 1 , 0,
@@ -79,6 +81,9 @@ public:
     // Compute parameters
     double* M3KL1(const double A1, const double B1, const double C1,
                   const double PHI1, const double PHI3);
+
+    // computes the inverse dynamics of the finger
+    double* computeInverseDynamics(const Eigen::Vector3d force);
 
     // this method makes the special euclidean matrix
     Eigen::Matrix4d SE3(Eigen::Matrix3d a_rot, Eigen::Vector3d a_tr);

@@ -54,16 +54,16 @@ double ang_stiffness = 1;
 // angular damping
 double ang_damping = 1;
 
-// stiffess
+// object stiffness
 double stiffness = 1;
 
-//damping
+// object damping
 double damping = 1;
 
-// static friciton constant
+// object static friction constant
 double us = 0.6;
 
-// dynamics friction constant
+// object dynamic friction constant
 double uk = 0.6;
 
 // slipping or not
@@ -140,11 +140,14 @@ void updateHaptics(void);
 // this function closes the application
 void close(void);
 
+// this function computes the force with a simple penalty algorithm
+cVector3d computePenaltyAlgorithm(const cVector3d& goal);
+
 // this function finds the proxy positions
 void computeNextBestProxyPosition(cVector3d& proxy , cVector3d& goal);
 
 // this function checks for collisions with moving objects
-void adjustProxy(cVector3d& proxy);
+void testFrictionAndMoveProxy(cVector3d& proxy);
 
 // this functions computes the first round of constraints
 bool computeProxyWithConstraints0(cVector3d& proxy , const cVector3d& goal);
@@ -553,10 +556,7 @@ void updateHaptics(void)
     // initialize the values
     //hand->updateJointAngles(thumb_pos,idx_pos,mid_pos , global_pos);
 
-
     double t = 0;
-    double dt = .25;
-    double simTime = 0;
     double Pi = 3.14159;
 
 
@@ -604,27 +604,25 @@ void updateHaptics(void)
         /////////////////////////////////////////////////////////////////////
         // UPDATE THE JOINT ANGLES AND RETURN NEW POSITION
         /////////////////////////////////////////////////////////////////////
-
+        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos);
 
         /////////////////////////////////////////////////////////////////////
         // COMPUTE THE NEXT PROXY POSITION
         /////////////////////////////////////////////////////////////////////
-
-        // compute proxy for thumb
-        //computeProxy(thumb_pos,thumb_proxy);
 
         // compute proxy for index finger
-        // computeNextBestProxyPosition(idx_proxy , idx_pos);
-
-        /////////////////////////////////////////////////////////////////////
-        // COMPUTE THE NEXT PROXY POSITION
-        /////////////////////////////////////////////////////////////////////
-
+        computeNextBestProxyPosition(idx_proxy , idx_pos);
         //std::cout << t4.getLocalPos() << std::endl;
 
         auto pos_vector = hand->h_hand->getFingertipCenters();
         cVector3d pos = *pos_vector[1];
         //std::cout << pos << std::endl;
+
+        /////////////////////////////////////////////////////////////////////
+        // COMMAND A NEW FORCE USING SOME ALGORITHM
+        /////////////////////////////////////////////////////////////////////
+
+        // command force using inverse kinematics
 
         // signal frequency counter
         freqCounterHaptics.signal(1);
@@ -636,6 +634,26 @@ void updateHaptics(void)
     simulationFinished = true;
 }
 
+//! penalty algorithm
+cVector3d computePenaltyAlgorithm(const cVector3d& goal)
+{
+    // declare collision settings and recorder
+    cCollisionSettings collisionSettings;
+    cCollisionRecorder collisionRecorder;
+    collisionSettings.m_collisionRadius = radius;
+
+    // compute collision
+    box->computeCollisionDetection(goal,goal,collisionRecorder,collisionSettings);
+
+    // compute force based on penetration depth
+    cVector3d normal = collisionRecorder.m_nearestCollision.m_localNormal;
+    double depth = collisionRecorder.m_nearestCollision.m_squareDistance;
+
+    // return the force
+    return normal*sqrt(depth);
+}
+
+//! proxy algorithm
 void computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal)
 {
     bool hit0, hit1;
@@ -664,10 +682,6 @@ void computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal)
 
 }
 
-void adjustProxy(cVector3d& proxy)
-{
-
-}
 
 bool computeProxyWithConstraints0(cVector3d& proxy , const cVector3d& goal)
 {
@@ -853,100 +867,123 @@ bool computeProxyWithConstraints1(cVector3d& proxy ,  cVector3d& goal)
 
 }
 
-void adjustForFriction(cVector3d& proxy ,  cVector3d& goal)
+void testFrictionAndMoveProxy(const cVector3d& a_goal,
+                              const cVector3d& a_proxy,
+                              cVector3d& a_normal,
+                              cGenericObject* a_parent)
 {
+    // check if friction is enabled
+    if (!a_parent->m_material->getUseHapticFriction())
+    {
+        m_nextBestProxyGlobalPos = a_goal;
+        return;
+    }
 
-}
+    // compute penetration depth; how far is the device "behind" the
+    // plane of the obstructing surface
+    cVector3d projectedGoal = cProjectPointOnPlane(m_deviceGlobalPos, a_proxy, a_normal);
+    double penetrationDepth = cSub(m_deviceGlobalPos,projectedGoal).length();
 
-void jointOptimization(Eigen::VectorXd & joint_angles, Eigen::Vector3d curPos, const Eigen::Vector3d desPos ,
-                       const int max_iterations , const double er)
-{
+    // find the appropriate friction coefficient
+    double mud = a_parent->m_material->getDynamicFriction();
+    double mus = a_parent->m_material->getStaticFriction();
 
-    // The home Matrix
-    Eigen::Matrix4d M;
-    M << 1 , 0 , 0 , 0,
-         0 , 0 , -1 , 0.025,
-         0 , 1 , 0 , 0,
-         0 , 0 , 0 , 1;
+    // no friction; don't try to compute friction cones
+    if ((mud == 0) && (mus == 0))
+    {
+        m_nextBestProxyGlobalPos = a_goal;
+        return;
+    }
 
-    Eigen::Matrix4d T1;
-    T1 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
+    // the corresponding friction cone radii
+    double atmd = atan(mud);
+    double atms = atan(mus);
 
-    Eigen::Matrix4d T2;
-    T2 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
+    // compute a vector from the device to the proxy, for computing
+    // the angle of the friction cone
+    cVector3d vDeviceProxy = cSub(a_proxy, m_deviceGlobalPos);
+    vDeviceProxy.normalize();
 
-    Eigen::MatrixXd T3;
-    T3 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
+    // now compute the angle of the friction cone...
+    double theta = acos(vDeviceProxy.dot(a_normal));
 
-    Eigen::Matrix4d T4;
-    T4 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
+    // manage the "slip-friction" state machine
 
-    Eigen::Matrix4d J1;
-    J1 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
+    // if the dynamic friction radius is for some reason larger than the
+    // static friction radius, always slip
+    if (mud > mus)
+    {
+        m_slipping = true;
+    }
 
-    Eigen::Matrix4d J2;
-    J2 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
+        // if we're slipping...
+    else if (m_slipping)
+    {
+        if (theta < (atmd * m_frictionDynHysteresisMultiplier))
+        {
+            m_slipping = false;
+        }
+        else
+        {
+            m_slipping = true;
+        }
+    }
 
-    Eigen::Matrix4d J3;
-    J3 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
+        // if we're not slipping...
+    else
+    {
+        if (theta > atms)
+        {
+            m_slipping = true;
+        }
+        else
+        {
+            m_slipping = false;
+        }
+    }
 
-    Eigen::Matrix4d J4;
-    J4 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
+    // the friction coefficient we're going to use...
+    double mu;
+    if (m_slipping)
+    {
+        mu = mud;
+    }
+    else
+    {
+        mu = mus;
+    }
 
+    // calculate the friction radius as the absolute value of the penetration
+    // depth times the coefficient of friction
+    double frictionRadius = fabs(penetrationDepth * mu);
 
-    Eigen::VectorXd theta_loop = joint_angles;
+    // calculate the distance between the proxy position and the current
+    // goal position.
+    double r = a_proxy.distance(a_goal);
 
-     do
-     {
+    // if this distance is smaller than C_SMALL, we consider the proxy
+    // to be at the same position as the goal, and we're done...
+    if (r < C_SMALL)
+    {
+        m_nextBestProxyGlobalPos = a_proxy;
+    }
 
-     } while ((curPos - desPos).squaredNorm() <= pow(er,2));
-}
+        // if the proxy is outside the friction cone, update its position to
+        // be on the perimeter of the friction cone...
+    else if (r > frictionRadius)
+    {
+        m_nextBestProxyGlobalPos = cAdd(a_goal, cMul(frictionRadius/r, cSub(a_proxy, a_goal)));
+    }
 
+        // otherwise, if the proxy is inside the friction cone, the proxy
+        // should not be moved (set next best position to current position)
+    else
+    {
+        m_nextBestProxyGlobalPos = a_proxy;
+    }
 
-void FK(Eigen::MatrixXd& pos, const Eigen::VectorXd joint_angles)
-{
-    Eigen::Matrix4d M;
-    M <<    1 , 0 , 0 , 0,
-            0 , 0 , -1 , 0.025,
-            0 , 1 , 0 , 0,
-            0 , 0 , 0 , 1;
-
-    Eigen::Matrix4d T1;
-    T1 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
-
-    Eigen::Matrix4d T2;
-    T2 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
-
-    Eigen::MatrixXd T3;
-    T3 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
-
-    Eigen::Matrix4d T4;
-    T4 <<  cos(joint_angles(0)) , -sin(joint_angles(0)) , 0 , 0,
-            sin(joint_angles(0)) , cos(joint_angles(0)) , 0 , 0,
-            0 , 0 , 1, 1;
-
+    // we're done; record the fact that we're still touching an object...
+    return;
 }
 
 void setEpsilonBaseValue(double a_value)

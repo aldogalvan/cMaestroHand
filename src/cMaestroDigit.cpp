@@ -4,6 +4,41 @@
 
 #include "cMaestroDigit.h"
 
+double* cMaestroDigit::computeInverseDynamics(const Eigen::Vector3d force)
+{
+    double torque[2];
+
+    Eigen::Vector3d P0 = M_T1.block<3,1>(0,3);
+    Eigen::Vector3d P1 = M_T2.block<3,1>(0,3) ;
+    Eigen::Vector3d P2 = M_T3.block<3,1>(0,3) ;
+    Eigen::Vector3d P3 = M_T4.block<3,1>(0,3) ;
+
+    Eigen::Vector3d L3 = P3 - P2 ;
+    Eigen::Vector3d L2 = P2 - P1 ;
+    Eigen::Vector3d L1 = P1 - P0 ;
+
+    // to do: dot product to extract torques only in the z axis
+    Eigen::Vector3d torques_P2 = L3.cross(force) ;  // + torques_P3 when generalizing
+    Eigen::Vector3d torques_P1 = L2.cross(force) + torques_P2 ;
+    Eigen::Vector3d torques_P0 = L1.cross(force) + torques_P1 ;
+
+    //
+    double joint_torque_MCP = 0.001*torques_P0.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
+    double joint_torque_PIP = 0.001*torques_P1.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
+    double joint_torque_DIP = 0.001*torques_P2.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
+
+
+    // compute exo joint torques
+    double exo_torque_MCP = joint_torque_MCP;
+    double exo_torque_PIP = -joint_torque_PIP;
+
+
+    // returns the torque
+    torque[0]= exo_torque_MCP ; torque[1] =  exo_torque_PIP;
+
+    return torque;
+}
+
 void cMaestroDigit::computeOptimization(const Eigen::Vector3d a_goalPos, const int a_maxIts , const double ep)
 {
     // first generate the desired transformation to proxy in space frame

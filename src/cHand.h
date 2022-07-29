@@ -220,9 +220,6 @@ protected:
     //! contains the actual positions of the fingertips
     std::vector<cVector3d*> m_positions;
 
-    //! contains the proxy positions of the fingertips
-    std::vector<cVector3d*> m_proxypositions;
-
 	//! Pi, needed for forward kinematics
 	double Pi = 3.14159;
 

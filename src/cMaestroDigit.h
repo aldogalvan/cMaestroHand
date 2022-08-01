@@ -2,17 +2,14 @@
 #include "cHand.h"
 #include <Eigen/Dense>
 
-
 //
 // Created by aldo on 1/24/22.
 //
 
 //==============================================================================
-
-//------------------------------------------------------------------------------
-class cMaestroDigit;
 //------------------------------------------------------------------------------
 using namespace chai3d;
+using namespace Eigen;
 //==============================================================================
 
 #ifndef MAESTRO_CHAI3D_CMAESTRODIGIT_H
@@ -29,15 +26,39 @@ public:
     //! Constructor of cMaestroDigit
     cMaestroDigit()
     {
-        // create the twist matrix
-        screw.resize(6,5);
+        counter = 0;
 
-        screw << 0 , 0 , 0 , 0 , 0,
-                0 , 1 , 1 , 1 , 0,
-                1 , 0 , 0 , 0 , 0,
-                MCP , 0 , MCP_PIP, MCP_PIP + PIP_DIP ,  MCP_PIP + PIP_DIP + DIP_TIP,
-                0 , 0 , 0 , 0 , 0,
-                0 , 0 , 0 , 0 , 0;
+        // resize the theta vector and set to zero
+        theta.resize(7);
+        theta.setZero();
+        theta_proxy.resize(7);
+        theta_proxy.setZero();
+
+        // tranformation from space to body in zero configuration
+        M << 1 , 0 , 0 , MCP_PIP + PIP_DIP + DIP_TIP,
+             0 , 1 , 0 , MCP                       ,
+             0 , 0 , 1 , 0                          ,
+             0 , 0 , 0 , 1                          ;
+
+        // create the twist matrix
+        S_space.resize(6,7);
+        S_space << 1  , 0 , 0 , 0  , 0 , 0       , 0                ,
+                0  , 1 , 0 , 0   , 1 , 1       , 1                ,
+                0  , 0 , 1 , 1   , 0 , 0       , 0                ,
+                0  , 0 , 0 , MCP , 0 , 0       , 0                ,
+                0  , 0 , 0 , 0   , 0 , 0       , 0                ,
+                0  , 0 , 0 , 0   , 0 , MCP_PIP , MCP_PIP + PIP_DIP;
+
+
+        B_body.resize(6,7);
+        B_body <<  1  , 0                           , 0                            , 0                           , 0                               , 0                    , 0       ,
+                0  , 1                              , 0                            , 0                           , 1                               , 1                    , 1       ,
+                0  , 0                              , 1                            , 1                           , 0                               , 0                    , 0       ,
+                0  , 0                              , -MCP                         , 0                           , 0                               , 0                    , 0       ,
+                0  , 0                              , MCP_PIP + PIP_DIP + DIP_TIP  , MCP_PIP + PIP_DIP + DIP_TIP , 0                               , 0                    , 0       ,
+                MCP, -(MCP_PIP + PIP_DIP + DIP_TIP) , 0                            , 0                           ,  -(MCP_PIP + PIP_DIP + DIP_TIP) , -(PIP_DIP + DIP_TIP) , -DIP_TIP;
+
+
 
 
     };
@@ -51,32 +72,47 @@ public:
     // PUBLIC METHODS:
     //--------------------------------------------------------------------------
 
-    // this function creates a stay on point virtual fixture
-    void stayOnPointVF(Eigen::MatrixXd& A ,Eigen::VectorXd& b, int n , int m , Eigen::Vector3d pos_des,
-                                      Eigen::Vector3d pos_cur , Eigen::Vector3d dir_des, Eigen::Vector3d dir_cur);
+    // hand proxy algorithm (no constraints)
+    // collision is a flag that determines whether it is necessary to compute IK
+    // i.e. if theta_proxy = theta
+    Vector3d computeHandProxy(const Vector3d a_pos, bool collision = false);
 
-    // this function creates a virtual wall virtual fixture
-    void virtualWallVF(Eigen::MatrixXd& A, Eigen::VectorXd& b );
+    // hand proxy algorithm (stay on point VF)
+    Vector3d computeHandProxySOP(const Vector3d a_pos, const double tol = 0.01, bool collision = false);
+
+    // hand proxy algorithm (wall VF)
+    Vector3d computeHandProxyWall(const Vector3d a_pos, const double tol = 0.01 , bool collision = false);
 
     // this function computes the forward kinematics and returns fingertip pos
-    Eigen::Vector3d updateJointAngles(double* robot_angles , Eigen::Vector3d a_global_pos);
+    Vector3d updateJointAngles(double* robot_angles , Vector3d a_global_pos, Vector3d a_globalRot);
 
-    // this function computes the forward kinematics
-    Eigen::Matrix4d computeForwardKinematics(double a_ang_MCP_fe, double a_ang_MCP_abad,
-                                     double a_ang_PIP, double a_ang_DIP);
+    // this function computes the forward kinematics using homogeneous transformation matrices
+    // DEPRECATED
+    Matrix4d computeFK(VectorXd a_theta);
 
-    // this function computes the jacobian
-    void computeJacobian(double a_ang_MCP_fe, double a_ang_MCP_abad,
-                                        double a_ang_PIP, double a_ang_DIP);
+    // this function computes the forward kinematics using the formula of matrix exponentials
+    Matrix4d computeFKSpaceFrame(VectorXd a_theta);
+
+    // this function computes the forward kinematics using the formula of matrix exponentials
+    Matrix4d computeFKBodyFrame(VectorXd a_theta);
+
+    // this function computes the jacobian in space frame
+    MatrixXd computeSpaceJacobian(VectorXd a_theta);
+
+    // this function computes the jacobian in body frame
+    MatrixXd computeBodyJacobian(VectorXd a_theta);
 
     // this method computes an optimization problem to find desired angular displacement
-    void computeOptimization(const Eigen::Vector3d a_goalPos, const int a_maxIts = 10, const double ep = 0.001);
+    void computeOptimization(const Vector3d a_goalPos, const int a_maxIts = 10, const double ep = 0.001);
 
     // this method commands a new joint torque
     double* commandJointTorque(double K , double B);
 
-    // return the vector of finger angles
-    void getJointAngles(double* joint_angles);
+    // return the vector of actual finger angles
+    VectorXd getJointAngles(void);
+
+    // return the vector of proxy anggles
+    VectorXd getProxyJointAngles(void);
 
     // Compute parameters
     double* M3KL1(const double A1, const double B1, const double C1,
@@ -85,23 +121,23 @@ public:
     // computes the inverse dynamics of the finger
     double* computeInverseDynamics(const Eigen::Vector3d force);
 
-    // this method makes the special euclidean matrix
-    Eigen::Matrix4d SE3(Eigen::Matrix3d a_rot, Eigen::Vector3d a_tr);
+    // this function computes numerical inverse kinematics to desired position in the body frame
+    bool computeIKBodyFrame(const Matrix4d T, Matrix4d& Tsb, const VectorXd a_theta0, VectorXd a_theta,
+                                int max_it = 20, double eomg = 0.005, double ev = 0.005);
 
-    // axis angle to rotation
-    Eigen::Matrix3d aa2rot(const Eigen::Vector3d a_axis, const double a_angle);
+    // this function computes numerical inverse kinematics to desired position
+    bool computeIKSpaceFrame(const Matrix4d T, Matrix4d& Tsb, const VectorXd a_theta0, VectorXd a_theta,
+                                 int max_it = 20, double eomg = 0.005, double ev = 0.005);
 
-    // vector to skew symmetric form
-    Eigen::Matrix3d vec2skew(const Eigen::Vector3d);
 
-    // this method commands a new joint torque
-    Eigen::Matrix4d computeTransformAtoB(const Eigen::Matrix4d A , const Eigen::Matrix4d B);
+protected:
 
-    // this method changes twist vector to matrix represenation
-    Eigen::Matrix4d twist2mat(const Eigen::VectorXd& a_twist);
+    // this function creates a stay on point virtual fixture
+    void stayOnPointVF(MatrixXd& A ,VectorXd& b, int n , int m , Vector3d pos_des,
+                       Vector3d pos_cur , Vector3d dir_des, Vector3d dir_cur);
 
-    // homogeneous transformation to ajoint representation
-    Eigen::MatrixXd adjointRepresentation(const Eigen::MatrixXd a_T);
+    // this function creates a virtual wall virtual fixture
+    void virtualWallVF(MatrixXd& A, VectorXd& b );
 
 public:
 
@@ -110,67 +146,48 @@ public:
     //--------------------------------------------------------------------------
 
     // the global position of the hand
-    Eigen::Vector3d global_pos;
+    Vector3d global_pos;
 
     // position of the tool tip
-    Eigen::Vector3d tip_pos;
+    Vector3d tip_pos;
 
     // position of the proxy
-    Eigen::Vector3d proxy_pos;
+    Vector3d proxy_pos;
 
 
 protected:
+
+    //! for testing delete later
+    int counter;
 
     //--------------------------------------------------------------------------
     // PROTECTED MEMBERS
     //--------------------------------------------------------------------------
 
+    // the array for joint angles
+    VectorXd theta;
+
+    // the array for proxy joint angles
+    VectorXd theta_proxy;
+
     // set the desired torque
     double exo_desired_torque_MCP;
     double exo_desired_torque_PIP;
 
-    // angles of interest
-    double ang_sensor_MCP_abad;
-    double ang_sensor_MCP_fe;
-    double ang_sensor_MCP_PIP;
-    double ang_sensor_PIP;
-    double ang_sensor_DIP;
+    // transformation from base to end
+    Matrix4d M;
 
-    // actual joint angles
-    double ang_MCP_abad = 0;
-    double ang_MCP_fe;
-    double ang_PIP;
-    double ang_DIP;
+    // current transformation to tip in body frame
+    Matrix4d T_body;
 
-    // proxy angles
-    Eigen::VectorXd theta_loop;
+    //current transformation to tip in space frame
+    Matrix4d T_space;
 
-    // base transformation
-    Eigen::Matrix4d M;
+    // current transformation to proxy tip in body
+    Matrix4d T_proxy_body;
 
-    // transformation base
-    Eigen::Matrix4d T1 ;
-
-    // transformation PIP
-    Eigen::Matrix4d T2;
-
-    // transformation DIP
-    Eigen::Matrix4d T3;
-
-    // transformation TIP
-    Eigen::Matrix4d T4;
-
-    // transformation
-    Eigen::Matrix4d M_T1;
-
-    //transformation
-    Eigen::Matrix4d M_T2;
-
-    // transofrmation
-    Eigen::Matrix4d M_T3;
-
-    // transofrmation
-    Eigen::Matrix4d M_T4;
+    // current transformation to proxy tip in space
+    Matrix4d T_proxy_space;
 
     // segment length from center of hand to MCP index
     double MCP = 0.025;
@@ -185,18 +202,16 @@ protected:
     double DIP_TIP = 0.01566;
 
     // jacobian matrix in space frame
-    Eigen::MatrixXd j_s;
+    MatrixXd J_s;
 
-    // screw axis
-    Eigen::MatrixXd screw;
+    // jacobian matrix in body frame
+    MatrixXd J_b;
 
-    // body twist
-    Eigen::MatrixXd twist_b;
+    // screw axis in space frame
+    MatrixXd S_space;
 
-    // space twist
-    Eigen::MatrixXd twist_s;
-
-
+    // screw axis in the body frame
+    MatrixXd B_body;
 
 
 };

@@ -403,7 +403,6 @@ std::vector<cVector3d*> cHand::getFingertipCenters()
     {
         tip_pos.push_back(new cVector3d);
         *tip_pos[fingerid] = graphics_container[fingerid][ndof_finger[fingerid] - 1]->getMesh(2)->getGlobalPos();
-        //std::cout << *tip_pos[fingerid] << std::endl;
     }
 
     return tip_pos;

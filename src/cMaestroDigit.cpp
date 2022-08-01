@@ -3,78 +3,97 @@
 //
 
 #include "cMaestroDigit.h"
+#include "mr.h"
+
+// NOTE :  ALL FORWARD KINEMATICS ARE COMPUTED IN THE SPACE FRAME. BODY
+// FRAME WILL REQUIRE SOME ADJUSTMENT
+// INDICES
+// 0,1,2 : alpha,beta,gamma correspondng to hand rotation
+// 3: MCP abduction/adduction
+// 4: MCP flex,ext
+// 5: PIP flex,ext
+// 6: DIP flex,ext
+
+// -----------------------------------------------------------------//
+
+Vector3d cMaestroDigit::computeHandProxy(const Vector3d a_pos, bool collision)
+{
+    if (collision)
+    {
+        Matrix4d T_des = T_body;
+        T_des.block<3, 1>(0, 3) = a_pos;
+        if(computeIKBodyFrame(T_des, T_proxy_body, theta,theta_proxy))
+            return T_proxy_body.block<3,1>(0,3);
+        else
+            return a_pos;
+    }
+    else
+    {
+        T_proxy_body = T_body;
+        theta_proxy = theta;
+        return a_pos;
+    }
+}
+
+// -----------------------------------------------------------------//
+
+Vector3d cMaestroDigit::computeHandProxySOP(const Vector3d a_pos, const double tol , bool collision)
+{
+
+}
+
+// -----------------------------------------------------------------//
+
+Vector3d cMaestroDigit::computeHandProxyWall(const Vector3d a_pos, const double tol, bool collision)
+{
+
+}
+
+// -----------------------------------------------------------------//
 
 double* cMaestroDigit::computeInverseDynamics(const Eigen::Vector3d force)
 {
+    /*
     double torque[2];
 
-    Eigen::Vector3d P0 = M_T1.block<3,1>(0,3);
-    Eigen::Vector3d P1 = M_T2.block<3,1>(0,3) ;
-    Eigen::Vector3d P2 = M_T3.block<3,1>(0,3) ;
-    Eigen::Vector3d P3 = M_T4.block<3,1>(0,3) ;
+    Vector3d P0 = M_T0.block<3,1>(0,3);
+    Vector3d P1 = M_T1.block<3,1>(0,3) ;
+    Vector3d P2 = M_T2.block<3,1>(0,3) ;
+    Vector3d P3 = M_T3.block<3,1>(0,3) ;
 
-    Eigen::Vector3d L3 = P3 - P2 ;
-    Eigen::Vector3d L2 = P2 - P1 ;
-    Eigen::Vector3d L1 = P1 - P0 ;
+    Vector3d L3 = P3 - P2 ;
+    Vector3d L2 = P2 - P1 ;
+    Vector3d L1 = P1 - P0 ;
 
     // to do: dot product to extract torques only in the z axis
-    Eigen::Vector3d torques_P2 = L3.cross(force) ;  // + torques_P3 when generalizing
-    Eigen::Vector3d torques_P1 = L2.cross(force) + torques_P2 ;
-    Eigen::Vector3d torques_P0 = L1.cross(force) + torques_P1 ;
+    Vector3d torques_P2 = L3.cross(force) ;  // + torques_P3 when generalizing
+    Vector3d torques_P1 = L2.cross(force) + torques_P2 ;
+    Vector3d torques_P0 = L1.cross(force) + torques_P1 ;
 
     //
     double joint_torque_MCP = 0.001*torques_P0.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
     double joint_torque_PIP = 0.001*torques_P1.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
     double joint_torque_DIP = 0.001*torques_P2.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
 
-
     // compute exo joint torques
     double exo_torque_MCP = joint_torque_MCP;
     double exo_torque_PIP = -joint_torque_PIP;
-
 
     // returns the torque
     torque[0]= exo_torque_MCP ; torque[1] =  exo_torque_PIP;
 
     return torque;
+     */
 }
+
+// -----------------------------------------------------------------//
 
 void cMaestroDigit::computeOptimization(const Eigen::Vector3d a_goalPos, const int a_maxIts , const double ep)
 {
-    // first generate the desired transformation to proxy in space frame
-    Eigen::Matrix4d Tsd;
-    // set current rotation as desired rotation
-    Tsd.block<3,3>(0,0) = M_T4.block<3,3>(0,0);
-    Tsd.block<3,1>(0,3) = a_goalPos;
-    Tsd.block<1,4>(3,0) << 0 , 0 , 0 , 1;
-    auto J_alpha = j_s.block<3,5>(0,0);
-    auto J_ep = j_s.block<3,5>(3,0);
 
-    int i = 0;
-
-    double D = (a_goalPos - tip_pos).squaredNorm();
-
-    if (D <= pow(ep,2))
-        return;
-
-    computeJacobian(ang_MCP_fe,ang_MCP_abad,ang_PIP,ang_DIP);
-    do
-    {
-
-        computeForwardKinematics(ang_MCP_fe,ang_MCP_abad,ang_PIP,ang_DIP);
-
-        computeJacobian(ang_MCP_fe,ang_MCP_abad,ang_PIP,ang_DIP);
-
-        D = (a_goalPos - proxy_pos).squaredNorm();
-
-        double er;
-        if ( D <= pow(ep,2))
-        {
-            return;
-        }
-        i++;
-    } while(i < a_maxIts);
 }
+
+// -----------------------------------------------------------------//
 
 void cMaestroDigit::stayOnPointVF(Eigen::MatrixXd &A, Eigen::VectorXd &b, int n, int m, Eigen::Vector3d pos_des,
                                        Eigen::Vector3d pos_cur, Eigen::Vector3d dir_des, Eigen::Vector3d dir_cur)
@@ -82,97 +101,120 @@ void cMaestroDigit::stayOnPointVF(Eigen::MatrixXd &A, Eigen::VectorXd &b, int n,
 
 }
 
-// Function to update the hand joint angles
- Eigen::Vector3d cMaestroDigit::updateJointAngles(double *robot_angles ,  Eigen::Vector3d a_global_pos)
+// -----------------------------------------------------------------//
+
+ Eigen::Vector3d cMaestroDigit::updateJointAngles(double *robot_angles , Vector3d a_globalPos, Vector3d a_globalRot)
 {
 
-    /*
-    // Values in degrees (Dec 3 2021)
-    ang_sensor_MCP_abad = exo_joint_angle_sensor_MCP_abad.GetExoJointAngleRad();
-    ang_sensor_MCP_fe = exo_joint_angle_sensor_MCP_fe.GetExoJointAngleRad();
-    ang_sensor_MCP_PIP = exo_joint_angle_sensor_MCP_PIP.GetExoJointAngleRad();
-    ang_sensor_PIP = exo_joint_angle_sensor_PIP.GetExoJointAngleRad();
-    ang_sensor_DIP = exo_joint_angle_sensor_DIP.GetExoJointAngleRad();
-    */
-
-    global_pos = a_global_pos;
-
-    ang_sensor_MCP_abad = robot_angles[0];
-    ang_sensor_MCP_fe = robot_angles[1];
-    ang_sensor_MCP_PIP = robot_angles[2];
-    ang_sensor_PIP = robot_angles[3];
-    ang_sensor_DIP = robot_angles[4];
+    global_pos = a_globalPos;
 
     /*
-    auto joint_angles = M3KL1(ang_sensor_MCP_abad, ang_sensor_MCP_fe, ang_sensor_MCP_PIP,
-                              ang_sensor_PIP, ang_sensor_DIP);
+    auto joint_angles = M3KL1(robot_angles[0], robot_angles[1], robot_angles[2],
+                              robot_angles[3], robot_angles[4]);
     */
 
-    ang_MCP_fe = 100 * 10 * (3.14 / 180) ;//joint_angles[0];
-    ang_PIP = 100 * 10 * (3.14 / 180) ;//joint_angles[1];
-    ang_DIP = 100 * 10 * (3.14 / 180) ; //ang_PIP*0.67;
 
-    auto ret = computeForwardKinematics(ang_MCP_fe,
-                                        ang_MCP_abad,ang_PIP,ang_DIP);
 
-    return tip_pos;
 
+    theta(0) = a_globalRot(0);
+    theta(1) = a_globalRot(1);
+    theta(2) = a_globalRot(2);
+    theta(3) = 0;
+    theta(4) = 0.000001* counter * (3.1412 / 180);
+    theta(5) = 0.000001* counter * (3.1414 / 180);
+    theta(6) = 0.000001* counter * 0.33 * (3.1412 / 180);
+
+    //auto T = computeFKSpaceFrame(theta);
+    T_body = computeFKBodyFrame(theta);
+
+    counter++;
+    if (counter > 100000000)
+        counter = 0;
+
+    return T_body.block<3,1>(0,3);
 }
 
-Eigen::Matrix4d cMaestroDigit::computeForwardKinematics(double a_ang_MCP_fe, double a_ang_MCP_abad,
-                                                double a_ang_PIP, double a_ang_DIP)
-{
+// -----------------------------------------------------------------//
 
+Matrix4d cMaestroDigit::computeFK(VectorXd a_theta)
+{
+    /*
     // transformation from hand to mcp (always angle zero)
     M = SE3(aa2rot(Eigen::Vector3d(0,0,1),a_ang_MCP_abad),Eigen::Vector3d(0,MCP,0));
 
     // transformation for MCP abad (always zero too)
-    T1 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_MCP_fe),Eigen::Vector3d(0,0,0));
+    T0 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_MCP_fe),Eigen::Vector3d(0,0,0));
 
     // transformation for MCP fe
-    T2 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_PIP),Eigen::Vector3d(MCP_PIP,0,0));
+    T1 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_PIP),Eigen::Vector3d(MCP_PIP,0,0));
 
     // transformation for abad (always zero too)
-    T3 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_DIP),Eigen::Vector3d(PIP_DIP,0,0));
+    T2 = SE3(aa2rot(Eigen::Vector3d(0,1,0),a_ang_DIP),Eigen::Vector3d(PIP_DIP,0,0));
 
     // transformation for DIP fe
-    T4 = SE3(aa2rot(Eigen::Vector3d(0,0,0),0),Eigen::Vector3d(DIP_TIP,0,0));
+    T3 = SE3(aa2rot(Eigen::Vector3d(0,0,0),0),Eigen::Vector3d(DIP_TIP,0,0));
 
     // transformation from M to T1
-    M_T1 = computeTransformAtoB(M,T1);
+    M_T0 = computeTransformAtoB(M,T0);
 
     // transformation from M to T2
+    M_T1 = computeTransformAtoB(M_T0,T1);
+
+    // transformation from M to T3
     M_T2 = computeTransformAtoB(M_T1,T2);
 
     // transformation from M to T3
     M_T3 = computeTransformAtoB(M_T2,T3);
 
-    // transformation from M to T3
-    M_T4 = computeTransformAtoB(M_T3,T4);
-
-    return M_T4;
+    return M_T4;*/
 }
 
-inline void cMaestroDigit::computeJacobian(double a_ang_MCP_fe, double a_ang_MCP_abad,
-                                    double a_ang_PIP, double a_ang_DIP)
+// -----------------------------------------------------------------//
+
+Matrix4d cMaestroDigit::computeFKSpaceFrame(VectorXd a_theta)
 {
-
-
-    j_s.col(0) = screw.col(0);
-    j_s.col(1) = adjointRepresentation(M)*screw.col(1);
-    j_s.col(2) = adjointRepresentation(M_T1)*screw.col(2);
-    j_s.col(3) = adjointRepresentation(M_T2)*screw.col(3);
-    j_s.col(4) = adjointRepresentation(M_T3)*screw.col(4);
-
+    auto ret = FKinSpace(M,S_space,a_theta);
+    return ret;
 }
 
+// -----------------------------------------------------------------//
 
-void cMaestroDigit::getJointAngles(double* joint_angles)
+Matrix4d cMaestroDigit::computeFKBodyFrame(VectorXd a_theta)
 {
-    joint_angles[0] = ang_MCP_fe;
-    joint_angles[1] = ang_PIP;
-    joint_angles[2] = ang_DIP;
+    auto ret = FKinBody(M,B_body,a_theta);
+    return ret;
 }
+
+// -----------------------------------------------------------------//
+
+MatrixXd cMaestroDigit::computeSpaceJacobian(VectorXd a_theta)
+{
+    return JacobianSpace(S_space,theta);
+}
+
+// -----------------------------------------------------------------//
+
+MatrixXd cMaestroDigit::computeBodyJacobian(VectorXd a_theta)
+{
+    return JacobianBody(B_body,theta);
+}
+
+// -----------------------------------------------------------------//
+
+VectorXd cMaestroDigit::getJointAngles(void)
+{
+    return theta.tail(4);
+}
+
+// -----------------------------------------------------------------//
+
+VectorXd cMaestroDigit::getProxyJointAngles(void)
+{
+    return theta_proxy.tail(4);
+}
+
+
+// -----------------------------------------------------------------//
 
 double* cMaestroDigit::commandJointTorque(double K ,  double B)
 {
@@ -184,6 +226,8 @@ double* cMaestroDigit::commandJointTorque(double K ,  double B)
 
     return joint_torque;
 }
+
+// -----------------------------------------------------------------//
 
 double* cMaestroDigit::M3KL1(const double A1, const double B1, const double C1, const double PHI1, const double PHI3)
 {
@@ -203,60 +247,18 @@ double* cMaestroDigit::M3KL1(const double A1, const double B1, const double C1, 
     return KL1;
 }
 
-inline Eigen::Matrix4d cMaestroDigit::SE3(Eigen::Matrix3d a_rot, Eigen::Vector3d a_tr)
+// -----------------------------------------------------------------//
+
+bool cMaestroDigit::computeIKBodyFrame(const Matrix4d T, Matrix4d& Tsb, const VectorXd a_theta0, VectorXd a_theta,
+                                           int max_it, double eomg, double ev)
 {
-    Eigen::Matrix4d ret;
-    ret.block<3,3>(0,0) = a_rot;
-    ret.block<3,1>(0,3) = a_tr;
-    ret.block<1,4>(3,0) << 0 , 0 , 0 , 1;
-    return ret;
+    return IKinBody(B_body,M,T,Tsb,a_theta0,a_theta,eomg,ev,max_it);
 }
 
-inline Eigen::Matrix3d cMaestroDigit::aa2rot(const Eigen::Vector3d a_axis, const double a_angle)
+// -----------------------------------------------------------------//
+
+bool cMaestroDigit::computeIKSpaceFrame(const Matrix4d T, Matrix4d& Tsb, const VectorXd a_theta0, VectorXd a_theta,
+                                            int max_it, double eomg, double ev)
 {
-    Eigen::Matrix3d skew;
-    skew = vec2skew(a_axis);
-
-    Eigen::Matrix3d ret = Eigen::Matrix3d().setIdentity() + sin(a_angle)*skew + (1-cos(a_angle))*skew*skew;
-
-    return ret;
-}
-
-inline Eigen::Matrix3d cMaestroDigit::vec2skew(const Eigen::Vector3d a_axis)
-{
-    Eigen::Matrix3d ret;
-    ret << 0 , -a_axis(2), a_axis(1),
-            a_axis(2), 0, -a_axis(0),
-            -a_axis(1), a_axis(0), 0;
-
-    return ret;
-}
-
-inline Eigen::Matrix4d cMaestroDigit::computeTransformAtoB(const Eigen::Matrix4d A , const Eigen::Matrix4d B)
-{
-    Eigen::Matrix4d ret;
-    //rotation
-    ret.block<3,3>(0,0) = A.block<3,3>(0,0)*B.block<3,3>(0,0);
-    //translation
-    ret.block<3,1>(0,3) = A.block<3,3>(0,0)*B.block<3,1>(0,3) + A.block<3,1>(0,3);
-    // bottom
-    ret.block<1,4>(3,0) << 0 , 0 , 0 , 1;
-
-    return ret;
-}
-
-inline Eigen::Matrix4d cMaestroDigit::twist2mat(const Eigen::VectorXd& a_twist)
-{
-
-}
-
-inline Eigen::MatrixXd cMaestroDigit::adjointRepresentation(const Eigen::MatrixXd a_T)
-{
-    Eigen::MatrixXd ret(6,6);
-
-    ret.block<3,3>(0,0) = a_T.block<3,3>(0,0);
-    ret.block<3,3>(0,3) = Eigen::Matrix3d().setZero();
-    ret.block<3,3>(3,0) = vec2skew(a_T.block<3,1>(0,4))*a_T.block<3,3>(0,0);
-    ret.block<3,3>(0,3) = a_T.block<3,3>(0,0);
-
+    return IKinBody(B_body,M,T,Tsb,a_theta0,a_theta,eomg,ev,max_it);
 }

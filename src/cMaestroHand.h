@@ -13,6 +13,7 @@
 #define MAESTRO_CHAI3D_CMAESTROHAND_H
 
 using namespace chai3d;
+using namespace Eigen;
 
     class cMaestroHand{
 
@@ -57,19 +58,19 @@ using namespace chai3d;
     public:
 
         // This function updates the cHand visualizer with new coordinates
-        void updateCHandAngles(void);
+        void updateVisualizer(void);
 
         // Updates the joint angle values from the Maestro
         void updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos, cVector3d& a_midPos,
-                               cVector3d a_globalPos);
+                               const Vector3d a_globalPos , const Vector3d a_globalRot);
 
         // Commands the desired joint torque to the Maestro using the proxy algorithm
         // the stiffnesses are angular stiffness to be used for joint control
         bool torqueControlProxy(double a_stiffness, double a_damping);
 
         // Commands the desired joint torque using an inverse kinematics algorithm
-        bool torqueControlInverseDynamics( cVector3d a_thumbForce,  cVector3d a_idxForce,
-                                             cVector3d a_midForce);
+        bool torqueControlInverseDynamics( Vector3d a_thumbForce,  Vector3d a_idxForce,
+                                             Vector3d a_midForce);
 
         // commands the desired joint position
         bool positionalControl();
@@ -98,7 +99,7 @@ using namespace chai3d;
 
         // Index finger chai3d
         cMaestroDigit *h_index;
-        bool use_idx = 0;
+        bool use_idx = 1;
 
         // Middle finger chai3d
         cMaestroDigit *h_middle;
@@ -106,14 +107,7 @@ using namespace chai3d;
 
         // Thumb chai3d
         cMaestroThumb *h_thumb;
-        bool use_thumb;
-
-        // Running Average
-        double run_avg[16];
-        int num_sensors = 16;
-        int count = 10;
-
-        //
+        bool use_thumb = 0;
 
     private:
 

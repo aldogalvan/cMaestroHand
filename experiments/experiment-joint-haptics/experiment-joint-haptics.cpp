@@ -82,7 +82,6 @@ cFontPtr font;
 // a label to display the rate [Hz] at which the simulation is running
 cLabel* labelRates;
 
-
 // a flag to indicate if the haptic simulation currently running
 bool simulationRunning = false;
 
@@ -118,6 +117,9 @@ int height = 0;
 
 // swap interval for the display context (vertical synchronization)
 int swapInterval = 1;
+
+// marker to track point
+cShapeSphere* marker;
 
 //------------------------------------------------------------------------------
 // EXPERIMENT VARIABLES
@@ -164,12 +166,16 @@ void updateHaptics(void);
 void close(void);
 
 // this function computes a penalty force
-cVector3d computePenaltyForce(const cVector3d& goal);
+cVector3d computePenaltyForce(const cVector3d a_goal,cVector3d& a_proxy);
+
+// this function computes a proxy force
+cVector3d computeProxyForce(const cVector3d a_goal, cVector3d& a_proxy);
 
 // simulation loop
 void loop(void);
 
-
+// this function computes the proxy force
+cVector3d computeProxyForce(const cVector3d a_goal, cVector3d& a_proxy);
 
 //==============================================================================
 /*
@@ -291,8 +297,6 @@ int main(int argc, char* argv[])
     }
 #endif
 
-
-
     //--------------------------------------------------------------------------
     // WORLD - CAMERA - LIGHTING
     //--------------------------------------------------------------------------
@@ -340,7 +344,6 @@ int main(int argc, char* argv[])
     // create a sphere (cursor) to represent the haptic device
     hand = new cMaestroHand();
 
-
     // gets the fingertip radius
     radius = hand->h_hand->radius();
 
@@ -352,6 +355,11 @@ int main(int argc, char* argv[])
     box->setLocalPos(.075,0.03,-.045);
     box->m_material->setGreenLight();
     world->addChild(box);
+
+    //! delete later
+    marker = new cShapeSphere(radius+0.0001);
+    world->addChild(marker);
+    marker->m_material->setRed();
 
 
     //--------------------------------------------------------------------------
@@ -394,72 +402,74 @@ int main(int argc, char* argv[])
         switch (trial_number)
         {
             case 1:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 2:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 3:
-                stiffness = 10;
-                damping = 10 ;
+                stiffness = 10; damping = 10 ;
                 loop();
+                break;
             case 4:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 5:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 6:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 7:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 8:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 9:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 10:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 11:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 12:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 13:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 14:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
             case 15:
-                stiffness = 10;
-                damping = 10;
+                stiffness = 10; damping = 10;
                 loop();
+                break;
+            case 16:
+                goto exit_loop;
             default:
-                stiffness = 0;
-                damping = 0;
+                stiffness = 0; damping = 0;
                 loop();
 
         }
     }
+    exit_loop:;
 
     // close window
     glfwDestroyWindow(window);
@@ -492,6 +502,7 @@ void errorCallback(int a_error, const char* a_description)
 
 void keyCallback(GLFWwindow* a_window, int a_key, int a_scancode, int a_action, int a_mods)
 {
+
     // filter calls that only include a key press
     if ((a_action != GLFW_PRESS) && (a_action != GLFW_REPEAT))
     {
@@ -613,6 +624,8 @@ void updateGraphics(void)
     // RENDER SCENE
     /////////////////////////////////////////////////////////////////////
 
+    hand->updateVisualizer();
+
     // update shadow maps (if any)
     world->updateShadowMaps(false, mirroredDisplay);
 
@@ -650,8 +663,9 @@ void updateHaptics(void)
     //initialize position
     global_pos = hand->h_hand->getGlobalPos();
 
-    // get the position of each digit
-    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos);
+    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Eigen::Vector3d(0,0,0));
+
+    idx_proxy = idx_pos;
 
     // main haptic simulation loop
     while(simulationRunning)
@@ -661,11 +675,15 @@ void updateHaptics(void)
         // UPDATE THE JOINT ANGLES AND RETURN NEW POSITION
         /////////////////////////////////////////////////////////////////////
 
+        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Eigen::Vector3d(0,0,0));
+
+        marker->setLocalPos(idx_pos);
 
         /////////////////////////////////////////////////////////////////////
-        // COMPUTE AND COMMAND THE NEW FORCE
+        // COMPUTE ANY COLLISIONS
         /////////////////////////////////////////////////////////////////////
 
+        cVector3d force = computePenaltyForce(idx_pos,idx_proxy);
 
         // signal frequency counter
         freqCounterHaptics.signal(1);
@@ -677,22 +695,51 @@ void updateHaptics(void)
     simulationFinished = true;
 }
 
-cVector3d computePenaltyForce(const cVector3d& goal)
+cVector3d computePenaltyForce(const cVector3d a_goal, cVector3d& a_proxy)
 {
     // declare collision settings and recorder
     cCollisionSettings collisionSettings;
     cCollisionRecorder collisionRecorder;
     collisionSettings.m_collisionRadius = radius;
 
+    cVector3d force(0,0,0);
+
     // compute collision
-    box->computeCollisionDetection(goal,goal,collisionRecorder,collisionSettings);
+    if (box->computeCollisionDetection(a_goal,a_goal,collisionRecorder,collisionSettings))
+    {
 
-    // compute force based on penetration depth
-    cVector3d normal = collisionRecorder.m_nearestCollision.m_localNormal;
-    double depth = collisionRecorder.m_nearestCollision.m_squareDistance;
+        // compute force based on penetration depth
+        cVector3d normal = collisionRecorder.m_nearestCollision.m_localNormal;
+        double depth = collisionRecorder.m_nearestCollision.m_squareDistance;
+        cout << 1 << endl;
+        // return the force
+        force =  normal * sqrt(depth);
+    }
+    else
+    {
+        a_proxy = a_goal;
+    }
+    return force;
+}
 
-    // return the force
-    return normal*sqrt(depth);
+cVector3d computeProxyForce(const cVector3d a_goal, cVector3d& a_proxy)
+{
+    // declare collision settings and recorder
+    cCollisionSettings collisionSettings;
+    cCollisionRecorder collisionRecorder;
+    collisionSettings.m_collisionRadius = radius;
+
+    cVector3d force(0,0,0);
+
+    // compute collision
+    if (box->computeCollisionDetection(a_proxy,a_goal,collisionRecorder,collisionSettings))
+    {
+
+    }
+    else
+    {
+        a_proxy = a_goal;
+    }
 }
 
 void loop(void)
@@ -711,4 +758,9 @@ void loop(void)
 
     // signal frequency counter
     freqCounterGraphics.signal(1);
+}
+
+void thankYou(void)
+{
+
 }

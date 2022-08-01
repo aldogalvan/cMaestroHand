@@ -144,7 +144,7 @@ void close(void);
 cVector3d computePenaltyAlgorithm(const cVector3d& goal);
 
 // this function finds the proxy positions
-void computeNextBestProxyPosition(cVector3d& proxy , cVector3d& goal);
+void computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal);
 
 // this function checks for collisions with moving objects
 void testFrictionAndMoveProxy(cVector3d& proxy);
@@ -515,6 +515,8 @@ void updateGraphics(void)
     // RENDER SCENE
     /////////////////////////////////////////////////////////////////////
 
+    hand->updateVisualizer();
+
     // update shadow maps (if any)
     world->updateShadowMaps(false, mirroredDisplay);
 
@@ -550,15 +552,20 @@ void updateHaptics(void)
     // global position of the hand
     cVector3d global_pos;
 
-    //initialize position
+    // global rotation of the hand
+    cVector3d global_rot(0,0,0);
+
+    // initialize position
     global_pos = hand->h_hand->getGlobalPos();
+
+    // initialize rot
+    // global_rot = hand->h_hand->getLocalRot();
 
     // initialize the values
     //hand->updateJointAngles(thumb_pos,idx_pos,mid_pos , global_pos);
 
     double t = 0;
     double Pi = 3.14159;
-
 
     std::vector<double> vec = std::vector<double>{
             0 * 30 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), -0 * 10 * (Pi / 180),
@@ -574,13 +581,13 @@ void updateHaptics(void)
     };
 
     // transformation from hand to mcp (always angle zero)
-    cTransform t0 =  ( cVector3d(0,0.025,0),cMatrix3d(cVector3d(1, 0, 0), 0));
+    cTransform t0 = ( cVector3d(0,0.025,0),cMatrix3d(cVector3d(1, 0, 0), 0));
 
     // transformation for abad (always zero too)
     cTransform t1 = ( cVector3d(0,0.0,0),cMatrix3d(cVector3d(0, 0, 1), 0));
 
     // transformation for fe
-    cTransform t2 =  ( cVector3d(0,0.0,0.03978),cMatrix3d(cVector3d(0, 1, 0), 0));
+    cTransform t2 = ( cVector3d(0,0.0,0.03978),cMatrix3d(cVector3d(0, 1, 0), 0));
 
     // transformation for PIP fe
     cTransform t3 = ( cVector3d(0.02238,0.0,0),cMatrix3d(cVector3d(0, 1, 0), 0));
@@ -591,11 +598,10 @@ void updateHaptics(void)
     // the fina
     cTransform tf = t0*t1*t2*t3*t4;
 
-    hand->updateCHandAngles();
 
     //std::cout << *hand->h_hand->getFingertipCenters()[1] << std::endl << std::endl;
 
-    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos);
+    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),global_rot.eigen());
 
     // main haptic simulation loop
     while(simulationRunning)
@@ -604,7 +610,7 @@ void updateHaptics(void)
         /////////////////////////////////////////////////////////////////////
         // UPDATE THE JOINT ANGLES AND RETURN NEW POSITION
         /////////////////////////////////////////////////////////////////////
-        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos);
+        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Eigen::Vector3d(0,0,0));
 
         /////////////////////////////////////////////////////////////////////
         // COMPUTE THE NEXT PROXY POSITION
@@ -612,6 +618,7 @@ void updateHaptics(void)
 
         // compute proxy for index finger
         computeNextBestProxyPosition(idx_proxy , idx_pos);
+
         //std::cout << t4.getLocalPos() << std::endl;
 
         auto pos_vector = hand->h_hand->getFingertipCenters();
@@ -657,9 +664,6 @@ cVector3d computePenaltyAlgorithm(const cVector3d& goal)
 void computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal)
 {
     bool hit0, hit1;
-
-    // adjust the proxy according moving objects that may have collided with the proxy
-    adjustProxy(proxy);
 
     // search for a first contact
     hit0 = computeProxyWithConstraints0(proxy , goal);
@@ -867,6 +871,7 @@ bool computeProxyWithConstraints1(cVector3d& proxy ,  cVector3d& goal)
 
 }
 
+/*
 void testFrictionAndMoveProxy(const cVector3d& a_goal,
                               const cVector3d& a_proxy,
                               cVector3d& a_normal,
@@ -985,7 +990,7 @@ void testFrictionAndMoveProxy(const cVector3d& a_goal,
     // we're done; record the fact that we're still touching an object...
     return;
 }
-
+*/
 void setEpsilonBaseValue(double a_value)
 {
     epsilonBaseValue = a_value;

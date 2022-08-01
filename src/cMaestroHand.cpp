@@ -19,15 +19,6 @@ using namespace chai3d;
             0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180)
     };
 
-// First principal component (used to drive the hand shape from one sensor)
-    std::vector<double> PC1{
-            0.03445656, 0.191433, -0.0310968, -0.07660658, -0.11885343,
-            0.00317037, 0.22895402, 0.00754185, 0.31359066, 0.21799484,
-            -0.00417658, 0.2861582, 0.00334999, 0.35693029, 0.27684938,
-            -0.01066, 0.28191222, 0.00776594, 0.35906561, 0.23993875,
-            -0.03012474, 0.25982226, 0.00517352, 0.27148087, 0.2919739
-    };
-
     // Hand geometry (phalanxes lenght)
     std::vector<std::vector<cVector3d>> fingertransl =
             {
@@ -134,12 +125,13 @@ using namespace chai3d;
 
     }
 
-
-    void cMaestroHand::createIndexFinger() {
+    void cMaestroHand::createIndexFinger()
+    {
         h_index = new cMaestroDigit();
     }
 
-    void cMaestroHand::createMiddleFinger() {
+    void cMaestroHand::createMiddleFinger()
+    {
         h_middle = new cMaestroDigit();
     }
 
@@ -149,7 +141,7 @@ using namespace chai3d;
 
     // this method updates the join angle values
     void cMaestroHand::updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos, cVector3d& a_midPos ,
-                                         cVector3d a_globalPos)
+                                         const Vector3d a_globalPos , const Vector3d a_globalRot)
     {
 
 
@@ -197,7 +189,9 @@ using namespace chai3d;
         double idx_robot_angles[5];
         idx_robot_angles[0] = 0; idx_robot_angles[1] = 0; idx_robot_angles[2] = 0; idx_robot_angles[3] = 0;
         idx_robot_angles[4] = 0;
-        Eigen::Vector3d idx_pos = h_index->updateJointAngles(idx_robot_angles , a_globalPos.eigen());
+        a_idxPos = cVector3d(h_index->updateJointAngles(idx_robot_angles,
+                                                             a_globalPos,
+                                                             a_globalRot));
 
     }
 
@@ -232,22 +226,22 @@ using namespace chai3d;
 
     }
 
-bool cMaestroHand::torqueControlInverseDynamics( cVector3d a_thumbForce,  cVector3d a_idxForce,
-                                     cVector3d a_midForce)
+bool cMaestroHand::torqueControlInverseDynamics( const Vector3d a_thumbForce,  const Vector3d a_idxForce,
+                                                const Vector3d a_midForce)
 {
     double* idx_torque;
     if (use_idx)
-        idx_torque = h_index->computeInverseDynamics(a_idxForce.eigen());
+        idx_torque = h_index->computeInverseDynamics(a_idxForce);
 
     double* mid_torque;
     if(use_middle)
-        mid_torque = h_middle->computeInverseDynamics(a_midForce.eigen());
+        mid_torque = h_middle->computeInverseDynamics(a_midForce);
 
 
 
 }
 
-void cMaestroHand::updateCHandAngles(void) {
+void cMaestroHand::updateVisualizer(void) {
 
 
         double thumb_angles;
@@ -255,31 +249,40 @@ void cMaestroHand::updateCHandAngles(void) {
         // TODO: MODIFY JOINT ANGLES OF RING AND PINKY BASED ON OTHER VALUES
         std::vector<double> vec;
 
+        vec = std::vector<double>{
+                // mcp = 2 pip = 4 dip = 5 (idx and mid)
+                0 * 30 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
+                -0 * 10 * (Pi / 180),
+                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
+                0 * 10 * (Pi / 180),
+                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
+                0 * 10 * (Pi / 180),
+                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
+                0 * 10 * (Pi / 180),
+                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
+                0 * 10 * (Pi / 180)
+        };
 
-        //if (!use_idx && !use_middle && !use_thumb) {
-        //    vec = vecstart;
-        //}
-        //else {
-            vec = std::vector<double>{
-                    0 * 30 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                    -0 * 10 * (Pi / 180),
-                    0 * 10 * (Pi / 180), 100 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 100 * 10 * (Pi / 180),
-                    100 * 10 * (Pi / 180),
-                    0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                    0 * 10 * (Pi / 180),
-                    0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                    0 * 10 * (Pi / 180),
-                    0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                    0 * 10 * (Pi / 180)
-            };
-        //}
+        if (use_idx)
+        {
+            auto idx_angles = h_index->getJointAngles();
+            vec[5] = idx_angles[0];
+            vec[6] = idx_angles[1];
+            vec[8] = idx_angles[2];
+            vec[9] = idx_angles[3];
+        }
+        if (use_middle)
+        {
+            auto mid_angles = h_index->getJointAngles();
+        }
+        if (use_thumb)
+        {
+
+        }
 
         // update hand model kinematics
         h_hand->updateAngles(vec);
         h_hand->updateKinematics();
-
-        // TODO: FIX THIS
-        auto tip_pos = h_hand->getFingertipCenters();
 
     }
 

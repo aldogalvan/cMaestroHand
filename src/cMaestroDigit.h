@@ -2,10 +2,6 @@
 #include "cHand.h"
 #include <Eigen/Dense>
 
-//
-// Created by aldo on 1/24/22.
-//
-
 //==============================================================================
 //------------------------------------------------------------------------------
 using namespace chai3d;
@@ -19,6 +15,7 @@ class cMaestroDigit : public cGenericObject
 {
 
 public:
+
     //--------------------------------------------------------------------------
     // CONSTRUCTOR & DESTRUCTOR:
     //--------------------------------------------------------------------------
@@ -26,7 +23,6 @@ public:
     //! Constructor of cMaestroDigit
     cMaestroDigit()
     {
-        counter = 0;
 
         // resize the theta vector and set to zero
         theta.resize(7);
@@ -57,9 +53,6 @@ public:
                 0  , 0                              , -MCP                         , 0                           , 0                               , 0                    , 0       ,
                 0  , 0                              , MCP_PIP + PIP_DIP + DIP_TIP  , MCP_PIP + PIP_DIP + DIP_TIP , 0                               , 0                    , 0       ,
                 MCP, -(MCP_PIP + PIP_DIP + DIP_TIP) , 0                            , 0                           ,  -(MCP_PIP + PIP_DIP + DIP_TIP) , -(PIP_DIP + DIP_TIP) , -DIP_TIP;
-
-
-
 
     };
 
@@ -157,9 +150,6 @@ public:
 
 protected:
 
-    //! for testing delete later
-    int counter;
-
     //--------------------------------------------------------------------------
     // PROTECTED MEMBERS
     //--------------------------------------------------------------------------
@@ -171,8 +161,8 @@ protected:
     VectorXd theta_proxy;
 
     // set the desired torque
-    double exo_desired_torque_MCP;
-    double exo_desired_torque_PIP;
+    double exo_desired_torque_MCP = 0;
+    double exo_desired_torque_PIP = 0;
 
     // transformation from base to end
     Matrix4d M;

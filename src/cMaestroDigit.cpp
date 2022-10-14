@@ -18,14 +18,19 @@
 
 Vector3d cMaestroDigit::computeHandProxy(const Vector3d a_pos, bool collision)
 {
+
     if (collision)
     {
         Matrix4d T_des = T_body;
         T_des.block<3, 1>(0, 3) = a_pos;
         if(computeIKBodyFrame(T_des, T_proxy_body, theta,theta_proxy))
-            return T_proxy_body.block<3,1>(0,3);
+        {
+            return T_proxy_body.block<3, 1>(0, 3);
+        }
         else
+        {
             return a_pos;
+        }
     }
     else
     {
@@ -108,28 +113,19 @@ void cMaestroDigit::stayOnPointVF(Eigen::MatrixXd &A, Eigen::VectorXd &b, int n,
 
     global_pos = a_globalPos;
 
-    /*
-    auto joint_angles = M3KL1(robot_angles[0], robot_angles[1], robot_angles[2],
-                              robot_angles[3], robot_angles[4]);
-    */
-
-
-
+    //auto joint_angles = M3KL1(robot_angles[0], robot_angles[1], robot_angles[2],
+      //                        robot_angles[3], robot_angles[4]);
 
     theta(0) = a_globalRot(0);
     theta(1) = a_globalRot(1);
     theta(2) = a_globalRot(2);
-    theta(3) = 0;
-    theta(4) = 0.000001* counter * (3.1412 / 180);
-    theta(5) = 0.000001* counter * (3.1414 / 180);
-    theta(6) = 0.000001* counter * 0.33 * (3.1412 / 180);
+    theta(3) = 0 * 10 * (3.14 / 180);
+    theta(4) = 0 * 10 * (3.14 / 180); //0*joint_angles[0];
+    theta(5) = 0 * 10 * (3.14 / 180); //0*joint_angles[1];
+    theta(6) = 0 * 10 * (3.14 / 180); //*0.33 * joint_angles[1];
 
     //auto T = computeFKSpaceFrame(theta);
     T_body = computeFKBodyFrame(theta);
-
-    counter++;
-    if (counter > 100000000)
-        counter = 0;
 
     return T_body.block<3,1>(0,3);
 }

@@ -5,6 +5,10 @@
 /home/agalvan-admin/maestro_chai3d/cmake-build-release/CMakeFiles/edit_cache.dir
 /home/agalvan-admin/maestro_chai3d/cmake-build-release/CMakeFiles/rebuild_cache.dir
 /home/agalvan-admin/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-01.dir
+/home/agalvan-admin/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-gripping.dir
+/home/agalvan-admin/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-deformable.dir
+/home/agalvan-admin/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-friction.dir
+/home/agalvan-admin/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-texture.dir
 /home/agalvan-admin/maestro_chai3d/cmake-build-release/examples/CMakeFiles/edit_cache.dir
 /home/agalvan-admin/maestro_chai3d/cmake-build-release/examples/CMakeFiles/rebuild_cache.dir
 /home/agalvan-admin/maestro_chai3d/cmake-build-release/experiments/CMakeFiles/experiment-joint-haptics.dir

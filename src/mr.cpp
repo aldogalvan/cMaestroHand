@@ -1,6 +1,4 @@
 #include "mr.h"
-#include <stdio.h>
-#include <iostream>
 
 double pi = 3.1412;
 
@@ -11,7 +9,7 @@ double pi = 3.1412;
     auto [R,p] = TransToRp(T);
     MatrixXd ret(6,6);
     ret.block<3,3>(0,0) = R;
-    ret.block<3,3>(0,3) = Eigen::Matrix3d().setZero();
+    ret.block<3,3>(0,3) = Matrix3d().setZero();
     ret.block<3,3>(3,0) = VecToso3(p) * R;
     ret.block<3,3>(3,3) = R;
 
@@ -281,7 +279,7 @@ double pi = 3.1412;
 
  Matrix3d ProjectToSO3(Matrix3d mat)
 {
-    Eigen::JacobiSVD<MatrixXd> svd(mat,Eigen::ComputeFullU | Eigen::ComputeFullV);
+    JacobiSVD<MatrixXd> svd(mat,ComputeFullU | ComputeFullV);
     auto U = svd.matrixU(); auto V = svd.matrixV();
     auto R = U * V.transpose();
     if (R.determinant() < 0)

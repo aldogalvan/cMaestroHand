@@ -1,6 +1,4 @@
-//
-// Created by aldo on 7/27/22.
-//
+
 
 //------------------------------------------------------------------------------
 #include "chai3d.h"
@@ -117,9 +115,6 @@ int height = 0;
 
 // swap interval for the display context (vertical synchronization)
 int swapInterval = 1;
-
-// marker to track point
-cShapeSphere* marker;
 
 //------------------------------------------------------------------------------
 // EXPERIMENT VARIABLES
@@ -342,7 +337,7 @@ int main(int argc, char* argv[])
     light->setDir(1.0, 0.0, 0.0);
 
     // create a sphere (cursor) to represent the haptic device
-    hand = new cMaestroHand();
+    hand = new cMaestroHand(true,true,false);
 
     // gets the fingertip radius
     radius = hand->h_hand->radius();
@@ -355,12 +350,6 @@ int main(int argc, char* argv[])
     box->setLocalPos(.075,0.03,-.045);
     box->m_material->setGreenLight();
     world->addChild(box);
-
-    //! delete later
-    marker = new cShapeSphere(radius+0.0001);
-    world->addChild(marker);
-    marker->m_material->setRed();
-
 
     //--------------------------------------------------------------------------
     // WIDGETS
@@ -663,8 +652,8 @@ void updateHaptics(void)
     //initialize position
     global_pos = hand->h_hand->getGlobalPos();
 
-    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Eigen::Vector3d(0,0,0));
-
+    // updates the hand joint angles
+    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Vector3d(0,0,0));
     idx_proxy = idx_pos;
 
     // main haptic simulation loop
@@ -675,15 +664,13 @@ void updateHaptics(void)
         // UPDATE THE JOINT ANGLES AND RETURN NEW POSITION
         /////////////////////////////////////////////////////////////////////
 
-        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Eigen::Vector3d(0,0,0));
-
-        marker->setLocalPos(idx_pos);
+        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Vector3d(0,0,0));
 
         /////////////////////////////////////////////////////////////////////
-        // COMPUTE ANY COLLISIONS
+        // COMPUTE ANY COLLISIONS AND PERFORM PROXY ALGORITHM
         /////////////////////////////////////////////////////////////////////
 
-        cVector3d force = computePenaltyForce(idx_pos,idx_proxy);
+        cVector3d force = computeProxyForce(idx_pos,idx_proxy);
 
         // signal frequency counter
         freqCounterHaptics.signal(1);
@@ -705,13 +692,13 @@ cVector3d computePenaltyForce(const cVector3d a_goal, cVector3d& a_proxy)
     cVector3d force(0,0,0);
 
     // compute collision
-    if (box->computeCollisionDetection(a_goal,a_goal,collisionRecorder,collisionSettings))
+    if (box->computeCollisionDetection(a_goal,a_goal + cVector3d(0,0,-0.001),collisionRecorder,collisionSettings))
     {
 
         // compute force based on penetration depth
         cVector3d normal = collisionRecorder.m_nearestCollision.m_localNormal;
         double depth = collisionRecorder.m_nearestCollision.m_squareDistance;
-        cout << 1 << endl;
+
         // return the force
         force =  normal * sqrt(depth);
     }
@@ -731,15 +718,24 @@ cVector3d computeProxyForce(const cVector3d a_goal, cVector3d& a_proxy)
 
     cVector3d force(0,0,0);
 
+    Vector3d thumb_pos , idx_pos , mid_pos;
+
     // compute collision
     if (box->computeCollisionDetection(a_proxy,a_goal,collisionRecorder,collisionSettings))
     {
-
+        idx_pos = a_proxy.eigen();
+        hand->computeHandProxy(thumb_pos,idx_pos,mid_pos,
+                               false,true,false);
     }
     else
     {
         a_proxy = a_goal;
+        idx_pos = a_proxy.eigen();
+        hand->computeHandProxy(thumb_pos,idx_pos,mid_pos,
+                               false,false,false);
     }
+
+    return force;
 }
 
 void loop(void)

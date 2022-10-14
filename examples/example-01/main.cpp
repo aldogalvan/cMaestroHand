@@ -13,15 +13,14 @@ using namespace std;
 // GENERAL SETTINGS
 //------------------------------------------------------------------------------
 
-// stereo Mode
-/*
-    C_STEREO_DISABLED:            Stereo is disabled
-    C_STEREO_ACTIVE:              Active stereo for OpenGL NVDIA QUADRO cards
-    C_STEREO_PASSIVE_LEFT_RIGHT:  Passive stereo where L/R images are rendered next to each other
-    C_STEREO_PASSIVE_TOP_BOTTOM:  Passive stereo where L/R images are rendered above each other
-*/
-
 cStereoMode stereoMode = C_STEREO_DISABLED;
+
+enum MouseStates
+{
+    MOUSE_IDLE,
+    MOUSE_MOVE_CAMERA
+};
+
 
 // fullscreen mode
 bool fullscreen = false;
@@ -38,6 +37,12 @@ cWorld* world;
 
 // a camera to render the world in the window display
 cCamera* camera;
+
+//! a haptic device handler
+cHapticDeviceHandler* handler;
+
+//! a pointer to the current haptic device
+cGenericHapticDevicePtr hapticDevice;
 
 // a light source to illuminate the objects in the world
 cDirectionalLight *light;
@@ -100,6 +105,12 @@ cFrequencyCounter freqCounterGraphics;
 // a frequency counter to measure the simulation haptic rate
 cFrequencyCounter freqCounterHaptics;
 
+// mouse state
+MouseStates mouseState = MOUSE_IDLE;
+
+// last mouse position
+double mouseX, mouseY;
+
 // haptic thread
 cThread* hapticsThread;
 
@@ -117,6 +128,9 @@ int height = 0;
 // swap interval for the display context (vertical synchronization)
 int swapInterval = 1;
 
+//! test for collision
+cShapeSphere* marker;
+
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -131,6 +145,15 @@ void errorCallback(int error, const char* a_description);
 // callback when a key is pressed
 void keyCallback(GLFWwindow* a_window, int a_key, int a_scancode, int a_action, int a_mods);
 
+// callback to handle mouse click
+void mouseButtonCallback(GLFWwindow* a_window, int a_button, int a_action, int a_mods);
+
+// callback to handle mouse motion
+void mouseMotionCallback(GLFWwindow* a_window, double a_posX, double a_posY);
+
+// callback to handle mouse scroll
+void mouseScrollCallback(GLFWwindow* a_window, double a_offsetX, double a_offsetY);
+
 // this function renders the scene
 void updateGraphics(void);
 
@@ -144,7 +167,7 @@ void close(void);
 cVector3d computePenaltyAlgorithm(const cVector3d& goal);
 
 // this function finds the proxy positions
-void computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal);
+bool computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal);
 
 // this function checks for collisions with moving objects
 void testFrictionAndMoveProxy(cVector3d& proxy);
@@ -160,13 +183,11 @@ bool computeProxyWithConstraints1(cVector3d& proxy , const cVector3d& goal);
 void jointOptimization(Eigen::VectorXd & joint_angles, Eigen::Vector3d curPos, const Eigen::Vector3d desPos ,
                        const int max_iterations , const double er);
 
-
 // sets the error thresholds
 void setEpsilonBaseValue(double a_value);
 
 // goal achieved critiera
 bool goalAchieved(const cVector3d& a_proxy, const cVector3d& a_goal);
-
 
 
 //==============================================================================
@@ -264,6 +285,15 @@ int main(int argc, char* argv[])
     // set key callback
     glfwSetKeyCallback(window, keyCallback);
 
+    // set mouse position callback
+    glfwSetCursorPosCallback(window, mouseMotionCallback);
+
+    // set mouse button callback
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+
+    // set mouse scroll callback
+    glfwSetScrollCallback(window, mouseScrollCallback);
+
     // set resize callback
     glfwSetWindowSizeCallback(window, windowSizeCallback);
 
@@ -330,13 +360,13 @@ int main(int argc, char* argv[])
     light->setDir(-1.0, 0.0, 0.0);
 
     // create a sphere (cursor) to represent the haptic device
-    hand = new cMaestroHand();
+    hand = new cMaestroHand(true,true,false);
 
     // gets the fingertip radius
     radius = hand->h_hand->radius();
 
     // sets the epsilon values
-    setEpsilonBaseValue(0.001);
+    setEpsilonBaseValue(0.00001);
 
     // insert cursor inside world
     world->addChild(hand->h_hand);
@@ -345,8 +375,36 @@ int main(int argc, char* argv[])
     box = new cShapeBox(.05,.05,.05);
     box->setLocalPos(.075,0.03,-.045);
     box->m_material->setGreenLight();
+    box->setShowCollisionDetector(true,true);
+    box->setShowBoundaryBox(true);
     world->addChild(box);
 
+    //! delete later
+    marker = new cShapeSphere(radius);
+    marker->m_material->setYellow();
+    world->addChild(marker);
+
+    //!--------------------------------------------------------------------------
+    //! HAPTIC DEVICE
+    //!--------------------------------------------------------------------------
+
+    // create a haptic device handler
+    handler = new cHapticDeviceHandler();
+
+    // get a handle to the first haptic device
+    handler->getDevice(hapticDevice, 0);
+
+    // open a connection to haptic device
+    hapticDevice->open();
+
+    // calibrate device (if necessary)
+    hapticDevice->calibrate();
+
+    // retrieve information about the current haptic device
+    cHapticDeviceInfo info = hapticDevice->getSpecifications();
+
+    // if the device has a gripper, enable the gripper to simulate a user switch
+    hapticDevice->setEnableGripperUserSwitch(true);
 
     //--------------------------------------------------------------------------
     // WIDGETS
@@ -358,7 +416,6 @@ int main(int argc, char* argv[])
     // create a label to display the haptic and graphic rate of the simulation
     labelRates = new cLabel(font);
     camera->m_frontLayer->addChild(labelRates);
-
 
     //--------------------------------------------------------------------------
     // START SIMULATION
@@ -478,6 +535,58 @@ void keyCallback(GLFWwindow* a_window, int a_key, int a_scancode, int a_action, 
     }
 }
 
+
+//------------------------------------------------------------------------------
+
+void mouseButtonCallback(GLFWwindow* a_window, int a_button, int a_action, int a_mods)
+{
+    if (a_button == GLFW_MOUSE_BUTTON_RIGHT && a_action == GLFW_PRESS)
+    {
+        // store mouse position
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        // update mouse state
+        mouseState = MOUSE_MOVE_CAMERA;
+    }
+
+    else
+    {
+        // update mouse state
+        mouseState = MOUSE_IDLE;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void mouseMotionCallback(GLFWwindow* a_window, double a_posX, double a_posY)
+{
+    if (mouseState == MOUSE_MOVE_CAMERA)
+    {
+        // compute mouse motion
+        int dx = a_posX - mouseX;
+        int dy = a_posY - mouseY;
+        mouseX = a_posX;
+        mouseY = a_posY;
+
+        // compute new camera angles
+        double azimuthDeg = camera->getSphericalAzimuthDeg() - 0.5 * dx;
+        double polarDeg = camera->getSphericalPolarDeg() - 0.5 * dy;
+
+        // assign new angles
+        camera->setSphericalAzimuthDeg(azimuthDeg);
+        camera->setSphericalPolarDeg(polarDeg);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void mouseScrollCallback(GLFWwindow* a_window, double a_offsetX, double a_offsetY)
+{
+    double r = camera->getSphericalRadius();
+    r = cClamp(r + 0.1 * a_offsetY, 0.5, 3.0);
+    camera->setSphericalRadius(r);
+}
+
 //------------------------------------------------------------------------------
 
 void close(void)
@@ -487,6 +596,9 @@ void close(void)
 
     // wait for graphics and haptics loops to terminate
     while (!simulationFinished) { cSleepMs(100); }
+
+    // close haptic device
+    hapticDevice->close();
 
     // delete resources
     delete hand;
@@ -558,82 +670,69 @@ void updateHaptics(void)
     // initialize position
     global_pos = hand->h_hand->getGlobalPos();
 
-    // initialize rot
-    // global_rot = hand->h_hand->getLocalRot();
-
-    // initialize the values
-    //hand->updateJointAngles(thumb_pos,idx_pos,mid_pos , global_pos);
-
-    double t = 0;
-    double Pi = 3.14159;
-
-    std::vector<double> vec = std::vector<double>{
-            0 * 30 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), -0 * 10 * (Pi / 180),
-            -0 * 10 * (Pi / 180),
-            0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), t * 10 * (Pi / 180),
-            0 * 10 * (Pi / 180),
-            0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), t * 10 * (Pi / 180),
-            0 * 10 * (Pi / 180),
-            0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), t * 10 * (Pi / 180),
-            0 * 10 * (Pi / 180),
-            0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), t * 10 * (Pi / 180),
-            0 * 10 * (Pi / 180)
-    };
-
-    // transformation from hand to mcp (always angle zero)
-    cTransform t0 = ( cVector3d(0,0.025,0),cMatrix3d(cVector3d(1, 0, 0), 0));
-
-    // transformation for abad (always zero too)
-    cTransform t1 = ( cVector3d(0,0.0,0),cMatrix3d(cVector3d(0, 0, 1), 0));
-
-    // transformation for fe
-    cTransform t2 = ( cVector3d(0,0.0,0.03978),cMatrix3d(cVector3d(0, 1, 0), 0));
-
-    // transformation for PIP fe
-    cTransform t3 = ( cVector3d(0.02238,0.0,0),cMatrix3d(cVector3d(0, 1, 0), 0));
-
-    // transformation for DIP fe
-    cTransform t4 = ( cVector3d(0.01566,0.0,0),cMatrix3d(cVector3d(0, 0, 1), 0));
-
-    // the fina
-    cTransform tf = t0*t1*t2*t3*t4;
-
-
-    //std::cout << *hand->h_hand->getFingertipCenters()[1] << std::endl << std::endl;
-
+    // update the hand joint angles
     hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),global_rot.eigen());
+
+    cVector3d lastPos;
+    cVector3d pos;
+    hapticDevice->getPosition(pos);
+    lastPos = pos;
+    marker->setLocalPos(pos);
+    cPrecisionClock clock;
+    clock.start(true);
+    double t;
+    t = clock.getCurrentTimeSeconds();
+
 
     // main haptic simulation loop
     while(simulationRunning)
     {
 
+        // compute global reference frames for each object
+        world->computeGlobalPositions(true);
+
         /////////////////////////////////////////////////////////////////////
         // UPDATE THE JOINT ANGLES AND RETURN NEW POSITION
         /////////////////////////////////////////////////////////////////////
+
         hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Eigen::Vector3d(0,0,0));
 
         /////////////////////////////////////////////////////////////////////
         // COMPUTE THE NEXT PROXY POSITION
         /////////////////////////////////////////////////////////////////////
 
+        lastPos = pos;
+        hapticDevice->getPosition(pos);
+        marker->setLocalPos(pos);
+
+        //bool col = box->computeCollisionDetection(lastMarkerPos,markerPos + 0.001*normVector, recorder,settings);
+        bool col = computeNextBestProxyPosition(lastPos,pos);
+        //cout << col << endl;
+
         // compute proxy for index finger
-        computeNextBestProxyPosition(idx_proxy , idx_pos);
+        /*
+        bool idxCollision = computeNextBestProxyPosition(idx_proxy , idx_pos);
+        Eigen::Vector3d idx_proxy_eigen = idx_proxy.eigen();
 
-        //std::cout << t4.getLocalPos() << std::endl;
+        // compute proxy for the middle finger
+        bool middleCollision = computeNextBestProxyPosition(mid_proxy , mid_pos);
+        Eigen::Vector3d mid_proxy_eigen = mid_proxy.eigen();
 
-        auto pos_vector = hand->h_hand->getFingertipCenters();
-        cVector3d pos = *pos_vector[1];
-        //std::cout << pos << std::endl;
+        // compute proxy for the thumb
+        bool thumbCollision = computeNextBestProxyPosition(thumb_proxy , thumb_pos);
+        Eigen::Vector3d thumb_proxy_eigen = thumb_proxy.eigen();
+
+        // do hand proxy algorithm
+        hand->computeHandProxy(thumb_proxy_eigen , idx_proxy_eigen , mid_proxy_eigen ,
+                               thumbCollision , idxCollision, middleCollision);
+                               */
 
         /////////////////////////////////////////////////////////////////////
         // COMMAND A NEW FORCE USING SOME ALGORITHM
         /////////////////////////////////////////////////////////////////////
 
-        // command force using inverse kinematics
-
         // signal frequency counter
         freqCounterHaptics.signal(1);
-
 
     }
 
@@ -641,27 +740,9 @@ void updateHaptics(void)
     simulationFinished = true;
 }
 
-//! penalty algorithm
-cVector3d computePenaltyAlgorithm(const cVector3d& goal)
-{
-    // declare collision settings and recorder
-    cCollisionSettings collisionSettings;
-    cCollisionRecorder collisionRecorder;
-    collisionSettings.m_collisionRadius = radius;
-
-    // compute collision
-    box->computeCollisionDetection(goal,goal,collisionRecorder,collisionSettings);
-
-    // compute force based on penetration depth
-    cVector3d normal = collisionRecorder.m_nearestCollision.m_localNormal;
-    double depth = collisionRecorder.m_nearestCollision.m_squareDistance;
-
-    // return the force
-    return normal*sqrt(depth);
-}
 
 //! proxy algorithm
-void computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal)
+bool computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal)
 {
     bool hit0, hit1;
 
@@ -669,7 +750,7 @@ void computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal)
     hit0 = computeProxyWithConstraints0(proxy , goal);
     if (!hit0)
     {
-        return;
+        return false;
     }
 
     // NOT REALLY NECESSARY IF JUST ONE BLOCK
@@ -683,7 +764,7 @@ void computeNextBestProxyPosition(cVector3d& proxy , const cVector3d& goal)
         return;
     }
      */
-
+    return true;
 }
 
 
@@ -767,13 +848,13 @@ bool computeProxyWithConstraints0(cVector3d& proxy , const cVector3d& goal)
     double collisionDistance;
     if (hit)
     {
+
         collisionDistance = sqrt(collisionRecorder.m_nearestCollision.m_squareDistance);
 
         if (collisionDistance > (distanceProxyGoal + C_SMALL))
         {
             hit = false;
         }
-
 
         if (hit)
         {
@@ -790,6 +871,7 @@ bool computeProxyWithConstraints0(cVector3d& proxy , const cVector3d& goal)
                 }
             }
         }
+
     }
 
     // if no collision occurs, then we move the proxy to its goal, and we're done
@@ -837,16 +919,20 @@ bool computeProxyWithConstraints0(cVector3d& proxy , const cVector3d& goal)
     cVector3d vCollisionToProxy;
     proxy.subr(collisionRecorder.m_collisions[0].m_globalPos, vCollisionToProxy);
 
+
     // move the proxy to the collision point, minus the distance along the
     // movement vector that we computed above.
     //
     // note that we're adjusting the 'proxy' variable, which is just a local
     // copy of the proxy position.  we still might decide not to move the
     // 'real' proxy due to friction.
+
+
     cVector3d vColNextGoal;
     vProxyToGoalNormalized.mulr(-distanceTriangleProxy, vColNextGoal);
     cVector3d nextProxyPos;
     collisionRecorder.m_collisions[0].m_globalPos.addr(vColNextGoal, nextProxyPos);
+    cout << "REACHED" << endl;
 
     // we can now set the next position of the proxy
     nextBestProxyGlobalPos = nextProxyPos;
@@ -862,6 +948,8 @@ bool computeProxyWithConstraints0(cVector3d& proxy , const cVector3d& goal)
     }
 
     proxy = nextBestProxyGlobalPos;
+
+
     return (true);
 }
 
@@ -991,6 +1079,7 @@ void testFrictionAndMoveProxy(const cVector3d& a_goal,
     return;
 }
 */
+
 void setEpsilonBaseValue(double a_value)
 {
     epsilonBaseValue = a_value;

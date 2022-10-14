@@ -24,7 +24,7 @@ using namespace Eigen;
         //--------------------------------------------------------------------------
 
         //! Constructor for hMaestroHand
-        cMaestroHand();
+        cMaestroHand(bool a_useThumb , bool a_useIdx , bool a_useMiddle);
 
         //! Destructor for hMaestroHand
         ~cMaestroHand()
@@ -75,6 +75,10 @@ using namespace Eigen;
         // commands the desired joint position
         bool positionalControl();
 
+        // compute proxy hand algorithm
+        void computeHandProxy( Vector3d& a_goalThumb,  Vector3d& a_goalIdx,  Vector3d& a_goalMid,
+                              bool thumbCollision = 0, bool idxCollision = 0, bool midCollision = 0);
+
         // this is a test trajectory
         std::vector<cVector3d*> testTrajectory(vector<double> vec);
 
@@ -99,7 +103,7 @@ using namespace Eigen;
 
         // Index finger chai3d
         cMaestroDigit *h_index;
-        bool use_idx = 1;
+        bool use_idx = 0;
 
         // Middle finger chai3d
         cMaestroDigit *h_middle;

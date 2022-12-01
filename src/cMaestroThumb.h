@@ -13,7 +13,7 @@ using namespace Eigen;
 #ifndef MAESTRO_CHAI3D_CMAESTROTHUMB_H
 #define MAESTRO_CHAI3D_CMAESTROTHUMB_H
 
-class cMaestroThumb : public cGenericObject {
+class cMaestroThumb {
 
 public:
 
@@ -101,7 +101,7 @@ public:
     void computeOptimization(const Vector3d a_goalPos, const int a_maxIts = 10, const double ep = 0.001);
 
     // this method commands a new joint torque
-    double* commandJointTorque(double K , double B);
+    double* commandJointTorqueProxy(double K , double B);
 
     // return the vector of actual finger angles
     VectorXd getJointAngles(void);

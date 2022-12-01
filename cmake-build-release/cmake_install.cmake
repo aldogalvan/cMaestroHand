@@ -1,4 +1,4 @@
-# Install script for directory: /home/agalvan-admin/maestro_chai3d
+# Install script for directory: /home/herolab/maestro_chai3d
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,12 +44,12 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/agalvan-admin/maestro_chai3d/cmake-build-release/examples/cmake_install.cmake")
+  include("/home/herolab/maestro_chai3d/cmake-build-release/examples/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/agalvan-admin/maestro_chai3d/cmake-build-release/experiments/cmake_install.cmake")
+  include("/home/herolab/maestro_chai3d/cmake-build-release/experiments/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -60,5 +60,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/agalvan-admin/maestro_chai3d/cmake-build-release/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/herolab/maestro_chai3d/cmake-build-release/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

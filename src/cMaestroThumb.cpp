@@ -52,45 +52,8 @@ Vector3d cMaestroThumb::computeHandProxySOP(const Vector3d a_pos, const double t
 Vector3d cMaestroThumb::computeHandProxyWall(const Vector3d a_pos, const double tol, bool collision)
 {
 
+
 }
-
-// -----------------------------------------------------------------//
-
-double* cMaestroThumb::computeInverseDynamics(const Eigen::Vector3d force)
-{
-    /*
-    double torque[2];
-
-    Vector3d P0 = M_T0.block<3,1>(0,3);
-    Vector3d P1 = M_T1.block<3,1>(0,3) ;
-    Vector3d P2 = M_T2.block<3,1>(0,3) ;
-    Vector3d P3 = M_T3.block<3,1>(0,3) ;
-
-    Vector3d L3 = P3 - P2 ;
-    Vector3d L2 = P2 - P1 ;
-    Vector3d L1 = P1 - P0 ;
-
-    // to do: dot product to extract torques only in the z axis
-    Vector3d torques_P2 = L3.cross(force) ;  // + torques_P3 when generalizing
-    Vector3d torques_P1 = L2.cross(force) + torques_P2 ;
-    Vector3d torques_P0 = L1.cross(force) + torques_P1 ;
-
-    //
-    double joint_torque_MCP = 0.001*torques_P0.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
-    double joint_torque_PIP = 0.001*torques_P1.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
-    double joint_torque_DIP = 0.001*torques_P2.dot(Eigen::Vector3d  (0,0,1)); //   [N m]
-
-    // compute exo joint torques
-    double exo_torque_MCP = joint_torque_MCP;
-    double exo_torque_PIP = -joint_torque_PIP;
-
-    // returns the torque
-    torque[0]= exo_torque_MCP ; torque[1] =  exo_torque_PIP;
-
-    return torque;
-     */
-}
-
 // -----------------------------------------------------------------//
 
 void cMaestroThumb::computeOptimization(const Eigen::Vector3d a_goalPos, const int a_maxIts , const double ep)
@@ -108,15 +71,11 @@ void cMaestroThumb::stayOnPointVF(Eigen::MatrixXd &A, Eigen::VectorXd &b, int n,
 
 // -----------------------------------------------------------------//
 
-Vector3d cMaestroThumb::updateJointAngles(double *robot_angles , Vector3d a_globalPos, Vector3d a_globalRot)
+Vector3d cMaestroThumb::updateJointAngles(double *joint_angles , Vector3d a_globalPos, Vector3d a_globalRot)
 {
 
     global_pos = a_globalPos;
 
-    /*
-    auto joint_angles = M3KL1(robot_angles[0], robot_angles[1], robot_angles[2],
-                              robot_angles[3], robot_angles[4]);
-    */
 
     theta(0) = a_globalRot(0);
     theta(1) = a_globalRot(1);
@@ -179,17 +138,18 @@ VectorXd cMaestroThumb::getProxyJointAngles(void)
 
 // -----------------------------------------------------------------//
 
-double* cMaestroThumb::commandJointTorque(double K ,  double B)
+double* cMaestroThumb::commandJointTorqueProxy(double K ,  double B)
 {
 
-    double joint_torque[4];
+    auto joint_torque = K*(theta_proxy - theta);
 
-    joint_torque[0] = exo_desired_torque_CMC_fe;
-    joint_torque[1] = exo_desired_torque_CMC_abad;
-    joint_torque[2] = exo_desired_torque_MCP;
-    joint_torque[3] = exo_desired_torque_IP;
+    double pjoint_torque[4];
+    pjoint_torque[0] = joint_torque(0);
+    pjoint_torque[1] = joint_torque(1);
+    pjoint_torque[2] = joint_torque(2);
+    pjoint_torque[3] = joint_torque(3);
 
-    return joint_torque;
+    return pjoint_torque;
 }
 
 // -----------------------------------------------------------------//

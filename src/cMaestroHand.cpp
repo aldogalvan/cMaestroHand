@@ -10,7 +10,7 @@ using namespace chai3d;
 double Pi = 3.14159;
 
 
-// Hand geometry (phalanxes lenght)
+// Hand geometry (phalanxes length)
 vector<vector<cVector3d>> fingertransl =
         {
                 /********************************************************/
@@ -84,7 +84,6 @@ cMaestroHand::cMaestroHand(bool a_useThumb, bool a_useIdx, bool a_useMiddle) {
         createMiddleFinger();
 
 
-
     // Initialize esmacat application first
     //application = new my_app();
     //application->set_ethercat_adapter_name_through_terminal();
@@ -115,8 +114,13 @@ cMaestroHand::cMaestroHand(bool a_useThumb, bool a_useIdx, bool a_useMiddle) {
         inputname.push_back("Joint " + to_string(i + 1));
     }
 
+    Py_Initialize();
+    PyObject* module_name = PyString_FromString(
+            (char*)"Maestro3");
+    assert(module_name!= nullptr);
+    auto module = PyImport_Import(module_name);
+    assert(module != nullptr);
     cout << "cMaestroHand Constructed" << endl;
-
 }
 
 void cMaestroHand::createIndexFinger()
@@ -138,97 +142,54 @@ void cMaestroHand::createThumb() {
 void cMaestroHand::updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos, cVector3d& a_midPos ,
                                      const Vector3d a_globalPos , const Vector3d a_globalRot)
 {
-
-
-    // Updates array with angles
-    //double robot_angles[16];
-    //application->updateJointAngles(robot_angles);
-
-    // TODO: SMOOTH SENSOR VALUES
-    /*
-    for(int i = 0; i < count; i++){
-        newAvg = movingAvg(arrNumbers, &sum, pos, len, joint_angles);
-        printf("The new average is %d\n", newAvg);
-        pos++;
-        if (pos >= len){
-            pos = 0;
-        }
-    }
-     */
+    // This function gets called from the main file and returns the position of the fingertip
+    double robot_angles[16];
+    application->updateJointAngles(robot_angles);
 
     // Updates thumb
-    /*
-    double thumb_robot_angles[6];
-    thumb_robot_angles[0] = robot_angles[10]; thumb_robot_angles[1] = robot_angles[11]; thumb_robot_angles[2] = robot_angles[12];
-    thumb_robot_angles[3] = robot_angles[13]; thumb_robot_angles[4] = robot_angles[14]; thumb_robot_angles[5] = robot_angles[15];
-    Eigen::Vector3d thumb_pos = h_thumb->updateJointAngles(thumb_robot_angles);
-    a_thumbPos = cVector3d(thumb_pos);
-    */
+    if (use_thumb)
+    {
+        double thumb_robot_angles[6];
+        thumb_robot_angles[0] = robot_angles[10];
+        thumb_robot_angles[1] = robot_angles[11];
+        thumb_robot_angles[2] = robot_angles[12];
+        thumb_robot_angles[3] = robot_angles[13];
+        thumb_robot_angles[4] = robot_angles[14];
+        thumb_robot_angles[5] = robot_angles[15];
+        Eigen::Vector3d thumb_pos = h_thumb->updateJointAngles(thumb_robot_angles, a_globalPos, a_globalRot);
+        a_thumbPos = cVector3d(thumb_pos);
+    }
 
     // Updates index
-    /*
-    double idx_robot_angles[5];
-    idx_robot_angles[0] = robot_angles[0]; idx_robot_angles[1] = robot_angles[1]; idx_robot_angles[2] = robot_angles[2];
-    idx_robot_angles[3] = robot_angles[3]; idx_robot_angles[4] = robot_angles[4];
-    Eigen::Vector3d idx_pos = h_index->updateJointAngles(idx_robot_angles , a_globalPos.eigen());
-    a_idxPos = cVector3d(idx_pos);
-
-    // Updates middle finger
-    double mid_robot_angles[5];
-    mid_robot_angles[0] = robot_angles[5]; mid_robot_angles[1] = robot_angles[6]; mid_robot_angles[2] = robot_angles[7];
-    mid_robot_angles[3] = robot_angles[8]; mid_robot_angles[4] = robot_angles[9];
-    Eigen::Vector3d mid_pos = h_index->updateJointAngles(mid_robot_angles , a_globalPos.eigen());
-    a_midPos = cVector3d(mid_pos);
-     */
-
-    double idx_robot_angles[5];
-    idx_robot_angles[0] = 0; idx_robot_angles[1] = 0; idx_robot_angles[2] = 0; idx_robot_angles[3] = 0;
-    idx_robot_angles[4] = 0;
-    a_idxPos = cVector3d(h_index->updateJointAngles(idx_robot_angles,
-                                                         a_globalPos,
-                                                         a_globalRot));
-
-    double thumb_robot_angles[5];
-    thumb_robot_angles[0] = 0; thumb_robot_angles[1] = 0; thumb_robot_angles[2] = 0; thumb_robot_angles[3] = 0;
-    thumb_robot_angles[4] = 0;
-    a_thumbPos = cVector3d(h_thumb->updateJointAngles(thumb_robot_angles,
-                                                    a_globalPos,
-                                                    a_globalRot));
-}
-
-bool cMaestroHand::torqueControlProxy(double a_stiffness,double a_damping) {
-
-    double index_torque[2];
     if (use_idx)
-        h_index->commandJointTorque(a_stiffness,a_damping);
+    {
+        double idx_robot_angles[5];
+        idx_robot_angles[0] = robot_angles[0];
+        idx_robot_angles[1] = robot_angles[1];
+        idx_robot_angles[2] = robot_angles[2];
+        idx_robot_angles[3] = robot_angles[3];
+        idx_robot_angles[4] = robot_angles[4];
+        Eigen::Vector3d idx_pos = h_index->updateJointAngles(idx_robot_angles, a_globalPos, a_globalRot);
+        a_idxPos = cVector3d(idx_pos);
 
-    double middle_torque[2];
+    }
+    // Updates middle finger
     if (use_middle)
-        h_middle->commandJointTorque(a_stiffness,a_damping);
-
-    double thumb_torque[4];
-    if (use_thumb)
-        h_thumb->commandJointTorque(a_stiffness,a_damping);
-
-    double command_torque[8];
-    double desired_angle[8];
-    double actual_torque[8];
-
-    command_torque[0] = index_torque[0];
-    command_torque[1] = index_torque[1];
-    command_torque[2] = middle_torque[0];
-    command_torque[3] = middle_torque[1];
-    command_torque[4] = thumb_torque[0];
-    command_torque[5] = thumb_torque[1];
-    command_torque[6] = thumb_torque[2];
-    command_torque[7] = thumb_torque[3];
-
-    application->commandJointTorque(command_torque, desired_angle, actual_torque);
+    {
+        double mid_robot_angles[5];
+        mid_robot_angles[0] = robot_angles[5];
+        mid_robot_angles[1] = robot_angles[6];
+        mid_robot_angles[2] = robot_angles[7];
+        mid_robot_angles[3] = robot_angles[8];
+        mid_robot_angles[4] = robot_angles[9];
+        Eigen::Vector3d mid_pos = h_middle->updateJointAngles(mid_robot_angles, a_globalPos, a_globalRot);
+        a_midPos = cVector3d(mid_pos);
+    }
 
 }
 
 void cMaestroHand::computeHandProxy( Vector3d& a_goalThumb, Vector3d& a_goalIdx, Vector3d& a_goalMid,
-                                    bool thumbCollision, bool idxCollision, bool midCollision)
+                                     bool thumbCollision, bool idxCollision, bool midCollision)
 {
     if(use_idx)
         a_goalIdx = h_index->computeHandProxy(a_goalIdx,idxCollision);
@@ -240,22 +201,40 @@ void cMaestroHand::computeHandProxy( Vector3d& a_goalThumb, Vector3d& a_goalIdx,
         a_goalThumb = h_index->computeHandProxy(a_goalThumb,thumbCollision);
 }
 
-bool cMaestroHand::torqueControlInverseDynamics( const Vector3d a_thumbForce,  const Vector3d a_idxForce,
-                                                const Vector3d a_midForce)
-{
+bool cMaestroHand::torqueControlProxy(const double a_stiffness, const double a_damping) {
+
     double* idx_torque;
+    idx_torque[0] = 0; idx_torque[1] = 0;
     if (use_idx)
-        idx_torque = h_index->computeInverseDynamics(a_idxForce);
+        idx_torque = h_index->commandJointTorqueProxy(a_stiffness,a_damping);
 
     double* mid_torque;
-    if(use_middle)
-        mid_torque = h_middle->computeInverseDynamics(a_midForce);
+    mid_torque[0] = 0; mid_torque[1] = 0;
+    if (use_middle)
+        mid_torque = h_middle->commandJointTorqueProxy(a_stiffness,a_damping);
 
     double* thumb_torque;
+    thumb_torque[0] = 0; thumb_torque[1] = 0; thumb_torque[2] = 0; thumb_torque[3] = 0;
     if (use_thumb)
-        thumb_torque = h_thumb->computeInverseDynamics(a_thumbForce);
+        thumb_torque = h_thumb->commandJointTorqueProxy(a_stiffness,a_damping);
+
+    double command_torque[8];
+    double desired_angle[8];
+    double actual_torque[8];
+
+    command_torque[0] = idx_torque[0];
+    command_torque[1] = idx_torque[1];
+    command_torque[2] = mid_torque[0];
+    command_torque[3] = mid_torque[1];
+    command_torque[4] = thumb_torque[0];
+    command_torque[5] = thumb_torque[1];
+    command_torque[6] = thumb_torque[2];
+    command_torque[7] = thumb_torque[3];
+
+    application->commandJointTorque(command_torque, desired_angle, actual_torque);
 
 }
+
 
 void cMaestroHand::updateVisualizer(void) {
 
@@ -278,7 +257,7 @@ void cMaestroHand::updateVisualizer(void) {
 
         if (use_idx)
         {
-            auto idx_angles = h_index->getJointAngles();
+            auto idx_angles = h_index->getProxyJointAngles();
             vec[5] = idx_angles[0];
             vec[6] = idx_angles[1];
             vec[8] = idx_angles[2];
@@ -286,7 +265,7 @@ void cMaestroHand::updateVisualizer(void) {
         }
         if (use_middle)
         {
-            auto mid_angles = h_middle->getJointAngles();
+            auto mid_angles = h_middle->getProxyJointAngles();
             vec[10] = mid_angles[0];
             vec[11] = mid_angles[1];
             vec[13] = mid_angles[2];
@@ -294,7 +273,7 @@ void cMaestroHand::updateVisualizer(void) {
         }
         if (use_thumb)
         {
-            auto thumb_angles = h_thumb->getJointAngles();
+            auto thumb_angles = h_thumb->getProxyJointAngles();
             vec[0] = thumb_angles[0];
             vec[1] = thumb_angles[1];
             vec[3] = thumb_angles[2];

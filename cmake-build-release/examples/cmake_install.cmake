@@ -1,4 +1,4 @@
-# Install script for directory: /home/agalvan-admin/maestro_chai3d/examples
+# Install script for directory: /home/herolab/maestro_chai3d/examples
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

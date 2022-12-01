@@ -103,12 +103,20 @@ INCLUDE_DIRECTORIES (
 # include Eigen
 FIND_PACKAGE(Eigen3 REQUIRED)
 
+# Find python and Boost - both are required dependencies
+find_package(PythonLibs 2.7 REQUIRED)
+find_package(Boost COMPONENTS python REQUIRED)
+
+# Without this, any build libraries automatically have names "lib{x}.so"
+set(CMAKE_SHARED_MODULE_PREFIX "")
+
 #
 # static library
 #
 
 # header search path
 include_directories(src)
+include_directories(python)
 
 # static library source files
 file (GLOB MAESTRO_HAPTICS_SOURCES src/*.cpp src/*.h)
@@ -117,7 +125,9 @@ file (GLOB MAESTRO_HAPTICS_SOURCES src/*.cpp src/*.h)
 add_library (maestro_chai3d STATIC ${MAESTRO_HAPTICS_SOURCES})
 
 # Link to libraries
-target_link_libraries(maestro_chai3d maestro3 ${CHAI3D_LIBRARIES} Eigen3::Eigen glfw)
+target_link_libraries(maestro_chai3d maestro3 ${CHAI3D_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} Eigen3::Eigen glfw)
+
+target_include_directories(maestro_chai3d PUBLIC ${PYTHON_INCLUDE_DIRS})
 
 # build examples
 add_subdirectory(examples)

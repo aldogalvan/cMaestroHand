@@ -11,7 +11,7 @@ using namespace Eigen;
 #ifndef MAESTRO_CHAI3D_CMAESTRODIGIT_H
 #define MAESTRO_CHAI3D_CMAESTRODIGIT_H
 
-class cMaestroDigit : public cGenericObject
+class cMaestroDigit
 {
 
 public:
@@ -99,17 +99,13 @@ public:
     void computeOptimization(const Vector3d a_goalPos, const int a_maxIts = 10, const double ep = 0.001);
 
     // this method commands a new joint torque
-    double* commandJointTorque(double K , double B);
+    double* commandJointTorqueProxy(double K , double B);
 
     // return the vector of actual finger angles
     VectorXd getJointAngles(void);
 
     // return the vector of proxy anggles
     VectorXd getProxyJointAngles(void);
-
-    // Compute parameters
-    double* M3KL1(const double A1, const double B1, const double C1,
-                  const double PHI1, const double PHI3);
 
     // computes the inverse dynamics of the finger
     double* computeInverseDynamics(const Eigen::Vector3d force);
@@ -159,6 +155,9 @@ protected:
 
     // the array for proxy joint angles
     VectorXd theta_proxy;
+
+    // the array for offset angles
+    VectorXd theta_offset;
 
     // set the desired torque
     double exo_desired_torque_MCP = 0;

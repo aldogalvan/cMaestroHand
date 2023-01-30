@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 using namespace chai3d;
 using namespace Eigen;
+
 //==============================================================================
 
 #ifndef MAESTRO_CHAI3D_CMAESTRODIGIT_H
@@ -70,11 +71,6 @@ public:
     // i.e. if theta_proxy = theta
     Vector3d computeHandProxy(const Vector3d a_pos, bool collision = false);
 
-    // hand proxy algorithm (stay on point VF)
-    Vector3d computeHandProxySOP(const Vector3d a_pos, const double tol = 0.01, bool collision = false);
-
-    // hand proxy algorithm (wall VF)
-    Vector3d computeHandProxyWall(const Vector3d a_pos, const double tol = 0.01 , bool collision = false);
 
     // this function computes the forward kinematics and returns fingertip pos
     Vector3d updateJointAngles(double* robot_angles , Vector3d a_global_pos, Vector3d a_globalRot);
@@ -82,6 +78,12 @@ public:
     // this function computes the forward kinematics using homogeneous transformation matrices
     // DEPRECATED
     Matrix4d computeFK(VectorXd a_theta);
+
+    // this function computes the forward kinematic to the joint
+    Matrix4d computeFKToJointSpaceFrame(VectorXd a_theta);
+
+    // this function computes the forward kinematic to the joint
+    Matrix4d computeFKToJointBodyFrame(VectorXd a_theta);
 
     // this function computes the forward kinematics using the formula of matrix exponentials
     Matrix4d computeFKSpaceFrame(VectorXd a_theta);
@@ -99,7 +101,10 @@ public:
     void computeOptimization(const Vector3d a_goalPos, const int a_maxIts = 10, const double ep = 0.001);
 
     // this method commands a new joint torque
-    double* commandJointTorqueProxy(double K , double B);
+    double* commandJointTorqueProxy(double K , double B , double dt);
+
+    // this method computes a joint torque with the jacobian
+    double* commandJointTorqueInverseDynamics(double K ,  double B);
 
     // return the vector of actual finger angles
     VectorXd getJointAngles(void);
@@ -111,22 +116,21 @@ public:
     double* computeInverseDynamics(const Eigen::Vector3d force);
 
     // this function computes numerical inverse kinematics to desired position in the body frame
-    bool computeIKBodyFrame(const Matrix4d T, Matrix4d& Tsb, const VectorXd a_theta0, VectorXd a_theta,
-                                int max_it = 20, double eomg = 0.005, double ev = 0.005);
+    bool computeIKBodyFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
+                                int max_it = 20, double eomg = 0.001, double ev = 0.001);
 
     // this function computes numerical inverse kinematics to desired position
-    bool computeIKSpaceFrame(const Matrix4d T, Matrix4d& Tsb, const VectorXd a_theta0, VectorXd a_theta,
-                                 int max_it = 20, double eomg = 0.005, double ev = 0.005);
+    bool computeIKSpaceFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
+                                 int max_it = 20, double eomg = 0.001, double ev = 0.001);
 
+    //  this function computes the forward kinematics (pulley to joint)
+    void computeForwardKinematics(double phi3, double psy2);
 
-protected:
+    // this function computes and returns the robot jacobian
+    double* computeRobotJacobian(double phi3, double psy2);
 
-    // this function creates a stay on point virtual fixture
-    void stayOnPointVF(MatrixXd& A ,VectorXd& b, int n , int m , Vector3d pos_des,
-                       Vector3d pos_cur , Vector3d dir_des, Vector3d dir_cur);
-
-    // this function creates a virtual wall virtual fixture
-    void virtualWallVF(MatrixXd& A, VectorXd& b );
+    // Function Declarations
+    static void Jacobian_RobotToFinger_toCpp(const double q_vec[2], const double L_vec[3], const double F_vec[6], double J[8]);
 
 public:
 
@@ -150,11 +154,23 @@ protected:
     // PROTECTED MEMBERS
     //--------------------------------------------------------------------------
 
+    // angles
+    double theta_MCP;
+    double theta_MCP_offset;
+    double theta_PIP;
+    double theta_PIP_offset;
+
     // the array for joint angles
     VectorXd theta;
 
     // the array for proxy joint angles
     VectorXd theta_proxy;
+
+    // the last proxy joint angles
+    VectorXd theta_last;
+
+    // angular velocity
+    VectorXd theta_dot;
 
     // the array for offset angles
     VectorXd theta_offset;
@@ -170,7 +186,7 @@ protected:
     Matrix4d T_body;
 
     //current transformation to tip in space frame
-    Matrix4d T_space;
+    MatrixXd T_space;
 
     // current transformation to proxy tip in body
     Matrix4d T_proxy_body;
@@ -201,6 +217,10 @@ protected:
 
     // screw axis in the body frame
     MatrixXd B_body;
+
+    // the robot jacobian
+    MatrixXd jacobian;
+    double* robot_jacobian;
 
 
 };

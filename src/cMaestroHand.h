@@ -4,11 +4,6 @@
 #include "cMaestroThumb.h"
 #include "esmacat_application.h"
 #include "my_app.h"
-#include <boost/python.hpp>
-#include <Python.h>
-
-
-using namespace boost::python;
 
 #ifndef MAESTRO_CHAI3D_CMAESTROHAND_H
 #define MAESTRO_CHAI3D_CMAESTROHAND_H
@@ -34,7 +29,6 @@ using namespace Eigen;
             std::cout << "Application closing!" << endl;
             std::cout.flush();
 
-            Py_Finalize();
             application->stop();
             // delete application;
         };
@@ -97,10 +91,8 @@ using namespace Eigen;
         // cHand
         cHand *h_hand;
 
-        // python app
-        PyObject* m3_python;
 
-    private:
+    public:
 
         //--------------------------------------------------------------------------
         // PRIVATE MEMBERS

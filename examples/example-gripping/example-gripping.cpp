@@ -1,7 +1,10 @@
 
 //------------------------------------------------------------------------------
 #include "chai3d.h"
+//---------------------------------------------------------------------------
 #include "cMaestroHand.h"
+//#include "CODE.h"
+// #include "CBullet.h"
 //------------------------------------------------------------------------------
 #include <GLFW/glfw3.h>
 //------------------------------------------------------------------------------
@@ -115,18 +118,10 @@ int height = 0;
 // swap interval for the display context (vertical synchronization)
 int swapInterval = 1;
 
-//------------------------------------------------------------------------------
-// EXPERIMENT VARIABLES
-//------------------------------------------------------------------------------
+// vector with haptic points
+// thumb = 0, idx = 1, mid = 2
+vector<cToolCursor*> haptic_points(3);
 
-//a label to display trial number
-cLabel* labelTrial;
-
-// subject number
-int  subject_number;
-
-// trial number
-int trial_number = 0;
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -333,6 +328,15 @@ int main(int argc, char* argv[])
     // create a sphere (cursor) to represent the haptic device
     hand = new cMaestroHand(true,true,false);
 
+    // create haptic points for each digit
+    for (int i = 0; i < 3; i++)
+    {
+        haptic_points[i] = new cToolCursor(world);
+        haptic_points[i]->setRadius(hand->h_hand->radius());
+        world->addChild(haptic_points[i]);
+        haptic_points[i]->start();
+    }
+
     // gets the fingertip radius
     radius = hand->h_hand->radius();
 
@@ -356,8 +360,7 @@ int main(int argc, char* argv[])
     labelRates = new cLabel(font);
     camera->m_frontLayer->addChild(labelRates);
 
-    labelTrial = new cLabel(font);
-    camera->m_frontLayer->addChild(labelTrial);
+
 
 
     //--------------------------------------------------------------------------
@@ -429,17 +432,6 @@ void keyCallback(GLFWwindow* a_window, int a_key, int a_scancode, int a_action, 
         glfwSetWindowShouldClose(a_window, GLFW_TRUE);
     }
 
-        // option - toggle fullscreen
-    else if (a_key == GLFW_KEY_1)
-    {
-        trial_number -= 1;
-    }
-
-        // option - toggle fullscreen
-    else if (a_key == GLFW_KEY_2)
-    {
-        trial_number += 1;
-    }
 
 }
 
@@ -527,12 +519,6 @@ void updateGraphics(void)
     // update position of label
     labelRates->setLocalPos((int)(0.5 * (width - labelRates->getWidth())), 15);
 
-    // update haptic and graphic rate data
-    labelTrial->setText("Trial: " + cStr(trial_number));
-
-    // update position of label
-    labelTrial->setLocalPos((int)(0.5 * (width - labelTrial->getWidth())), 1000);
-
 
     /////////////////////////////////////////////////////////////////////
     // RENDER SCENE
@@ -564,41 +550,63 @@ void updateHaptics(void)
     simulationFinished = false;
 
     // fingertip positions and proxies
-    cVector3d thumb_pos;
-    cVector3d idx_pos;
-    cVector3d mid_pos;
-    cVector3d thumb_proxy;
-    cVector3d idx_proxy;
-    cVector3d mid_proxy;
+    vector<cVector3d> proxy(3);
 
     // global position of the hand
     cVector3d global_pos;
 
-    //initialize position
+    // global rotation of the hand
+    cVector3d global_rot(0,0,0);
+
+    // initialize position
     global_pos = hand->h_hand->getGlobalPos();
 
-    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Vector3d(0,0,0));
-    idx_proxy = idx_pos;
+    // update the hand joint angles
+    cVector3d thumb_pos;
+    cVector3d idx_pos;
+    cVector3d mid_pos;
+    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),global_rot.eigen());
 
     // main haptic simulation loop
     while(simulationRunning)
     {
 
+        world->computeGlobalPositions();
         /////////////////////////////////////////////////////////////////////
         // UPDATE THE JOINT ANGLES AND RETURN NEW POSITION
         /////////////////////////////////////////////////////////////////////
 
-        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Vector3d(0,0,0));
+        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Eigen::Vector3d(0,0,0));
+
+        int i = 1;
+        haptic_points[i]->setDeviceLocalPos(idx_pos);
+        //haptic_points[i]->updateFromDevice();
+        haptic_points[i]->computeInteractionForces();
+        auto temp = haptic_points[i]->getHapticPoint(0);
+        proxy[i] = temp->getGlobalPosProxy();
+        auto thumb_pos_eigen = thumb_pos.eigen();
+        auto idx_pos_eigen = proxy[i].eigen();
+        auto mid_pos_eigen = mid_pos.eigen();
+
+        if (temp->isInContact(box)){
+            auto before_idx = idx_pos_eigen;
+            hand->computeHandProxy(thumb_pos_eigen,idx_pos_eigen,mid_pos_eigen,
+                                   false,true,false);
+            auto return_idx = idx_pos_eigen;
+
+        }
+        else
+        {
+            hand->computeHandProxy(thumb_pos_eigen,idx_pos_eigen,mid_pos_eigen,
+                                   false,true,false);
+        }
 
         /////////////////////////////////////////////////////////////////////
-        // COMPUTE ANY COLLISIONS AND PERFORM PROXY ALGORITHM
+        // COMMAND A NEW FORCE USING SOME ALGORITHM
         /////////////////////////////////////////////////////////////////////
-
-        cVector3d force = computeProxyForce(idx_pos,idx_proxy);
 
         // signal frequency counter
         freqCounterHaptics.signal(1);
-
 
     }
 

@@ -4,9 +4,57 @@
 //------------------------------------------------------------------------------
 #include <GLFW/glfw3.h>
 //------------------------------------------------------------------------------
+//==============================================================================
+/*
+    Software License Agreement (BSD License)
+    Copyright (c) 2003-2016, CHAI3D.
+    (www.chai3d.org)
 
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+    * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    * Neither the name of CHAI3D nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+
+    \author    <http://www.chai3d.org>
+    \author    Francois Conti
+    \version   3.2.0 $Rev: 1925 $
+*/
+//==============================================================================
+
+//------------------------------------------------------------------------------
+#include "chai3d.h"
+//------------------------------------------------------------------------------
+#include <GLFW/glfw3.h>
+//------------------------------------------------------------------------------
 using namespace chai3d;
 using namespace std;
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // GENERAL SETTINGS
@@ -19,13 +67,6 @@ using namespace std;
     C_STEREO_PASSIVE_LEFT_RIGHT:  Passive stereo where L/R images are rendered next to each other
     C_STEREO_PASSIVE_TOP_BOTTOM:  Passive stereo where L/R images are rendered above each other
 */
-
-enum MouseStates
-{
-    MOUSE_IDLE,
-    MOUSE_MOVE_CAMERA
-};
-
 cStereoMode stereoMode = C_STEREO_DISABLED;
 
 // fullscreen mode
@@ -33,6 +74,7 @@ bool fullscreen = false;
 
 // mirrored display
 bool mirroredDisplay = false;
+
 
 //------------------------------------------------------------------------------
 // DECLARED VARIABLES
@@ -50,27 +92,18 @@ cDirectionalLight *light;
 // a small sphere (cursor) representing the haptic device
 cMaestroHand* hand;
 
-// hand radius
-double radius;
+// vector with haptic points
+// thumb = 0, idx = 1, mid = 2
+vector<cToolCursor*> haptic_points(3);
 
-// stiffess
-double stiffness = 0;
+// a few mesh objects
+cMesh* object0;
+cMesh* object1;
+cMesh* object2;
+cMesh* object3;
 
-//damping
-double damping = 0;
-
-// epsilon values
-double epsilonBaseValue;
-double epsilonMinimalValue;
-double epsilon;
-double epsilonCollisionDetection;
-double epsilonInitialValue;
-
-// collision events
-int numCollisionEvents = 0;
-
-// algorithm counter
-int algoCounter = 0;
+// a colored background
+cBackground* background;
 
 // a font for rendering text
 cFontPtr font;
@@ -78,10 +111,13 @@ cFontPtr font;
 // a label to display the rate [Hz] at which the simulation is running
 cLabel* labelRates;
 
-// a flag to indicate if the haptic simulation currently running
+// a label to explain what is happening
+cLabel* labelMessage;
+
+// a flag that indicates if the haptic simulation is currently running
 bool simulationRunning = false;
 
-// a flag to indicate if the haptic simulation has terminated
+// a flag that indicates if the haptic simulation has terminated
 bool simulationFinished = true;
 
 // a frequency counter to measure the simulation graphic rate
@@ -90,23 +126,17 @@ cFrequencyCounter freqCounterGraphics;
 // a frequency counter to measure the simulation haptic rate
 cFrequencyCounter freqCounterHaptics;
 
-// mouse state
-MouseStates mouseState = MOUSE_IDLE;
-
-// last mouse position
-double mouseX, mouseY;
-
 // haptic thread
 cThread* hapticsThread;
+
+// tool radius
+double radius;
 
 // a handle to window display context
 GLFWwindow* window = NULL;
 
-// the BOX!
-cMesh* box;
-
 // current width of window
-int width  = 0;
+int width = 0;
 
 // current height of window
 int height = 0;
@@ -114,18 +144,9 @@ int height = 0;
 // swap interval for the display context (vertical synchronization)
 int swapInterval = 1;
 
-//------------------------------------------------------------------------------
-// EXPERIMENT VARIABLES
-//------------------------------------------------------------------------------
+// root resource path
+string resourceRoot;
 
-//a label to display trial number
-cLabel* labelTrial;
-
-// subject number
-int  subject_number;
-
-// trial number
-int trial_number = 0;
 
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
@@ -140,15 +161,6 @@ void errorCallback(int error, const char* a_description);
 // callback when a key is pressed
 void keyCallback(GLFWwindow* a_window, int a_key, int a_scancode, int a_action, int a_mods);
 
-// callback to handle mouse click
-void mouseButtonCallback(GLFWwindow* a_window, int a_button, int a_action, int a_mods);
-
-// callback to handle mouse motion
-void mouseMotionCallback(GLFWwindow* a_window, double a_posX, double a_posY);
-
-// callback to handle mouse scroll
-void mouseScrollCallback(GLFWwindow* a_window, double a_offsetX, double a_offsetY);
-
 // this function renders the scene
 void updateGraphics(void);
 
@@ -158,33 +170,13 @@ void updateHaptics(void);
 // this function closes the application
 void close(void);
 
-// this function computes a penalty force
-cVector3d computePenaltyForce(const cVector3d a_goal,cVector3d& a_proxy);
-
-// this function computes a proxy force
-cVector3d computeProxyForce(const cVector3d a_goal, cVector3d& a_proxy);
-
-// simulation loop
-void loop(void);
-
-// this function computes the proxy force
-cVector3d computeProxyForce(const cVector3d a_goal, cVector3d& a_proxy);
 
 //==============================================================================
 /*
-    DEMO:   01-mydevice.cpp
+    DEMO:    16-friction.cpp
 
-    This application illustrates how to program forces, torques and gripper
-    forces to your haptic device.
-
-    In this example the application opens an OpenGL window and displays a
-    3D cursor for the device connected to your computer. If the user presses
-    onto the user button (if available on your haptic device), the color of
-    the cursor changes from blue to green.
-
-    In the main haptics loop function  "updateHaptics()" , the position,
-    orientation and user switch status are read at each haptic cycle.
-    Force and torque vectors are computed and sent back to the haptic device.
+    This example illustrates how friction is implemented with the
+    finger-proxy force algorithm on meshes.
 */
 //==============================================================================
 
@@ -196,13 +188,19 @@ int main(int argc, char* argv[])
 
     cout << endl;
     cout << "-----------------------------------" << endl;
-    cout << "Example Gripping" << endl;
-    cout << "-----------------------------------" << endl;
+    cout << "CHAI3D" << endl;
+    cout << "Demo: 16-friction" << endl;
+    cout << "Copyright 2003-2016" << endl;
+    cout << "-----------------------------------" << endl << endl << endl;
+    cout << "Keyboard Options:" << endl << endl;
+    cout << "[f] - Enable/Disable full screen mode" << endl;
+    cout << "[m] - Enable/Disable vertical mirroring" << endl;
     cout << "[q] - Exit application" << endl;
+    cout << endl << endl;
 
 
     //--------------------------------------------------------------------------
-    // OPENGL - WINDOW DISPLAY
+    // OPEN GL - WINDOW DISPLAY
     //--------------------------------------------------------------------------
 
     // initialize GLFW library
@@ -247,7 +245,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-
     // get width and height of window
     glfwGetWindowSize(window, &width, &height);
 
@@ -256,15 +253,6 @@ int main(int argc, char* argv[])
 
     // set key callback
     glfwSetKeyCallback(window, keyCallback);
-
-    // set mouse position callback
-    glfwSetCursorPosCallback(window, mouseMotionCallback);
-
-    // set mouse button callback
-    glfwSetMouseButtonCallback(window, mouseButtonCallback);
-
-    // set mouse scroll callback
-    glfwSetScrollCallback(window, mouseScrollCallback);
 
     // set resize callback
     glfwSetWindowSizeCallback(window, windowSizeCallback);
@@ -285,6 +273,7 @@ int main(int argc, char* argv[])
     }
 #endif
 
+
     //--------------------------------------------------------------------------
     // WORLD - CAMERA - LIGHTING
     //--------------------------------------------------------------------------
@@ -293,44 +282,66 @@ int main(int argc, char* argv[])
     world = new cWorld();
 
     // set the background color of the environment
-    world->m_backgroundColor.setBlack();
+    world->m_backgroundColor.setWhite();
 
     // create a camera and insert it into the virtual world
     camera = new cCamera(world);
     world->addChild(camera);
 
     // position and orient the camera
-    camera->set( cVector3d (0.25, 0.25, 0.20),    // camera position (eye)
-                 cVector3d (0.0, 0.0, 0.0),    // look at position (target)
-                 cVector3d (0.0, 0.0, 1.0));   // direction of the (up) vector
+    camera->set(cVector3d(2.0, 0.0, 0.0),    // camera position (eye)
+                cVector3d(0.0, 0.0, 0.0),    // lookat position (target)
+                cVector3d(0.0, 0.0, 1.0));   // direction of the (up) vector
 
     // set the near and far clipping planes of the camera
+    // anything in front or behind these clipping planes will not be rendered
     camera->setClippingPlanes(0.01, 10.0);
+
+    // set orthographic camera mode
+    if (stereoMode == C_STEREO_DISABLED)
+    {
+        camera->setOrthographicView(1.3);
+    }
 
     // set stereo mode
     camera->setStereoMode(stereoMode);
 
     // set stereo eye separation and focal length (applies only if stereo is enabled)
     camera->setStereoEyeSeparation(0.01);
-    camera->setStereoFocalLength(0.5);
+    camera->setStereoFocalLength(1.0);
 
     // set vertical mirrored display mode
     camera->setMirrorVertical(mirroredDisplay);
 
-    // create a directional light source
+    // create a light source
     light = new cDirectionalLight(world);
 
-    // insert light source inside world
+    // add light to world
     world->addChild(light);
 
     // enable light source
     light->setEnabled(true);
 
-    // define direction of light beam
-    light->setDir(1.0, 0.0, 0.0);
+    // define the direction of the light beam
+    light->setDir(-1.0, 0.0,-0.4);
+
+
+    //--------------------------------------------------------------------------
+    // HAPTIC DEVICES / TOOLS
+    //--------------------------------------------------------------------------
+
 
     // create a sphere (cursor) to represent the haptic device
-    hand = new cMaestroHand(true,true,false);
+    hand = new cMaestroHand(false,true,false);
+
+    // create haptic points for each digit
+    for (int i = 0; i < 3; i++)
+    {
+        haptic_points[i] = new cToolCursor(world);
+        haptic_points[i]->setRadius(hand->h_hand->radius());
+        world->addChild(haptic_points[i]);
+        haptic_points[i]->start();
+    }
 
     // gets the fingertip radius
     radius = hand->h_hand->radius();
@@ -338,12 +349,127 @@ int main(int argc, char* argv[])
     // insert cursor inside world
     world->addChild(hand->h_hand);
 
-    // create the example box
-    cCreateBox(box,.05,.05,.05);
-    box->setLocalPos(.075,0.03,-.045);
-    box->m_material->setGreenLight();
-    box->createAABBCollisionDetector(radius);
-    world->addChild(box);
+
+    //--------------------------------------------------------------------------
+    // CREATING OBJECTS
+    //--------------------------------------------------------------------------
+
+
+    // properties
+    double maxStiffness = 1000;
+
+
+    /////////////////////////////////////////////////////////////////////////
+    // OBJECT 0:
+    /////////////////////////////////////////////////////////////////////////
+
+    // create a mesh
+    object0 = new cMesh();
+
+    // create a box
+    cCreateBox(object0, 2.0, 0.5, 0.05);
+
+    // create collision detector
+    object0->createAABBCollisionDetector(radius);
+
+    // add object to world
+    world->addChild(object0);
+
+    // set the position of the object
+    object0->setLocalPos(0.0, -0.3, 0.2);
+
+    // set material color
+    object0->m_material->setBlueRoyal();
+
+    // set haptic properties
+    object0->m_material->setStiffness(0.05 * maxStiffness);
+    object0->m_material->setStaticFriction(0.0);
+    object0->m_material->setDynamicFriction(0.4);
+
+
+    /////////////////////////////////////////////////////////////////////////
+    // OBJECT 1:
+    ////////////////////////////////////////////////////////////////////////
+
+    // create a mesh
+    object1 = new cMesh();
+
+    // create a box
+    cCreateBox(object1, 2.0, 0.5, 0.05);
+
+    // create collision detector
+    object1->createAABBCollisionDetector(radius);
+
+    // add object to world
+    world->addChild(object1);
+
+    // set the position of the object
+    object1->setLocalPos(0.0, 0.3, 0.2);
+
+    // set material color
+    object1->m_material->setRedFireBrick();
+
+    // set haptic properties
+    object1->m_material->setStiffness(0.05 * maxStiffness);
+    object1->m_material->setStaticFriction(0.0);
+    object1->m_material->setDynamicFriction(0.0);
+
+
+    /////////////////////////////////////////////////////////////////////////
+    // OBJECT 2:
+    /////////////////////////////////////////////////////////////////////////
+
+    // create a mesh
+    object2 = new cMesh();
+
+    // create a box
+    cCreateBox(object2, 2.0, 0.5, 0.05);
+
+    // create collision detector
+    object2->createAABBCollisionDetector(radius);
+
+    // add object to world
+    world->addChild(object2);
+
+    // set the position of the object
+    object2->setLocalPos(0.0,-0.3,-0.2);
+
+    // set material color
+    object2->m_material->setGreenDarkOlive();
+
+    // set haptic properties
+    object2->m_material->setStiffness(0.05 * maxStiffness);
+    object2->m_material->setStaticFriction(0.4);
+    object2->m_material->setDynamicFriction(0.2);
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // OBJECT 3:
+    ////////////////////////////////////////////////////////////////////////
+
+    // create a mesh
+    object3 = new cMesh();
+
+    // create a box
+    cCreateBox(object3, 2.0, 0.5, 0.05);
+
+    // create collision detector
+    object3->createAABBCollisionDetector(radius);
+
+    // add object to world
+    world->addChild(object3);
+
+    // set the position of the object
+    object3->setLocalPos(0.0, 0.3,-0.2);
+
+    // set material color
+    object3->m_material->setGrayDarkSlate();
+
+    // set haptic properties
+    object3->m_material->setStiffness(0.05 * maxStiffness);
+    object3->m_material->setStaticFriction(1.0);
+    object3->m_material->setDynamicFriction(0.7);
+
 
     //--------------------------------------------------------------------------
     // WIDGETS
@@ -354,10 +480,24 @@ int main(int argc, char* argv[])
 
     // create a label to display the haptic and graphic rate of the simulation
     labelRates = new cLabel(font);
+    labelRates->m_fontColor.setGrayLevel(0.4);
     camera->m_frontLayer->addChild(labelRates);
 
-    labelTrial = new cLabel(font);
-    camera->m_frontLayer->addChild(labelTrial);
+    // create a small message
+    labelMessage = new cLabel(font);
+    labelMessage->m_fontColor.setBlack();
+    labelMessage->setText("dynamic/static friction properties");
+    camera->m_frontLayer->addChild(labelMessage);
+
+    // create a background
+    background = new cBackground();
+    camera->m_backLayer->addChild(background);
+
+    // set background properties
+    background->setCornerColors(cColorf(1.0f, 1.0f, 1.0f),
+                                cColorf(1.0f, 1.0f, 1.0f),
+                                cColorf(0.8f, 0.8f, 0.8f),
+                                cColorf(0.8f, 0.8f, 0.8f));
 
 
     //--------------------------------------------------------------------------
@@ -382,7 +522,20 @@ int main(int argc, char* argv[])
     // main graphic loop
     while (!glfwWindowShouldClose(window))
     {
-        loop();
+        // get width and height of window
+        glfwGetWindowSize(window, &width, &height);
+
+        // render graphics
+        updateGraphics();
+
+        // swap buffers
+        glfwSwapBuffers(window);
+
+        // process events
+        glfwPollEvents();
+
+        // signal frequency counter
+        freqCounterGraphics.signal(1);
     }
 
     // close window
@@ -403,6 +556,9 @@ void windowSizeCallback(GLFWwindow* a_window, int a_width, int a_height)
     width  = a_width;
     height = a_height;
 
+    // update position of message label
+    labelMessage->setLocalPos((int)(0.5 * (width - labelMessage->getWidth())), 40);
+
 }
 
 //------------------------------------------------------------------------------
@@ -416,7 +572,6 @@ void errorCallback(int a_error, const char* a_description)
 
 void keyCallback(GLFWwindow* a_window, int a_key, int a_scancode, int a_action, int a_mods)
 {
-
     // filter calls that only include a key press
     if ((a_action != GLFW_PRESS) && (a_action != GLFW_REPEAT))
     {
@@ -430,71 +585,42 @@ void keyCallback(GLFWwindow* a_window, int a_key, int a_scancode, int a_action, 
     }
 
         // option - toggle fullscreen
-    else if (a_key == GLFW_KEY_1)
+    else if (a_key == GLFW_KEY_F)
     {
-        trial_number -= 1;
+        // toggle state variable
+        fullscreen = !fullscreen;
+
+        // get handle to monitor
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+        // get information about monitor
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        // set fullscreen or window mode
+        if (fullscreen)
+        {
+            glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            glfwSwapInterval(swapInterval);
+        }
+        else
+        {
+            int w = 0.8 * mode->height;
+            int h = 0.5 * mode->height;
+            int x = 0.5 * (mode->width - w);
+            int y = 0.5 * (mode->height - h);
+            glfwSetWindowMonitor(window, NULL, x, y, w, h, mode->refreshRate);
+            glfwSwapInterval(swapInterval);
+        }
     }
 
-        // option - toggle fullscreen
-    else if (a_key == GLFW_KEY_2)
+        // option - toggle vertical mirroring
+    else if (a_key == GLFW_KEY_M)
     {
-        trial_number += 1;
-    }
-
-}
-
-//------------------------------------------------------------------------------
-
-void mouseButtonCallback(GLFWwindow* a_window, int a_button, int a_action, int a_mods)
-{
-    if (a_button == GLFW_MOUSE_BUTTON_RIGHT && a_action == GLFW_PRESS)
-    {
-        // store mouse position
-        glfwGetCursorPos(window, &mouseX, &mouseY);
-
-        // update mouse state
-        mouseState = MOUSE_MOVE_CAMERA;
-    }
-
-    else
-    {
-        // update mouse state
-        mouseState = MOUSE_IDLE;
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void mouseMotionCallback(GLFWwindow* a_window, double a_posX, double a_posY)
-{
-    if (mouseState == MOUSE_MOVE_CAMERA)
-    {
-        // compute mouse motion
-        int dx = a_posX - mouseX;
-        int dy = a_posY - mouseY;
-        mouseX = a_posX;
-        mouseY = a_posY;
-
-        // compute new camera angles
-        double azimuthDeg = camera->getSphericalAzimuthDeg() - 0.5 * dx;
-        double polarDeg = camera->getSphericalPolarDeg() - 0.5 * dy;
-
-        // assign new angles
-        camera->setSphericalAzimuthDeg(azimuthDeg);
-        camera->setSphericalPolarDeg(polarDeg);
+        mirroredDisplay = !mirroredDisplay;
+        camera->setMirrorVertical(mirroredDisplay);
     }
 }
 
-//------------------------------------------------------------------------------
-
-void mouseScrollCallback(GLFWwindow* a_window, double a_offsetX, double a_offsetY)
-{
-    double r = camera->getSphericalRadius();
-    r = cClamp(r + 0.1 * a_offsetY, 0.5, 3.0);
-    camera->setSphericalRadius(r);
-}
-
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 
@@ -507,7 +633,6 @@ void close(void)
     while (!simulationFinished) { cSleepMs(100); }
 
     // delete resources
-    delete hand;
     delete hapticsThread;
     delete world;
 }
@@ -527,17 +652,12 @@ void updateGraphics(void)
     // update position of label
     labelRates->setLocalPos((int)(0.5 * (width - labelRates->getWidth())), 15);
 
-    // update haptic and graphic rate data
-    labelTrial->setText("Trial: " + cStr(trial_number));
-
-    // update position of label
-    labelTrial->setLocalPos((int)(0.5 * (width - labelTrial->getWidth())), 1000);
-
 
     /////////////////////////////////////////////////////////////////////
     // RENDER SCENE
     /////////////////////////////////////////////////////////////////////
 
+    // Updates the visual representation
     hand->updateVisualizer();
 
     // update shadow maps (if any)
@@ -546,13 +666,12 @@ void updateGraphics(void)
     // render world
     camera->renderView(width, height);
 
-    // wait until all OpenGL commands are completed
+    // wait until all GL commands are completed
     glFinish();
 
     // check for any OpenGL errors
-    GLenum err;
-    err = glGetError();
-    if (err != GL_NO_ERROR) cout << "Error:  %s\n" << gluErrorString(err);
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) cout << "Error: " << gluErrorString(err) << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -564,118 +683,73 @@ void updateHaptics(void)
     simulationFinished = false;
 
     // fingertip positions and proxies
-    cVector3d thumb_pos;
-    cVector3d idx_pos;
-    cVector3d mid_pos;
-    cVector3d thumb_proxy;
-    cVector3d idx_proxy;
-    cVector3d mid_proxy;
+    vector<cVector3d> proxy(3);
 
     // global position of the hand
     cVector3d global_pos;
 
-    //initialize position
+    // global rotation of the hand
+    cVector3d global_rot(0,0,0);
+
+    // initialize position
     global_pos = hand->h_hand->getGlobalPos();
 
-    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Vector3d(0,0,0));
-    idx_proxy = idx_pos;
+    // update the hand joint angles
+    cVector3d thumb_pos;
+    cVector3d idx_pos;
+    cVector3d mid_pos;
+    //cVector3d thumb_proxy;
+    //cVector3d idx_proxy;
+    //cVector3d mid_proxy;
+
+    hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),global_rot.eigen());
+
 
     // main haptic simulation loop
     while(simulationRunning)
     {
 
+        world->computeGlobalPositions();
         /////////////////////////////////////////////////////////////////////
         // UPDATE THE JOINT ANGLES AND RETURN NEW POSITION
         /////////////////////////////////////////////////////////////////////
 
-        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Vector3d(0,0,0));
+        hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),Eigen::Vector3d(0,0,0));
+        //pos = hand->h_hand->getFingertipCenters();
+        //std::cout << idx_pos << std::endl;
+
+        int i = 1;
+        haptic_points[i]->setDeviceLocalPos(idx_pos);
+        //haptic_points[i]->updateFromDevice();
+        haptic_points[i]->computeInteractionForces();
+        auto temp = haptic_points[i]->getHapticPoint(0);
+        proxy[i] = temp->getGlobalPosProxy();
+        auto thumb_pos_eigen = thumb_pos.eigen();
+        auto idx_pos_eigen = proxy[i].eigen();
+        auto mid_pos_eigen = mid_pos.eigen();
+
+        if (temp->getNumCollisionEvents() > 0){
+            auto before_idx = idx_pos_eigen;
+            hand->computeHandProxy(thumb_pos_eigen,idx_pos_eigen,mid_pos_eigen,
+                                   false,true,false);
+            auto return_idx = idx_pos_eigen;
+
+        }
+        else
+        {
+            hand->computeHandProxy(thumb_pos_eigen,idx_pos_eigen,mid_pos_eigen,
+                                   false,true,false);
+        }
 
         /////////////////////////////////////////////////////////////////////
-        // COMPUTE ANY COLLISIONS AND PERFORM PROXY ALGORITHM
+        // COMMAND A NEW FORCE USING SOME ALGORITHM
         /////////////////////////////////////////////////////////////////////
-
-        cVector3d force = computeProxyForce(idx_pos,idx_proxy);
 
         // signal frequency counter
         freqCounterHaptics.signal(1);
-
 
     }
 
     // exit haptics thread
     simulationFinished = true;
-}
-
-cVector3d computePenaltyForce(const cVector3d a_goal, cVector3d& a_proxy)
-{
-    // declare collision settings and recorder
-    cCollisionSettings collisionSettings;
-    cCollisionRecorder collisionRecorder;
-    collisionSettings.m_collisionRadius = radius;
-
-    cVector3d force(0,0,0);
-
-    // compute collision
-    if (box->computeCollisionDetection(a_goal,a_goal + cVector3d(0,0,-0.001),collisionRecorder,collisionSettings))
-    {
-
-        // compute force based on penetration depth
-        cVector3d normal = collisionRecorder.m_nearestCollision.m_localNormal;
-        double depth = collisionRecorder.m_nearestCollision.m_squareDistance;
-
-        // return the force
-        force =  normal * sqrt(depth);
-    }
-    else
-    {
-        a_proxy = a_goal;
-    }
-    return force;
-}
-
-cVector3d computeProxyForce(const cVector3d a_goal, cVector3d& a_proxy)
-{
-    // declare collision settings and recorder
-    cCollisionSettings collisionSettings;
-    cCollisionRecorder collisionRecorder;
-    collisionSettings.m_collisionRadius = radius;
-
-    cVector3d force(0,0,0);
-
-    Vector3d thumb_pos , idx_pos , mid_pos;
-
-    // compute collision
-    if (box->computeCollisionDetection(a_proxy,a_goal,collisionRecorder,collisionSettings))
-    {
-        idx_pos = a_proxy.eigen();
-        hand->computeHandProxy(thumb_pos,idx_pos,mid_pos,
-                               false,true,false);
-    }
-    else
-    {
-        a_proxy = a_goal;
-        idx_pos = a_proxy.eigen();
-        hand->computeHandProxy(thumb_pos,idx_pos,mid_pos,
-                               false,false,false);
-    }
-
-    return force;
-}
-
-void loop(void)
-{
-    // get width and height of window
-    glfwGetWindowSize(window, &width, &height);
-
-    // render graphics
-    updateGraphics();
-
-    // swap buffers
-    glfwSwapBuffers(window);
-
-    // process events
-    glfwPollEvents();
-
-    // signal frequency counter
-    freqCounterGraphics.signal(1);
 }

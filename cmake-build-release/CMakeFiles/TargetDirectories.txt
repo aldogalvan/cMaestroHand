@@ -4,12 +4,10 @@
 /home/herolab/maestro_chai3d/cmake-build-release/CMakeFiles/maestro_chai3d.dir
 /home/herolab/maestro_chai3d/cmake-build-release/CMakeFiles/edit_cache.dir
 /home/herolab/maestro_chai3d/cmake-build-release/CMakeFiles/rebuild_cache.dir
-/home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-01.dir
+/home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-teapot.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-gripping.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-deformable.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-friction.dir
-/home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-texture.dir
-/home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-saad.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/edit_cache.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/rebuild_cache.dir
 /home/herolab/maestro_chai3d/cmake-build-release/experiments/CMakeFiles/experiment-joint-haptics.dir

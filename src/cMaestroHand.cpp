@@ -4,6 +4,11 @@
 
 #include "cMaestroHand.h"
 
+/// ----------------------------------------------------------------------------
+/// This code was written to interface with the Maestro3. Any code related to it has
+/// been removed for proprietary reasons.
+/// ----------------------------------------------------------------------------
+
 using namespace chai3d;
 
 // Pi
@@ -70,25 +75,26 @@ static bool run_check = false;
 //!Constructor
 cMaestroHand::cMaestroHand(bool a_useThumb, bool a_useIdx, bool a_useMiddle) {
 
-    // create thumb if true
-    use_thumb = a_useThumb;
-    if (use_thumb)
-        createThumb();
-    //create index if true
-    use_idx = a_useIdx;
-    if (use_idx)
-        createIndexFinger();
-    //create middle if true
-    use_middle = a_useMiddle;
-    if (use_middle)
-        createMiddleFinger();
-
 
     // Initialize esmacat application first
     //application = new my_app();
     //application->set_ethercat_adapter_name_through_terminal();
     //application->start();
 
+    // create thumb if true
+    use_thumb = a_useThumb;
+    if (use_thumb)
+        createThumb();
+
+    //create index if true
+    use_idx = a_useIdx;
+    if (use_idx)
+        createIndexFinger();
+
+    //create middle if true
+    use_middle = a_useMiddle;
+    if (use_middle)
+        createMiddleFinger();
 
     // create cHand
     h_hand = new chai3d::cHand();
@@ -114,13 +120,8 @@ cMaestroHand::cMaestroHand(bool a_useThumb, bool a_useIdx, bool a_useMiddle) {
         inputname.push_back("Joint " + to_string(i + 1));
     }
 
-    Py_Initialize();
-    PyObject* module_name = PyString_FromString(
-            (char*)"Maestro3");
-    assert(module_name!= nullptr);
-    auto module = PyImport_Import(module_name);
-    assert(module != nullptr);
-    cout << "cMaestroHand Constructed" << endl;
+    std::cout << "cMaestroHand Constructed" << std::endl;
+
 }
 
 void cMaestroHand::createIndexFinger()
@@ -204,14 +205,15 @@ void cMaestroHand::computeHandProxy( Vector3d& a_goalThumb, Vector3d& a_goalIdx,
 bool cMaestroHand::torqueControlProxy(const double a_stiffness, const double a_damping) {
 
     double* idx_torque;
+    double dt = 0.01;
     idx_torque[0] = 0; idx_torque[1] = 0;
     if (use_idx)
-        idx_torque = h_index->commandJointTorqueProxy(a_stiffness,a_damping);
+        idx_torque = h_index->commandJointTorqueProxy(a_stiffness,a_damping,dt);
 
     double* mid_torque;
     mid_torque[0] = 0; mid_torque[1] = 0;
     if (use_middle)
-        mid_torque = h_middle->commandJointTorqueProxy(a_stiffness,a_damping);
+        mid_torque = h_middle->commandJointTorqueProxy(a_stiffness,a_damping,dt);
 
     double* thumb_torque;
     thumb_torque[0] = 0; thumb_torque[1] = 0; thumb_torque[2] = 0; thumb_torque[3] = 0;

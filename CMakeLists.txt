@@ -69,7 +69,8 @@ add_library(soem STATIC
         ${SOEM_SOURCES}
         ${OSAL_SOURCES}
         ${OSHW_SOURCES}
-        ${OSHW_EXTRA_SOURCES})
+        ${OSHW_EXTRA_SOURCES}
+)
 target_link_libraries(soem ${OS_LIBS})
 
 add_library(esmacat STATIC
@@ -81,6 +82,9 @@ add_library(maestro3 STATIC
         ${MAESTRO3_SOURCES}
         )
 target_link_libraries(maestro3 esmacat soem)
+
+
+
 
 #CHAI-3D
 # include Chai3d
@@ -100,12 +104,18 @@ INCLUDE_DIRECTORIES (
         ${CHAI3D_INCLUDE_DIRS}
 )
 
+FIND_PACKAGE(CHAI3D-GEL REQUIRED)
+LINK_DIRECTORIES(${CHAI3D-GEL_LIBRARY_DIRS})
+FIND_PACKAGE(CHAI3D-ODE REQUIRED)
+LINK_DIRECTORIES(${CHAI3D-ODE_LIBRARY_DIRS})
+FIND_PACKAGE(CHAI3D-BULLET REQUIRED)
+LINK_DIRECTORIES(${CHAI3D-BULLET_LIBRARY_DIRS})
+
 # include Eigen
 FIND_PACKAGE(Eigen3 REQUIRED)
-
 # Find python and Boost - both are required dependencies
-find_package(PythonLibs 2.7 REQUIRED)
-find_package(Boost COMPONENTS python REQUIRED)
+#find_package(PythonLibs 2.7 REQUIRED)
+#find_package(Boost COMPONENTS python REQUIRED)
 
 # Without this, any build libraries automatically have names "lib{x}.so"
 set(CMAKE_SHARED_MODULE_PREFIX "")
@@ -116,18 +126,21 @@ set(CMAKE_SHARED_MODULE_PREFIX "")
 
 # header search path
 include_directories(src)
-include_directories(python)
 
 # static library source files
 file (GLOB MAESTRO_HAPTICS_SOURCES src/*.cpp src/*.h)
 
 # static library
-add_library (maestro_chai3d STATIC ${MAESTRO_HAPTICS_SOURCES})
+add_library (maestro_chai3d STATIC ${MAESTRO_HAPTICS_SOURCES} include/mr/mr.cpp)
+
+#${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
+# ${catkin_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS}
 
 # Link to libraries
-target_link_libraries(maestro_chai3d maestro3 ${CHAI3D_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} Eigen3::Eigen glfw)
+target_link_libraries(maestro_chai3d PUBLIC maestro3 ${catkin_LIBRARIES} ${CHAI3D-BULLET_LIBRARIES} ${CHAI3D-GEL_LIBRARIES} ${CHAI3D-ODE_LIBRARIES} ${CHAI3D_LIBRARIES}  Eigen3::Eigen glfw)
 
-target_include_directories(maestro_chai3d PUBLIC ${PYTHON_INCLUDE_DIRS})
+
+target_include_directories(maestro_chai3d PUBLIC ${PROJECT_SOURCE_DIR}/include/mr ${CHAI3D-GEL_INCLUDE_DIRS} ${CHAI3D-BULLET_INCLUDE_DIRS} ${CHAI3D-ODE_INCLUDE_DIRS} )
 
 # build examples
 add_subdirectory(examples)

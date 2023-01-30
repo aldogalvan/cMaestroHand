@@ -70,20 +70,28 @@ public:
     //--------------------------------------------------------------------------
     // PUBLIC METHODS:
     //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // PUBLIC METHODS:
+    //--------------------------------------------------------------------------
 
     // hand proxy algorithm (no constraints)
     // collision is a flag that determines whether it is necessary to compute IK
     // i.e. if theta_proxy = theta
     Vector3d computeHandProxy(const Vector3d a_pos, bool collision = false);
 
-    // hand proxy algorithm (stay on point VF)
-    Vector3d computeHandProxySOP(const Vector3d a_pos, const double tol = 0.01, bool collision = false);
-
-    // hand proxy algorithm (wall VF)
-    Vector3d computeHandProxyWall(const Vector3d a_pos, const double tol = 0.01 , bool collision = false);
 
     // this function computes the forward kinematics and returns fingertip pos
     Vector3d updateJointAngles(double* robot_angles , Vector3d a_global_pos, Vector3d a_globalRot);
+
+    // this function computes the forward kinematics using homogeneous transformation matrices
+    // DEPRECATED
+    Matrix4d computeFK(VectorXd a_theta);
+
+    // this function computes the forward kinematic to the joint
+    Matrix4d computeFKToJointSpaceFrame(VectorXd a_theta);
+
+    // this function computes the forward kinematic to the joint
+    Matrix4d computeFKToJointBodyFrame(VectorXd a_theta);
 
     // this function computes the forward kinematics using the formula of matrix exponentials
     Matrix4d computeFKSpaceFrame(VectorXd a_theta);
@@ -109,31 +117,19 @@ public:
     // return the vector of proxy anggles
     VectorXd getProxyJointAngles(void);
 
-    // Compute parameters
-    double* M3KL1(const double A1, const double B1, const double C1,
-                  const double PHI1, const double PHI3);
-
     // computes the inverse dynamics of the finger
     double* computeInverseDynamics(const Eigen::Vector3d force);
 
     // this function computes numerical inverse kinematics to desired position in the body frame
-    bool computeIKBodyFrame(const Matrix4d T, Matrix4d& Tsb, const VectorXd a_theta0, VectorXd a_theta,
-                            int max_it = 20, double eomg = 0.005, double ev = 0.005);
+    bool computeIKBodyFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
+                            int max_it = 20, double eomg = 0.001, double ev = 0.001);
 
     // this function computes numerical inverse kinematics to desired position
-    bool computeIKSpaceFrame(const Matrix4d T, Matrix4d& Tsb, const VectorXd a_theta0, VectorXd a_theta,
-                             int max_it = 20, double eomg = 0.005, double ev = 0.005);
+    bool computeIKSpaceFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
+                             int max_it = 20, double eomg = 0.001, double ev = 0.001);
 
-
-protected:
-
-    // this function creates a stay on point virtual fixture
-    void stayOnPointVF(MatrixXd& A ,VectorXd& b, int n , int m , Vector3d pos_des,
-                       Vector3d pos_cur , Vector3d dir_des, Vector3d dir_cur);
-
-    // this function creates a virtual wall virtual fixture
-    void virtualWallVF(MatrixXd& A, VectorXd& b );
-
+    //  this function computes the forward kinematics (pulley to joint)
+    void computeForwardKinematics(double phi3, double psy2);
 
 
 public:
@@ -174,19 +170,19 @@ protected:
     double exo_desired_torque_IP = 0;
 
     // transformation from base to end
-    Matrix4d M;
+    MatrixXd M;
 
     // current transformation to tip in body frame
-    Matrix4d T_body;
+    MatrixXd T_body;
 
     //current transformation to tip in space frame
-    Matrix4d T_space;
+    MatrixXd T_space;
 
     // current transformation to proxy tip in body
-    Matrix4d T_proxy_body;
+    MatrixXd T_proxy_body;
 
     // current transformation to proxy tip in space
-    Matrix4d T_proxy_space;
+    MatrixXd T_proxy_space;
 
     // segment lengths from center of hand to MCP index
     double CMC_x = -0.060; double CMC_y = 0.040;

@@ -14,26 +14,105 @@
 # EXTERNAL cache entries
 ########################
 
+//Set when you want to build the Bullet 2 demos
+BUILD_BULLET2_DEMOS:BOOL=ON
+
+//Set when you want to build Bullet 3
+BUILD_BULLET3:BOOL=ON
+
+//Set when you want to build apps with enet TCP networking support
+BUILD_CLSOCKET:BOOL=ON
+
+//Build original Bullet CPU examples
+BUILD_CPU_DEMOS:BOOL=ON
+
+//Build OpenGL/EGL
+BUILD_EGL:BOOL=ON
+
+//Set when you want to build apps with enet UDP networking support
+BUILD_ENET:BOOL=ON
+
+//Set when you want to build the extras
+BUILD_EXTRAS:BOOL=ON
+
+//Set when you want to build Bullet 3 OpenGL3+ demos
+BUILD_OPENGL3_DEMOS:BOOL=ON
+
+//Set when you want to build pybullet (Python bindings for Bullet)
+BUILD_PYBULLET:BOOL=OFF
+
+//Use shared libraries
+BUILD_SHARED_LIBS:BOOL=OFF
+
+//Build Unit Tests
+BUILD_UNIT_TESTS:BOOL=ON
+
+//Build Bullet 2 libraries with mutex locking around certain operations
+// (required for multi-threading)
+BULLET2_MULTITHREADING:BOOL=OFF
+
 //Value Computed by CMake
-CHAI3D-BULLET_BINARY_DIR:STATIC=/home/herolab/maestro_chai3d/cmake-build-release/external/BULLET
+BULLET_PHYSICS_BINARY_DIR:STATIC=/home/herolab/maestro_chai3d/cmake-build-release/external/bullet
+
+//Value Computed by CMake
+BULLET_PHYSICS_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+BULLET_PHYSICS_SOURCE_DIR:STATIC=/home/herolab/maestro_chai3d/external/bullet
+
+//The directory containing a CMake configuration file for Boost.
+Boost_DIR:PATH=Boost_DIR-NOTFOUND
+
+//Boost filesystem library (debug)
+Boost_FILESYSTEM_LIBRARY_DEBUG:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_filesystem.so
+
+//Boost filesystem library (release)
+Boost_FILESYSTEM_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_filesystem.so
+
+//Path to a file.
+Boost_INCLUDE_DIR:PATH=/usr/include
+
+//Boost library directory DEBUG
+Boost_LIBRARY_DIR_DEBUG:PATH=/usr/lib/x86_64-linux-gnu
+
+//Boost library directory RELEASE
+Boost_LIBRARY_DIR_RELEASE:PATH=/usr/lib/x86_64-linux-gnu
+
+//Boost program_options library (debug)
+Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_program_options.so
+
+//Boost program_options library (release)
+Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_program_options.so
+
+//Boost system library (debug)
+Boost_SYSTEM_LIBRARY_DEBUG:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_system.so
+
+//Boost system library (release)
+Boost_SYSTEM_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_system.so
+
+//Dependencies for the target
+BulletRobotics_LIB_DEPENDS:STATIC=general;pthread;general;dl;
+
+//Value Computed by CMake
+CHAI3D-BULLET_BINARY_DIR:STATIC=/home/herolab/maestro_chai3d/cmake-build-release/external/chai3d-bullet
 
 //The directory containing a CMake configuration file for CHAI3D-BULLET.
-CHAI3D-BULLET_DIR:PATH=/home/herolab/Documents/chai3d-3.2.0/cmake-build-release/modules/BULLET
+CHAI3D-BULLET_DIR:PATH=/home/herolab/maestro_chai3d/cmake-build-debug/external/chai3d-bullet
 
 //Value Computed by CMake
 CHAI3D-BULLET_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
-CHAI3D-BULLET_SOURCE_DIR:STATIC=/home/herolab/maestro_chai3d/external/BULLET
+CHAI3D-BULLET_SOURCE_DIR:STATIC=/home/herolab/maestro_chai3d/external/chai3d-bullet
 
 //The directory containing a CMake configuration file for CHAI3D-GEL.
-CHAI3D-GEL_DIR:PATH=/home/herolab/Documents/chai3d-3.2.0/cmake-build-release/modules/GEL
+CHAI3D-GEL_DIR:PATH=/home/herolab/chai3d-3.2.0/build/modules/GEL
 
 //Value Computed by CMake
 CHAI3D-ODE_BINARY_DIR:STATIC=/home/herolab/maestro_chai3d/cmake-build-release/external/ODE
 
 //The directory containing a CMake configuration file for CHAI3D-ODE.
-CHAI3D-ODE_DIR:PATH=/home/herolab/Documents/chai3d-3.2.0/cmake-build-debug/modules/ODE
+CHAI3D-ODE_DIR:PATH=/home/herolab/maestro_chai3d/cmake-build-release/external/ODE
 
 //Value Computed by CMake
 CHAI3D-ODE_IS_TOP_LEVEL:STATIC=OFF
@@ -42,13 +121,23 @@ CHAI3D-ODE_IS_TOP_LEVEL:STATIC=OFF
 CHAI3D-ODE_SOURCE_DIR:STATIC=/home/herolab/maestro_chai3d/external/ODE
 
 //The directory containing a CMake configuration file for CHAI3D.
-CHAI3D_DIR:PATH=/home/herolab/Documents/chai3d-3.2.0/cmake-build-release
+CHAI3D_DIR:PATH=/home/herolab/chai3d-3.2.0/build
+
+//Build for use inside other CMake projects as dependency.
+CLSOCKET_DEP_ONLY:BOOL=OFF
+
+//Build clsocket lib as shared.
+CLSOCKET_SHARED:BOOL=OFF
 
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
 
 //Path to a program.
 CMAKE_AR:FILEPATH=/usr/bin/ar
+
+//For backwards compatibility, what version of CMake commands and
+// syntax should this version of CMake try to support.
+CMAKE_BACKWARDS_COMPATIBILITY:STRING=2.4
 
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
 // MinSizeRel ...
@@ -253,17 +342,98 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Single output directory for building all executables.
+EXECUTABLE_OUTPUT_PATH:PATH=
+
 //The directory containing a CMake configuration file for Eigen3.
 Eigen3_DIR:PATH=/usr/local/share/eigen3/cmake
 
 //The directory containing a CMake configuration file for GLFW.
 GLFW_DIR:PATH=/home/herolab/Documents/chai3d-3.2.0/cmake-build-debug/extras/GLFW
 
+//The subdirectory to the header prefix
+INCLUDE_INSTALL_DIR:PATH=include/bullet
+
+//Install generated CMake files
+INSTALL_CMAKE_FILES:BOOL=ON
+
+//Set when you want extra libraries installed
+INSTALL_EXTRA_LIBS:BOOL=ON
+
+//Set when you want to install libraries
+INSTALL_LIBS:BOOL=ON
+
+//Internal update serialization structures
+INTERNAL_UPDATE_SERIALIZATION_STRUCTURES:BOOL=OFF
+
+//Single output directory for building all libraries.
+LIBRARY_OUTPUT_PATH:PATH=
+
+//Library directory name
+LIB_DESTINATION:STRING=lib
+
+//Define suffix of directory name (32/64)
+LIB_SUFFIX:STRING=
+
+//Path to a file.
+OPENGL_EGL_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a file.
+OPENGL_GLX_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a file.
+OPENGL_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a library.
+OPENGL_egl_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libEGL.so
+
+//Path to a library.
+OPENGL_gl_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libGL.so
+
+//Path to a library.
+OPENGL_glu_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libGLU.so
+
+//Path to a library.
+OPENGL_glx_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libGLX.so
+
+//Path to a library.
+OPENGL_opengl_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libOpenGL.so
+
+//Path to a file.
+OPENGL_xmesa_INCLUDE_DIR:PATH=OPENGL_xmesa_INCLUDE_DIR-NOTFOUND
+
+//Dependencies for the target
+OpenGLWindow_LIB_DEPENDS:STATIC=general;dl;
+
+//Base directory for pkgconfig files
+PKGCONFIG_INSTALL_PREFIX:STRING=lib/pkgconfig/
+
 //Path to a program.
 ProcessorCount_cmd_nproc:FILEPATH=/usr/bin/nproc
 
 //Path to a program.
 ProcessorCount_cmd_sysctl:FILEPATH=/sbin/sysctl
+
+//Use custom vectormath library
+USE_CUSTOM_VECTOR_MATH:BOOL=OFF
+
+//Use double precision
+USE_DOUBLE_PRECISION:BOOL=OFF
+
+//Use Glut
+USE_GLUT:BOOL=ON
+
+//Use Graphical Benchmark
+USE_GRAPHICAL_BENCHMARK:BOOL=ON
+
+//Use MSVC Incremental Linking
+USE_MSVC_INCREMENTAL_LINKING:BOOL=OFF
+
+//Use MSVC Runtime Library DLL (/MD or /MDd)
+USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF
+
+//Use btSoftMultiBodyDynamicsWorld
+USE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD:BOOL=ON
 
 //Dependencies for the target
 chai3d-ODE_LIB_DEPENDS:STATIC=general;STATIC;
@@ -277,11 +447,34 @@ maestro_chai3d_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 maestro_chai3d_SOURCE_DIR:STATIC=/home/herolab/maestro_chai3d
 
+//The directory containing a CMake configuration file for yaml-cpp.
+yaml-cpp_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/yaml-cpp
+
 
 ########################
 # INTERNAL cache entries
 ########################
 
+//ADVANCED property for variable: Boost_DIR
+Boost_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_FILESYSTEM_LIBRARY_DEBUG
+Boost_FILESYSTEM_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_FILESYSTEM_LIBRARY_RELEASE
+Boost_FILESYSTEM_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_INCLUDE_DIR
+Boost_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_LIBRARY_DIR_DEBUG
+Boost_LIBRARY_DIR_DEBUG-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_LIBRARY_DIR_RELEASE
+Boost_LIBRARY_DIR_RELEASE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG
+Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE
+Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_SYSTEM_LIBRARY_DEBUG
+Boost_SYSTEM_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_SYSTEM_LIBRARY_RELEASE
+Boost_SYSTEM_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_ADDR2LINE
 CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_AR
@@ -431,10 +624,44 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Details about finding Boost
+FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[/usr/include][cfound components: program_options filesystem system ][v1.65.1()]
+//Details about finding OpenGL
+FIND_PACKAGE_MESSAGE_DETAILS_OpenGL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libOpenGL.so][/usr/lib/x86_64-linux-gnu/libGLX.so][/usr/include][c ][v()]
+//ADVANCED property for variable: OPENGL_EGL_INCLUDE_DIR
+OPENGL_EGL_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OPENGL_GLX_INCLUDE_DIR
+OPENGL_GLX_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OPENGL_INCLUDE_DIR
+OPENGL_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OPENGL_egl_LIBRARY
+OPENGL_egl_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OPENGL_gl_LIBRARY
+OPENGL_gl_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OPENGL_glu_LIBRARY
+OPENGL_glu_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OPENGL_glx_LIBRARY
+OPENGL_glx_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OPENGL_opengl_LIBRARY
+OPENGL_opengl_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OPENGL_xmesa_INCLUDE_DIR
+OPENGL_xmesa_INCLUDE_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ProcessorCount_cmd_nproc
 ProcessorCount_cmd_nproc-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ProcessorCount_cmd_sysctl
 ProcessorCount_cmd_sysctl-ADVANCED:INTERNAL=1
+//Components requested for this build tree.
+_Boost_COMPONENTS_SEARCHED:INTERNAL=filesystem;program_options;system
+//Last used Boost_INCLUDE_DIR value.
+_Boost_INCLUDE_DIR_LAST:INTERNAL=/usr/include
+//Last used Boost_LIBRARY_DIR_DEBUG value.
+_Boost_LIBRARY_DIR_DEBUG_LAST:INTERNAL=/usr/lib/x86_64-linux-gnu
+//Last used Boost_LIBRARY_DIR_RELEASE value.
+_Boost_LIBRARY_DIR_RELEASE_LAST:INTERNAL=/usr/lib/x86_64-linux-gnu
+//Last used Boost_NAMESPACE value.
+_Boost_NAMESPACE_LAST:INTERNAL=boost
+//Last used Boost_USE_MULTITHREADED value.
+_Boost_USE_MULTITHREADED_LAST:INTERNAL=TRUE
 //linker supports push/pop state
 _CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED:INTERNAL=TRUE
 

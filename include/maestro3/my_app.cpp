@@ -265,14 +265,15 @@ void my_app::loop(){
 
     //TODO: Implement high level control (e.g. AAN, Impedance)
     run_flag = run_flag && !kbhit(); //check for keystroke or other stop condition triggered by program
-
+    motorsHomed = true;
     if(!motorsHomed && run_flag){
-        // motorsHomed = pHW_interface->homeMotors();
+        motorsHomed = pHW_interface->homeMotors();
         // paria's addition to not home motor 8
-        // motorsHomed = pHW_interface->homeMotors_but_eight(); // modified to only home 5&6
+        //motorsHomed = pHW_interface->homeMotors_but_eight(); // modified to only home 5&6
         startTime = elapsed_time_ms;
         motorsHomed = 1;
     }
+    /*
     else if(!sensorsZeroed && run_flag)
     {
         cout << "Please place your hand in the zero configuration." << endl;
@@ -317,11 +318,11 @@ void my_app::loop(){
                 break;
             }
         }
-    }
+    }*/
     else if( run_flag){
 
         running_cnt++;
-
+        //cout << running_cnt << endl;
         // Updates the sensor data
         pHW_interface->UpdateAllSensorData();
 

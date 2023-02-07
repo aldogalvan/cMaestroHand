@@ -79,8 +79,10 @@ using namespace Eigen;
         void computeHandProxy( Vector3d& a_goalThumb,  Vector3d& a_goalIdx,  Vector3d& a_goalMid,
                               bool thumbCollision = 0, bool idxCollision = 0, bool midCollision = 0);
 
-        // this is a test trajectory
-        std::vector<cVector3d*> testTrajectory(vector<double> vec);
+        // render the ghost hand
+        void renderGhostHand(void);
+
+
 
     public:
 
@@ -90,6 +92,9 @@ using namespace Eigen;
 
         // cHand
         cHand *h_hand;
+
+        // ghost hand
+        cHand* h_ghost_hand;
 
 
     public:

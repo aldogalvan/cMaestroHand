@@ -1,8 +1,6 @@
-
 #include "cMaestroDigit.h"
 #include "mr.h"
 # define pi           3.14159265358979323846  /* pi */
-
 using namespace mr;
 
 // NOTE :  ALL FORWARD KINEMATICS ARE COMPUTED IN THE SPACE FRAME. BODY
@@ -18,23 +16,32 @@ using namespace mr;
 
 Vector3d cMaestroDigit::computeHandProxy(const Vector3d a_pos, bool collision)
 {
-    if (collision)
-    {
-        VectorXd theta_temp = theta_proxy.tail(4);
-        MatrixXd T_des = T_space;
-        T_des.block<3, 1>(0, 3) = a_pos;
-        auto flag = computeIKSpaceFrame(T_des, T_space, theta_temp);
 
-        if(flag)
+    if (1)
+    {
+        VectorXd theta_temp;
+        if (counter == 0)
         {
-            T_proxy_space = T_space;
-            theta_proxy.tail(4) = theta_temp;
-            //std::cout << "Converged Successfully" << std::endl;
-            return T_proxy_space.block<3, 1>(0, 3);
+             theta_temp = theta.tail(4);
+             counter ++;
         }
         else
         {
-            T_proxy_space = T_space;
+             theta_temp = theta_proxy.tail(4);
+        }
+
+        MatrixXd T_des = T_body;
+        T_des.block<3, 1>(0, 3) = a_pos;
+        auto flag = computeIKBodyFrame(T_des, T_body, theta_temp);
+        if(flag)
+        {
+            T_proxy_body = T_body;
+            theta_proxy.tail(4) = theta_temp;
+            return T_proxy_body.block<3, 1>(0, 3);
+        }
+        else
+        {
+            T_proxy_body = T_body;
             theta_proxy = theta;
             theta_proxy.tail(4) = theta_temp;
             return a_pos;
@@ -42,7 +49,7 @@ Vector3d cMaestroDigit::computeHandProxy(const Vector3d a_pos, bool collision)
     }
     else
     {
-        T_proxy_space = T_space;
+        T_proxy_body = T_body;
         theta_proxy = theta;
         return a_pos;
     }
@@ -57,27 +64,33 @@ Vector3d cMaestroDigit::computeHandProxy(const Vector3d a_pos, bool collision)
 
     global_pos = a_globalPos;
 
-     std::cout << "ABAD: " << joint_angles[0] << "  MCP_FE: " << joint_angles[1] << "  PIP_FE: " << joint_angles[3] << std::endl;
+    // std::cout << "ABAD: " << joint_angles[0] << "  MCP_FE: " << joint_angles[1] << "  PIP_FE: " << joint_angles[3] << std::endl;
     // APPROXIMATE OFFSETS IN THE ZERO CONFIGURATION
     // SUBJECT TO CHANGE!
     // ABAD: 2.668 MCP_FE: 1.970 PIP_FE: 0.787
 
     // TODO: MERGE JACOBIAN FUNCTIONS
-    robot_jacobian = cMaestroDigit::computeRobotJacobian(joint_angles[1],joint_angles[3]);
-    computeForwardKinematics(joint_angles[1],joint_angles[3]);
+    //robot_jacobian = cMaestroDigit::computeRobotJacobian(joint_angles[1],joint_angles[3]);
+    // computeForwardKinematics(joint_angles[1],joint_angles[3]);
+
+    // set angles directly who cares
+    theta_MCP = joint_angles[2] ;//- theta_MCP_offset;
+    theta_PIP = joint_angles[3] ;// theta_PIP_offset;
+    theta_DIP = 0.67*joint_angles[3];
+    theta_MCP_ABAD = joint_angles[0] ;//- theta_MCP_ABAD_offset;
 
     theta(0) = a_globalRot(0);
     theta(1) = a_globalRot(1);
     theta(2) = a_globalRot(2);
-    theta(3) =  2.668 + pi - joint_angles[0];
-    theta(4) = theta_MCP - 3.14/7 - 2*pi;
+    theta(3) = theta_MCP_ABAD;
+    theta(4) = theta_MCP;// - 3.14/7 - 2*pi;
     theta(5) = theta_PIP;
-    theta(6) = 0.33 * theta_PIP;
+    theta(6) = theta_DIP;
 
     //auto T = computeFKSpaceFrame(theta);
-    T_space = computeFKSpaceFrame(theta);
+    T_body = computeFKBodyFrame(theta);
 
-    return T_space.block<3,1>(0,3);
+    return T_body.block<3,1>(0,3);
 }
 
 // -----------------------------------------------------------------//
@@ -85,7 +98,7 @@ Vector3d cMaestroDigit::computeHandProxy(const Vector3d a_pos, bool collision)
 Matrix4d cMaestroDigit::computeFKToJointSpaceFrame(VectorXd a_theta)
 {
 
-    auto ret = FKinSpace(M,S_space.block<6,3>(0,0),a_theta);
+    auto ret = FKinSpace(M_to_mcp,S_space.block<6,3>(0,0),a_theta);
     return ret;
 }
 
@@ -93,7 +106,7 @@ Matrix4d cMaestroDigit::computeFKToJointSpaceFrame(VectorXd a_theta)
 
 Matrix4d cMaestroDigit::computeFKToJointBodyFrame(VectorXd a_theta)
 {
-    auto ret = FKinBody(M,B_body.block<6,3>(0,0),a_theta);
+    auto ret = FKinBody(M_to_mcp,B_body.block<6,3>(0,0),a_theta);
     return ret;
 }
 
@@ -175,19 +188,25 @@ double* cMaestroDigit::commandJointTorqueInverseDynamics(double K ,  double B)
 // -----------------------------------------------------------------//
 
 bool cMaestroDigit::computeIKBodyFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
-                                           int max_it, double eomg, double ev)
+                                            double eomg, double ev)
 {
     MatrixXd B = B_body.block<6,4>(0,3);
-    return IKinBody(B,M,T,Tsb,a_theta,eomg,ev);
+    MatrixXd Tstart = computeFKToJointBodyFrame(theta_proxy.head(3));
+    return IKinBody(B,M,T,Tstart,Tsb,a_theta, theta.tail(4), lb, ub,eomg,ev);
 }
 
 // -----------------------------------------------------------------//
 
-bool cMaestroDigit::computeIKSpaceFrame(const MatrixXd T, MatrixXd& Tsb,  VectorXd& a_theta,
-                                            int max_it, double eomg, double ev)
+bool cMaestroDigit::computeIKSpaceFrame(const MatrixXd& T, MatrixXd& Tsb,  VectorXd& a_theta,
+                                             double eomg, double ev)
 {
+
+    // compute the forward kinematics for first three
     MatrixXd S = S_space.block<6,4>(0,3);
-    return IKinSpace(S,M,T,Tsb,a_theta,eomg,ev);
+    // fuck it solve analytically for now
+    MatrixXd Tstart = computeFKToJointSpaceFrame(theta_proxy.head(3));
+    VectorXd theta_finger = theta.tail(4);
+    return IKinSpace( S, M , T , Tstart , Tsb, a_theta, theta_finger, lb, ub, eomg, ev);
 }
 
 // -----------------------------------------------------------------//
@@ -254,7 +273,7 @@ void cMaestroDigit::computeForwardKinematics(double phi3, double psy2)
     double psy4 = 2*atan((((cos(psy2) + 1)*pow((-(pow(a2,4) + pow(b2,4) + pow(c2,4) + pow(d2,4) - 2*pow(a2,2)*pow(b2,2) - 2*pow(a2,2)*pow(c2,2) + 2*pow(a2,2)*pow(d2,2) - 2*pow(b2,2)*pow(c2,2) - 2*pow(b2,2)*pow(d2,2) - 2*pow(c2,2)*pow(d2,2) + 4*pow(a2,2)*pow(d2,2)*pow(cos(psy2),2) + 4*a2*pow(d2,3)*cos(psy2) + 4*pow(a2,3)*d2*cos(psy2) - 4*a2*pow(b2,2)*d2*cos(psy2) - 4*a2*pow(c2,2)*d2*cos(psy2))/pow(cos(psy2/2),4)),(1/2)))/2 + 2*a2*c2*sin(psy2))/(pow(a2,2) + 2*cos(psy2)*a2*c2 + 2*cos(psy2)*a2*d2 - pow(b2,2) + pow(c2,2) + 2*c2*d2 + pow(d2,2)));
 
     theta_MCP = 2*pi - phi1 - phi4;
-    theta_PIP = - psy3;
+    theta_PIP = 2*pi ;//theta_b2_c2 - psy1 - self.idx.psys;
 
     //std::cout << "phi3 :" << phi3 << "psy2 :" << psy2 << "theta_MCP : " << theta_MCP << "theta_PIP: " << theta_PIP << std::endl;
     //theta_b2_c2 = 2*pi - (pi - psy2) - psy4 - (pi - psy2 - psy3);

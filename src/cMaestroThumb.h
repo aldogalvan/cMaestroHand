@@ -54,6 +54,11 @@ public:
                    -CMC_y , CMC_x + CMC_MCP + MCP_IP + IP_TIP , 0                                 , 0                         , CMC_MCP + MCP_IP + IP_TIP , 0                , 0      ,
                    0      , 0                                 , CMC_x + CMC_MCP + MCP_IP + IP_TIP , CMC_MCP + MCP_IP + IP_TIP , 0                         , MCP_IP + IP_TIP  , IP_TIP;
 
+        // sets the bounds for the displacement of the joints
+        double pi = 3.14;
+        ub.resize(4); lb.resize(4);
+        ub << pi, pi, pi, 0 ;
+        lb << -pi, -pi , -pi , -pi ;
     }
 
     //! Destructor of cPhantomDevice.
@@ -122,11 +127,11 @@ public:
 
     // this function computes numerical inverse kinematics to desired position in the body frame
     bool computeIKBodyFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
-                            int max_it = 20, double eomg = 0.001, double ev = 0.001);
+                             double eomg = 0.001, double ev = 0.001);
 
     // this function computes numerical inverse kinematics to desired position
     bool computeIKSpaceFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
-                             int max_it = 20, double eomg = 0.001, double ev = 0.001);
+                              double eomg = 0.001, double ev = 0.001);
 
     //  this function computes the forward kinematics (pulley to joint)
     void computeForwardKinematics(double phi3, double psy2);
@@ -151,7 +156,7 @@ public:
 protected:
 
     //! for testing delete later
-    int counter;
+    int counter = 0;
 
     //--------------------------------------------------------------------------
     // PROTECTED MEMBERS
@@ -163,6 +168,10 @@ protected:
     // the array for proxy joint angles
     VectorXd theta_proxy;
 
+    // the bounds for the joints
+    VectorXd ub;
+    VectorXd lb;
+
     // set the desired torque
     double exo_desired_torque_CMC_fe = 0;
     double exo_desired_torque_CMC_abad = 0;
@@ -170,7 +179,7 @@ protected:
     double exo_desired_torque_IP = 0;
 
     // transformation from base to end
-    MatrixXd M;
+    Matrix4d M;
 
     // current transformation to tip in body frame
     MatrixXd T_body;
@@ -179,10 +188,10 @@ protected:
     MatrixXd T_space;
 
     // current transformation to proxy tip in body
-    MatrixXd T_proxy_body;
+    Matrix4d T_proxy_body;
 
     // current transformation to proxy tip in space
-    MatrixXd T_proxy_space;
+    Matrix4d T_proxy_space;
 
     // segment lengths from center of hand to MCP index
     double CMC_x = -0.060; double CMC_y = 0.040;

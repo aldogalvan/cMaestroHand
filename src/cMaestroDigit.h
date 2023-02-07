@@ -1,3 +1,5 @@
+
+
 #include "chai3d.h"
 #include "cHand.h"
 #include <Eigen/Dense>
@@ -22,8 +24,18 @@ public:
     //--------------------------------------------------------------------------
 
     //! Constructor of cMaestroDigit
-    cMaestroDigit()
+    cMaestroDigit(bool isMid = false)
     {
+
+        if (isMid)
+        {
+            MCP = 0.00;
+            MCP_PIP = 0.04463;
+            PIP_DIP = 0.02633;
+            DIP_TIP = 0.0173778;
+
+        }
+
 
         // resize the theta vector and set to zero
         theta.resize(7);
@@ -37,14 +49,27 @@ public:
              0 , 0 , 1 , 0                          ,
              0 , 0 , 0 , 1                          ;
 
+
+        // tranformation from space to body in zero configuration
+        M_mcp_to_tip << 1 , 0 , 0 , MCP_PIP + PIP_DIP + DIP_TIP,
+                0 , 1 , 0 , 0                       ,
+                0 , 0 , 1 , 0                          ,
+                0 , 0 , 0 , 1                          ;
+
+        // transformation from hand to MCP
+        M_to_mcp << 1 , 0 , 0 , 0,
+                0 , 1 , 0 , MCP                       ,
+                0 , 0 , 1 , 0                          ,
+                0 , 0 , 0 , 1                          ;
+
         // create the twist matrix
         S_space.resize(6,7);
-        S_space << 1  , 0 , 0 , 0  , 0 , 0       , 0                ,
-                0  , 1 , 0 , 0   , 1 , 1       , 1                ,
-                0  , 0 , 1 , 1   , 0 , 0       , 0                ,
-                0  , 0 , 0 , MCP , 0 , 0       , 0                ,
-                0  , 0 , 0 , 0   , 0 , 0       , 0                ,
-                0  , 0 , 0 , 0   , 0 , MCP_PIP , MCP_PIP + PIP_DIP;
+        S_space << 1  , 0 , 0 , 0   , 0 , 0       , 0                ,
+                   0  , 1 , 0 , 0   , 1 , 1       , 1                ,
+                   0  , 0 , 1 , 1   , 0 , 0       , 0                ,
+                   0  , 0 , 0 , MCP , 0 , 0       , 0                ,
+                   0  , 0 , 0 , 0   , 0 , 0       , 0                ,
+                   0  , 0 , 0 , 0   , 0 , MCP_PIP , MCP_PIP + PIP_DIP;
 
 
         B_body.resize(6,7);
@@ -55,6 +80,11 @@ public:
                 0  , 0                              , MCP_PIP + PIP_DIP + DIP_TIP  , MCP_PIP + PIP_DIP + DIP_TIP , 0                               , 0                    , 0       ,
                 MCP, -(MCP_PIP + PIP_DIP + DIP_TIP) , 0                            , 0                           ,  -(MCP_PIP + PIP_DIP + DIP_TIP) , -(PIP_DIP + DIP_TIP) , -DIP_TIP;
 
+        double pi = 3.14;
+        // sets the bounds for the displacement of the joints
+        ub.resize(4); lb.resize(4);
+        ub << pi, pi, pi, pi;
+        lb << -pi, -pi/4, 0 , 0;
     };
 
     //! Destructor of cMaestroDigit
@@ -75,10 +105,6 @@ public:
     // this function computes the forward kinematics and returns fingertip pos
     Vector3d updateJointAngles(double* robot_angles , Vector3d a_global_pos, Vector3d a_globalRot);
 
-    // this function computes the forward kinematics using homogeneous transformation matrices
-    // DEPRECATED
-    Matrix4d computeFK(VectorXd a_theta);
-
     // this function computes the forward kinematic to the joint
     Matrix4d computeFKToJointSpaceFrame(VectorXd a_theta);
 
@@ -97,9 +123,6 @@ public:
     // this function computes the jacobian in body frame
     MatrixXd computeBodyJacobian(VectorXd a_theta);
 
-    // this method computes an optimization problem to find desired angular displacement
-    void computeOptimization(const Vector3d a_goalPos, const int a_maxIts = 10, const double ep = 0.001);
-
     // this method commands a new joint torque
     double* commandJointTorqueProxy(double K , double B , double dt);
 
@@ -117,11 +140,11 @@ public:
 
     // this function computes numerical inverse kinematics to desired position in the body frame
     bool computeIKBodyFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
-                                int max_it = 20, double eomg = 0.001, double ev = 0.001);
+                                 double eomg = 0.001, double ev = 0.001);
 
     // this function computes numerical inverse kinematics to desired position
-    bool computeIKSpaceFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
-                                 int max_it = 20, double eomg = 0.001, double ev = 0.001);
+    bool computeIKSpaceFrame(const MatrixXd& T, MatrixXd& Tsb, VectorXd& a_theta,
+                                 double eomg = 0.0005, double ev = 0.001);
 
     //  this function computes the forward kinematics (pulley to joint)
     void computeForwardKinematics(double phi3, double psy2);
@@ -138,6 +161,8 @@ public:
     // PUBLIC MEMBERS
     //--------------------------------------------------------------------------
 
+    int counter = 0;
+
     // the global position of the hand
     Vector3d global_pos;
 
@@ -147,6 +172,9 @@ public:
     // position of the proxy
     Vector3d proxy_pos;
 
+    // length of the finger
+
+
 
 protected:
 
@@ -155,10 +183,18 @@ protected:
     //--------------------------------------------------------------------------
 
     // angles
+    // actual senspr values
+    double theta_MCP_ABAD;
+    double theta_MCP_ABAD_offset = 2.41;
     double theta_MCP;
-    double theta_MCP_offset;
+    double theta_MCP_offset = 0.80;
     double theta_PIP;
-    double theta_PIP_offset;
+    double theta_PIP_offset = 2.01;
+    double theta_DIP;
+
+    // the bounds for the joints
+    VectorXd ub;
+    VectorXd lb;
 
     // the array for joint angles
     VectorXd theta;
@@ -182,8 +218,14 @@ protected:
     // transformation from base to end
     Matrix4d M;
 
+    // transformation from MCP to fingertip
+    Matrix4d M_mcp_to_tip;
+
+    // transformation to MCP
+    Matrix4d M_to_mcp;
+
     // current transformation to tip in body frame
-    Matrix4d T_body;
+    MatrixXd T_body;
 
     //current transformation to tip in space frame
     MatrixXd T_space;

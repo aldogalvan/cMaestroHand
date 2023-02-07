@@ -83,12 +83,8 @@ add_library(maestro3 STATIC
         )
 target_link_libraries(maestro3 esmacat soem)
 
-
-
-
 #CHAI-3D
 # include Chai3d
-include_directories(include/chai3d-3.2.0)
 # -- this is required by Chai3d to pick the correct path for OpenGL headers
 FIND_PACKAGE(CHAI3D REQUIRED)
 ADD_DEFINITIONS(${CHAI3D_DEFINITIONS})
@@ -106,13 +102,21 @@ INCLUDE_DIRECTORIES (
 
 FIND_PACKAGE(CHAI3D-GEL REQUIRED)
 LINK_DIRECTORIES(${CHAI3D-GEL_LIBRARY_DIRS})
-FIND_PACKAGE(CHAI3D-ODE REQUIRED)
-LINK_DIRECTORIES(${CHAI3D-ODE_LIBRARY_DIRS})
-FIND_PACKAGE(CHAI3D-BULLET REQUIRED)
-LINK_DIRECTORIES(${CHAI3D-BULLET_LIBRARY_DIRS})
+INCLUDE_DIRECTORIES (
+        ${CHAI3D-GEL_LIBRARY_DIRS}}
+)
 
-# include Eigen
+FIND_PACKAGE(CHAI3D-BULLET REQUIRED)
+LINK_DIRECTORIES(${CHAI3D-BULLET_DIRS})
+INCLUDE_DIRECTORIES (
+        ${CHAI3D-BULLET_LIBRARY_DIRS}}
+)
+
+
+#include eigen
+set(EIGEN3_INCLUDE_DIR "/home/herolab/eigen-3.4.0/build")
 FIND_PACKAGE(Eigen3 REQUIRED)
+
 # Find python and Boost - both are required dependencies
 #find_package(PythonLibs 2.7 REQUIRED)
 #find_package(Boost COMPONENTS python REQUIRED)
@@ -137,14 +141,13 @@ add_library (maestro_chai3d STATIC ${MAESTRO_HAPTICS_SOURCES} include/mr/mr.cpp)
 # ${catkin_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS}
 
 # Link to libraries
-target_link_libraries(maestro_chai3d PUBLIC maestro3 ${catkin_LIBRARIES} ${CHAI3D-BULLET_LIBRARIES} ${CHAI3D-GEL_LIBRARIES} ${CHAI3D-ODE_LIBRARIES} ${CHAI3D_LIBRARIES}  Eigen3::Eigen glfw)
+target_link_libraries(maestro_chai3d PUBLIC maestro3 ${catkin_LIBRARIES}  ${CHAI3D-GEL_LIBRARIES} ${CHAI3D_LIBRARIES}   Eigen3::Eigen glfw)
 
-
-target_include_directories(maestro_chai3d PUBLIC ${PROJECT_SOURCE_DIR}/include/mr ${CHAI3D-GEL_INCLUDE_DIRS} ${CHAI3D-BULLET_INCLUDE_DIRS} ${CHAI3D-ODE_INCLUDE_DIRS} )
+target_include_directories(maestro_chai3d PUBLIC ${PROJECT_SOURCE_DIR}/include/alglib-cpp ${PROJECT_SOURCE_DIR}/include/mr ${CHAI3D-GEL_INCLUDE_DIRS} ${CHAI3D-BULLET_INCLUDE_DIRS} )
 
 # build examples
 add_subdirectory(examples)
 
 # build the experiment directory
-add_subdirectory(experiments)
+# add_subdirectory(experiments)
 

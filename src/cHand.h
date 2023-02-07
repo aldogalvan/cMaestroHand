@@ -112,7 +112,7 @@ namespace chai3d {
 
 		//! defines hand kinematics (joints position and orientation) as defined by a collection of cTransforms
 		void initialize_transforms(const std::vector<std::vector<cTransform>>&, bool hasarcpalm = false);
-		
+
 		void initialize_graphics(cColorf joints_color = cColorf(32.0 / 255.0, 3.0 / 255.0, 113.0 / 255.0, 1.0),
 			//cColorf& links_color  = cColorf(122.0/255.0, 218.0 / 255.0, 192.0 / 255.0, 1.0),
 			cColorf links_color = cColorf(0.0, 0.5, 0.5, 1.0),
@@ -129,7 +129,7 @@ namespace chai3d {
         std::vector<cVector3d*> getFingertipCenters();
 
 		//! initialization for both transforms and graphics (uses the primitive-based initialization) 
-		void initialize(const std::vector<std::vector<cTransform>>&, bool hasarcpalm = false);
+		void initialize(const std::vector<std::vector<cTransform>>&, bool is_ghost_hand =false, bool hasarcpalm = false);
 
 		//! default initializations from some premade hand models
 		void initialize_Simple20Dof() { initialize(t_default_Simple20DoF); };
@@ -160,7 +160,18 @@ namespace chai3d {
 		//! function to print a cVector3d
 		void printcVector3d(cVector3d V, std::string Vname);
 
-
+        //!
+        void setTransparencyHand(double a_transparency)
+        {
+            for (int i = 0 ; i  < graphics_container.size(); i++)
+            {
+                for (int j = 0 ; j < graphics_container[i].size(); j++)
+                {
+                    graphics_container[i][j]->setTransparencyLevel(a_transparency,1,1,1);
+                }
+            }
+            palm_graphic_container->setTransparencyLevel(a_transparency,1,1,1);
+        }
 
 
 

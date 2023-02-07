@@ -21,22 +21,29 @@ Vector3d cMaestroThumb::computeHandProxy(const Vector3d a_pos, bool collision)
 {
     if (collision)
     {
-        VectorXd theta_temp = theta_proxy.tail(4);
-        MatrixXd T_des = T_space;
-        T_des.block<3, 1>(0, 3) = a_pos;
-        auto flag = computeIKSpaceFrame(T_des, T_space, theta_temp);
-
-        if(flag)
+        VectorXd theta_temp;
+        if (counter == 0)
         {
-            T_proxy_space = T_space;
-            theta_proxy.tail(4) = theta_temp;
-            //std::cout << "Converged Successfully" << std::endl;
-            return T_proxy_space.block<3, 1>(0, 3);
+            theta_temp = theta.tail(4);
+            counter ++;
         }
         else
         {
-            std::cout << "Failed to Converge" << std::endl;
-            T_proxy_space = T_space;
+            theta_temp = theta_proxy.tail(4);
+        }
+        MatrixXd T_des = T_body;
+        T_des.block<3, 1>(0, 3) = a_pos;
+        auto flag = computeIKBodyFrame(T_des, T_body, theta_temp);
+
+        if(flag)
+        {
+            T_proxy_body = T_body;
+            theta_proxy.tail(4) = theta_temp;
+            return T_proxy_body.block<3, 1>(0, 3);
+        }
+        else
+        {
+            T_proxy_body = T_body;
             theta_proxy = theta;
             theta_proxy.tail(4) = theta_temp;
             return a_pos;
@@ -44,7 +51,7 @@ Vector3d cMaestroThumb::computeHandProxy(const Vector3d a_pos, bool collision)
     }
     else
     {
-        T_proxy_space = T_space;
+        T_proxy_body = T_body;
         theta_proxy = theta;
         return a_pos;
     }
@@ -61,10 +68,10 @@ Vector3d cMaestroThumb::updateJointAngles(double *joint_angles , Vector3d a_glob
     theta(0) = a_globalRot(0);
     theta(1) = a_globalRot(1);
     theta(2) = a_globalRot(2);
-    theta(3) = 0;//100 * (3.14 / 180);
-    theta(4) = 0;//10 * (3.14 / 180);//joint_angles[0];
-    theta(5) = 0;//10 * (3.14 / 180);//joint_angles[1];
-    theta(6) = 0;//10 * (3.14 / 180);//0.33 * joint_angles[1];
+    theta(3) = joint_angles[0];//100 * (3.14 / 180);
+    theta(4) = joint_angles[1];//10 * (3.14 / 180);//joint_angles[0];
+    theta(5) = joint_angles[3];//10 * (3.14 / 180);//joint_angles[1];
+    theta(6) = joint_angles[5];//10 * (3.14 / 180);//0.33 * joint_angles[1];
 
     //auto T = computeFKSpaceFrame(theta);
     T_body = computeFKBodyFrame(theta);
@@ -91,19 +98,39 @@ Matrix4d cMaestroThumb::computeFKBodyFrame(VectorXd a_theta)
 // -----------------------------------------------------------------//
 
 bool cMaestroThumb::computeIKBodyFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
-                                       int max_it, double eomg, double ev)
+                                       double eomg, double ev)
 {
     MatrixXd B = B_body.block<6,4>(0,3);
-    return IKinBody(B,M,T,Tsb,a_theta,eomg,ev);
+    MatrixXd Tstart = computeFKToJointBodyFrame(a_theta.head(3));
+    return IKinBody(B,M,T,Tstart,Tsb,a_theta,theta.tail(4),lb,ub,eomg,ev);
+}
+
+// -----------------------------------------------------------------//
+
+Matrix4d cMaestroThumb::computeFKToJointSpaceFrame(VectorXd a_theta)
+{
+
+    auto ret = FKinSpace(M,S_space.block<6,3>(0,0),a_theta);
+    return ret;
+}
+
+// -----------------------------------------------------------------//
+
+Matrix4d cMaestroThumb::computeFKToJointBodyFrame(VectorXd a_theta)
+{
+    auto ret = FKinBody(M,B_body.block<6,3>(0,0),a_theta);
+    return ret;
 }
 
 // -----------------------------------------------------------------//
 
 bool cMaestroThumb::computeIKSpaceFrame(const MatrixXd T, MatrixXd& Tsb,  VectorXd& a_theta,
-                                        int max_it, double eomg, double ev)
+                                         double eomg, double ev)
 {
     MatrixXd S = S_space.block<6,4>(0,3);
-    return IKinSpace(S,M,T,Tsb,a_theta,eomg,ev);
+    VectorXd theta_opt(4);
+    MatrixXd Tstart = computeFKToJointSpaceFrame(a_theta.head(3));
+    return 1;//IKinSpace( S, M, T, Tstart, Tsb,a_theta,theta_opt,eomg,ev);
 }
 
 // -----------------------------------------------------------------//

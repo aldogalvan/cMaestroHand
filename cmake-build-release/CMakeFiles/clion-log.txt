@@ -1,5 +1,0 @@
-/snap/clion/209/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" -S /home/herolab/maestro_chai3d -B /home/herolab/maestro_chai3d/cmake-build-release
-OS is linux
--- Configuring done
--- Generating done
--- Build files have been written to: /home/herolab/maestro_chai3d/cmake-build-release

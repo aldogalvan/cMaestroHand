@@ -77,9 +77,9 @@ cMaestroHand::cMaestroHand(bool a_useThumb, bool a_useIdx, bool a_useMiddle) {
 
 
     // Initialize esmacat application first
-    //application = new my_app();
-    //application->set_ethercat_adapter_name_through_terminal();
-    //application->start();
+//    application = new my_app();
+//    application->set_ethercat_adapter_name_through_terminal();
+//    application->start();
 
     // create thumb if true
     use_thumb = a_useThumb;
@@ -99,6 +99,9 @@ cMaestroHand::cMaestroHand(bool a_useThumb, bool a_useIdx, bool a_useMiddle) {
     // create cHand
     h_hand = new chai3d::cHand();
 
+    // create a ghost hand
+    h_ghost_hand = new chai3d::cHand();
+
     vector<vector<cTransform>> newT = h_hand->t_default_Tkach25Dof;
 
     // Tkach model with modified fingers lenghts
@@ -114,6 +117,10 @@ cMaestroHand::cMaestroHand(bool a_useThumb, bool a_useIdx, bool a_useMiddle) {
     }
 
     h_hand->initialize(newT);
+    h_ghost_hand->initialize(newT, true);
+    //h_hand->setTransparencyLevel(0.55);
+    //h_hand->setTransparencyHand(0.55);
+
 
     for (int i = 0; i < h_hand->getdof(); i++)
     {
@@ -131,7 +138,7 @@ void cMaestroHand::createIndexFinger()
 
 void cMaestroHand::createMiddleFinger()
 {
-    h_middle = new cMaestroDigit();
+    h_middle = new cMaestroDigit(true);
 }
 
 void cMaestroHand::createThumb() {
@@ -144,8 +151,8 @@ void cMaestroHand::updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos,
                                      const Vector3d a_globalPos , const Vector3d a_globalRot)
 {
     // This function gets called from the main file and returns the position of the fingertip
-    double robot_angles[16];
-    application->updateJointAngles(robot_angles);
+    double robot_angles[16] = {0.03,0.0,0.6,0.8,0,-0.03,0,0.7,0.9,0.8,0.8,0.8,0,-0.7,0 ,-0.3};
+    // application->updateJointAngles(robot_angles);
 
     // Updates thumb
     if (use_thumb)
@@ -157,7 +164,7 @@ void cMaestroHand::updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos,
         thumb_robot_angles[3] = robot_angles[13];
         thumb_robot_angles[4] = robot_angles[14];
         thumb_robot_angles[5] = robot_angles[15];
-        Eigen::Vector3d thumb_pos = h_thumb->updateJointAngles(thumb_robot_angles, a_globalPos, a_globalRot);
+        Vector3d thumb_pos = h_thumb->updateJointAngles(thumb_robot_angles, a_globalPos, a_globalRot);
         a_thumbPos = cVector3d(thumb_pos);
     }
 
@@ -170,7 +177,8 @@ void cMaestroHand::updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos,
         idx_robot_angles[2] = robot_angles[2];
         idx_robot_angles[3] = robot_angles[3];
         idx_robot_angles[4] = robot_angles[4];
-        Eigen::Vector3d idx_pos = h_index->updateJointAngles(idx_robot_angles, a_globalPos, a_globalRot);
+        //cout << idx_robot_angles[0] << " , " << idx_robot_angles [1] << " , " << idx_robot_angles [2]  << " , " << idx_robot_angles [3] << " , " << idx_robot_angles [4] << endl;
+        Vector3d idx_pos = h_index->updateJointAngles(idx_robot_angles, a_globalPos, a_globalRot);
         a_idxPos = cVector3d(idx_pos);
 
     }
@@ -183,7 +191,7 @@ void cMaestroHand::updateJointAngles(cVector3d& a_thumbPos, cVector3d& a_idxPos,
         mid_robot_angles[2] = robot_angles[7];
         mid_robot_angles[3] = robot_angles[8];
         mid_robot_angles[4] = robot_angles[9];
-        Eigen::Vector3d mid_pos = h_middle->updateJointAngles(mid_robot_angles, a_globalPos, a_globalRot);
+        Vector3d mid_pos = h_middle->updateJointAngles(mid_robot_angles, a_globalPos, a_globalRot);
         a_midPos = cVector3d(mid_pos);
     }
 
@@ -193,13 +201,23 @@ void cMaestroHand::computeHandProxy( Vector3d& a_goalThumb, Vector3d& a_goalIdx,
                                      bool thumbCollision, bool idxCollision, bool midCollision)
 {
     if(use_idx)
-        a_goalIdx = h_index->computeHandProxy(a_goalIdx,idxCollision);
-
+    {
+        cout << "idx begin" << endl;
+        a_goalIdx = h_index->computeHandProxy(a_goalIdx, idxCollision);
+        cout << "idx end" << endl;
+    }
     if(use_middle)
-        a_goalMid = h_middle->computeHandProxy(a_goalMid,midCollision);
-
+    {
+        cout << "mid begin" << endl;
+        a_goalMid = h_middle->computeHandProxy(a_goalMid, midCollision);
+        cout << "mid end" << endl;
+    }
     if(use_thumb)
-        a_goalThumb = h_index->computeHandProxy(a_goalThumb,thumbCollision);
+    {
+        cout << "thumb begin" << endl;
+        a_goalThumb = h_thumb->computeHandProxy(a_goalThumb, thumbCollision);
+        cout << "thumb end" << endl;
+    }
 }
 
 bool cMaestroHand::torqueControlProxy(const double a_stiffness, const double a_damping) {
@@ -243,27 +261,29 @@ void cMaestroHand::updateVisualizer(void) {
         // TODO: MODIFY JOINT ANGLES OF RING AND PINKY BASED ON OTHER VALUES
         vector<double> vec;
 
-        vec = vector<double>{
-                // mcp = 2 pip = 4 dip = 5 (idx and mid)
-                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
-                0 * 10 * (Pi / 180)
-        };
+    vec = vector<double>{
+            // mcp = 2 pip = 4 dip = 5 (idx and mid)
+            2 * 10 * (Pi / 180), 3 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), -4 * 10 * (Pi / 180),
+            -4 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180), 9 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 8 * 10 * (Pi / 180),
+            0.67* 8 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180), 9 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 8 * 10 * (Pi / 180),
+            0.67* 8 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180), 9 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 8 * 10 * (Pi / 180),
+            0.67* 8 * 10* (Pi / 180),
+    };
 
-        if (use_idx)
+
+    if (use_idx)
         {
             auto idx_angles = h_index->getProxyJointAngles();
             vec[5] = idx_angles[0];
             vec[6] = idx_angles[1];
             vec[8] = idx_angles[2];
             vec[9] = idx_angles[3];
+            cout << idx_angles[0] << " , " << idx_angles[1] << " , " << idx_angles[2] << endl << flush;
         }
         if (use_middle)
         {
@@ -288,14 +308,51 @@ void cMaestroHand::updateVisualizer(void) {
 
     }
 
-vector<cVector3d*> cMaestroHand::testTrajectory(vector<double> vec) {
+void cMaestroHand::renderGhostHand(void)
+{
+    // TODO: MODIFY JOINT ANGLES OF RING AND PINKY BASED ON OTHER VALUES
+    vector<double> vec;
+
+    vec = vector<double>{
+            // mcp = 2 pip = 4 dip = 5 (idx and mid)
+            2 * 10 * (Pi / 180), 3 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), -4 * 10 * (Pi / 180),
+            -4 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 0 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180), 10 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 8 * 10 * (Pi / 180),
+            0.67* 8 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180), 10 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 8 * 10 * (Pi / 180),
+            0.67* 8 * 10 * (Pi / 180),
+            0 * 10 * (Pi / 180), 10 * 10 * (Pi / 180), 0 * 10 * (Pi / 180), 8 * 10 * (Pi / 180),
+            0.67* 8 * 10* (Pi / 180),
+    };
+
+    if (use_idx)
+    {
+        auto idx_angles = h_index->getJointAngles();
+        vec[5] = idx_angles[0];
+        vec[6] = idx_angles[1];
+        vec[8] = idx_angles[2];
+        vec[9] = idx_angles[3];
+    }
+    if (use_middle)
+    {
+        auto mid_angles = h_middle->getJointAngles();
+        vec[10] = mid_angles[0];
+        vec[11] = mid_angles[1];
+        vec[13] = mid_angles[2];
+        vec[14] = mid_angles[3];
+    }
+    if (use_thumb)
+    {
+        auto thumb_angles = h_thumb->getJointAngles();
+        vec[0] = thumb_angles[0];
+        vec[1] = thumb_angles[1];
+        vec[3] = thumb_angles[2];
+        vec[4] = thumb_angles[3];
+    }
 
     // update hand model kinematics
-    h_hand->updateAngles(vec);
-    h_hand->updateKinematics();
-
-    // update chand and get fingertip pos
-    auto tip_pos = h_hand->getFingertipCenters();
-
-    return tip_pos;
+    h_ghost_hand->updateAngles(vec);
+    h_ghost_hand->updateKinematics();
 }

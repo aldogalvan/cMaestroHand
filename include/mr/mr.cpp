@@ -1,9 +1,15 @@
+#define OPTIM_ENABLE_EIGEN_WRAPPERS
+//#include "optim.hpp"
 #include "mr.h"
-#include "iostream"
 #include <Eigen/Dense>
 #include <cmath>
 #include <vector>
+#include <iostream>
+//#include "src/stdafx.h"
+//#include "src/interpolation.h"
 
+using namespace Eigen;
+using namespace std;
 # define M_PI           3.14159265358979323846  /* pi */
 
 namespace mr {
@@ -13,7 +19,7 @@ namespace mr {
      * Returns: Boolean of true-ignore or false-can't ignore
      */
     bool NearZero(const double val) {
-        return (std::abs(val) < .000001);
+        return (std::abs(val) < .00001);
     }
 
     /*
@@ -413,58 +419,127 @@ namespace mr {
     }
 
     // TODO: Constrain the DIP angle to the PIP
-    bool IKinBody(const MatrixXd& Blist, const MatrixXd& M, const MatrixXd& T, MatrixXd& Tsb,
-                  VectorXd& thetalist, double eomg, double ev) {
+    bool IKinBody(const MatrixXd& Blist, const MatrixXd& M, const MatrixXd& Tdes, const MatrixXd& Tstart, MatrixXd& Tend,
+                  VectorXd& thetalist, const VectorXd& thetaopt, const VectorXd& lb, const VectorXd& ub, double eomg, double ev) {
         int i = 0;
         int maxiterations = 20;
+        int sz = thetalist.size();
+
         MatrixXd Tfk = FKinBody(M, Blist, thetalist);
-        MatrixXd Tdiff = TransInv(Tfk)*T;
+        MatrixXd Tdiff = TransInv(Tfk)*Tdes;
+        Tdiff.block<3,3>(0,0) = MatrixXd::Identity(3,3);
+
         VectorXd Vb = se3ToVec(MatrixLog6(Tdiff));
         Vector3d angular(Vb(0), Vb(1), Vb(2));
         Vector3d linear(Vb(3), Vb(4), Vb(5));
-
-        bool err = (angular.norm() > eomg || linear.norm() > ev);
+        bool err =  linear.norm() > ev;
         MatrixXd Jb;
         while (err && i < maxiterations) {
+
             Jb = JacobianBody(Blist, thetalist);
-            thetalist += Jb.bdcSvd(ComputeThinU | ComputeThinV).solve(Vb);
+            MatrixXd Jb_pinv = Jb.completeOrthogonalDecomposition().pseudoInverse();
+            MatrixXd primary_goal = Jb_pinv*Vb;
+
+            // check if any constraints are violated
+            for (int i = 0; i < 4; i++)
+            {
+                if (thetalist[i] < lb[i])
+                {
+                    // set a penalty returning the constraint
+                    thetalist[i] = lb[i];
+                    // saturate the jacobian
+                    if (primary_goal(i) < 0 )
+                    {
+                        primary_goal(i) *= -1;
+                    }
+
+                }
+
+                if (thetalist[i] > ub[i])
+                {
+                    thetalist[i] = ub[i];
+                    if (primary_goal(i) > 0 )
+                    {
+                        primary_goal(i) *= -1;
+                    }
+                }
+            }
+
+
+            VectorXd d_thetalist =  primary_goal + (MatrixXd::Identity(4,4) - Jb_pinv*Jb)*(thetaopt - thetalist);
+            thetalist += d_thetalist;
             i += 1;
+
             // iterate
             Tfk = FKinBody(M, Blist, thetalist);
-            Tdiff = TransInv(Tfk)*T;
+            Tdiff = TransInv(Tfk)*Tdes;
+            Tdiff.block<3,3>(0,0) = MatrixXd::Identity(3,3);
             Vb = se3ToVec(MatrixLog6(Tdiff));
             angular = Vector3d(Vb(0), Vb(1), Vb(2));
             linear = Vector3d(Vb(3), Vb(4), Vb(5));
-            err = (angular.norm() > eomg || linear.norm() > ev);
+            err =  linear.norm() > ev;
         }
+        cout << i << endl;
         return !err;
     }
 
-    bool IKinSpace(const MatrixXd& Slist, const MatrixXd& M, const MatrixXd& T, MatrixXd& Tsb,
-                   VectorXd& thetalist, double eomg, double ev) {
+    bool IKinSpace(const MatrixXd& Slist, const MatrixXd& M, const MatrixXd& Tdes, const MatrixXd& Tstart, MatrixXd& Tend,
+                   VectorXd& thetalist, const VectorXd& thetaopt, const VectorXd& lb, const VectorXd& ub, double eomg, double ev) {
         int i = 0;
         int maxiterations = 20;
+        int sz = thetalist.size();
+
+        // MatrixXd T = TransInv(Tstart)*Tdes;
+
+        for (int i = 0; i  < sz ; i ++)
+        {
+            if (thetalist[i] < lb[i])
+                thetalist[i] = lb[i];
+            else if ( thetalist[i] > ub[i])
+                thetalist[i] = ub[i];
+        }
+
         MatrixXd Tfk = FKinSpace(M, Slist, thetalist);
-        MatrixXd Tdiff = TransInv(Tfk)*T;
+        // Tfk = TransInv(Tstart)*Tfk;
+        MatrixXd Tdiff = TransInv(Tfk)*Tdes;
         VectorXd Vs = Adjoint(Tfk)*se3ToVec(MatrixLog6(Tdiff));
         Vector3d angular(Vs(0), Vs(1), Vs(2));
         Vector3d linear(Vs(3), Vs(4), Vs(5));
-
-        bool err = (angular.norm() > eomg || linear.norm() > ev);
+        bool err = linear.norm() > ev;
         MatrixXd Js;
+
+        // TODO: implement joint limits
         while (err && i < maxiterations) {
-            // modifications made to support the interdependence of the PIP and DIP
             Js = JacobianSpace(Slist, thetalist);
-            thetalist += Js.bdcSvd(ComputeThinU | ComputeThinV).solve(Vs);
+            thetalist += Js.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Vs);
+            //MatrixXd Js_pinv = Js.completeOrthogonalDecomposition().pseudoInverse();
+            //VectorXd d_thetalist = Js_pinv*Vs + (MatrixXd::Identity(4,4) - Js_pinv*Js)*(thetaopt - thetalist);
+            //thetalist += d_thetalist;
+
+            // set the joint limits
+            for (int i = 0; i  < sz ; i ++)
+            {
+                if (thetalist[i] < lb[i]) {
+                    //cout << "ub" << endl;
+                    thetalist[i] = lb[i];
+                }
+                else if ( thetalist[i] > ub[i]) {
+                    //cout << "lb" << endl;
+                    thetalist[i] = ub[i];
+                }
+            }
             i += 1;
             // iterate
             Tfk = FKinSpace(M, Slist, thetalist);
-            Tdiff = TransInv(Tfk)*T;
+            //Tfk = TransInv(Tstart)*Tfk;
+            Tdiff = TransInv(Tfk)*Tdes;
             Vs = Adjoint(Tfk)*se3ToVec(MatrixLog6(Tdiff));
             angular = Vector3d(Vs(0), Vs(1), Vs(2));
             linear = Vector3d(Vs(3), Vs(4), Vs(5));
-            err = (angular.norm() > eomg || linear.norm() > ev);
+            err = linear.norm() > ev;
         }
+        Tend = Tfk;
+
         return !err;
     }
 

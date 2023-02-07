@@ -4,9 +4,7 @@
 //------------------------------------------------------------------------------
 #include <GLFW/glfw3.h>
 #include "GEL3D.h"
-//------------------------------------------------------------------------------
-#include "cMaestroHand.h"
-//------------------------------------------------------------------------------
+
 
 using namespace chai3d;
 using namespace std;
@@ -328,7 +326,7 @@ int main(int argc, char* argv[])
     world = new cWorld();
 
     // set the background color of the environment
-    world->m_backgroundColor.setBlack();
+    world->m_backgroundColor.setWhite();
 
     // create a camera and insert it into the virtual world
     camera = new cCamera(world);
@@ -381,6 +379,9 @@ int main(int argc, char* argv[])
 
     // insert cursor inside world
     world->addChild(hand->h_hand);
+    world->addChild(hand->h_ghost_hand);
+
+
 
     //-----------------------------------------------------------------------
     // COMPOSE THE VIRTUAL SCENE
@@ -409,6 +410,8 @@ int main(int argc, char* argv[])
         close();
         return (-1);
     }
+
+    defObject->scale(0.4,true);
 
     // set some material color on the object
     cMaterial mat;
@@ -447,9 +450,9 @@ int main(int argc, char* argv[])
     defObject->buildVertices();
 
     // set default properties for skeleton nodes
-    cGELSkeletonNode::s_default_radius        = 0.05;  // [m]
-    cGELSkeletonNode::s_default_kDampingPos   = 2.5;
-    cGELSkeletonNode::s_default_kDampingRot   = 0.6;
+    cGELSkeletonNode::s_default_radius        = 0.02;  // [m]
+    cGELSkeletonNode::s_default_kDampingPos   = 1.0;
+    cGELSkeletonNode::s_default_kDampingRot   = 0.1;
     cGELSkeletonNode::s_default_mass          = 0.002; // [kg]
     cGELSkeletonNode::s_default_showFrame     = true;
     cGELSkeletonNode::s_default_color.setBlueCornflower();
@@ -468,7 +471,7 @@ int main(int argc, char* argv[])
             cGELSkeletonNode* newNode = new cGELSkeletonNode();
             nodes[x][y] = newNode;
             defObject->m_nodes.push_front(newNode);
-            newNode->m_pos.set( (-0.45 + 0.1*(double)x), (-0.43 + 0.1*(double)y), 0.0);
+            newNode->m_pos.set( (-0.18 + 0.04*(double)x), (-0.18 + 0.04*(double)y), -0.00);
         }
     }
 
@@ -479,9 +482,9 @@ int main(int argc, char* argv[])
     nodes[9][9]->m_fixed = true;
 
     // set default physical properties for links
-    cGELSkeletonLink::s_default_kSpringElongation = 25.0;  // [N/m]
-    cGELSkeletonLink::s_default_kSpringFlexion    = 0.5;   // [Nm/RAD]
-    cGELSkeletonLink::s_default_kSpringTorsion    = 0.1;   // [Nm/RAD]
+    cGELSkeletonLink::s_default_kSpringElongation = 5.0;  // [N/m]
+    cGELSkeletonLink::s_default_kSpringFlexion    = 0.2;   // [Nm/RAD]
+    cGELSkeletonLink::s_default_kSpringTorsion    = 0.05;   // [Nm/RAD]
     cGELSkeletonLink::s_default_color.setBlueCornflower();
 
     // create links between nodes
@@ -499,6 +502,9 @@ int main(int argc, char* argv[])
             defObject->m_links.push_front(newLinkY1);
         }
     }
+
+    defWorld->updateSkins();
+    defObject->translate(cVector3d(0,0,-0.01));
 
     // connect skin (mesh) to skeleton (GEM)
     defObject->connectVerticesToSkeleton(false);
@@ -783,7 +789,6 @@ void updateHaptics(void)
 
     hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),global_rot.eigen());
 
-
     // main haptic simulation loop
     while(simulationRunning)
     {
@@ -826,6 +831,7 @@ void updateHaptics(void)
 
         // compute reaction forces
         cVector3d force(0.0, 0.0, 0.0);
+
         for (int y=0; y<10; y++)
         {
             for (int x=0; x<10; x++)

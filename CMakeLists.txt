@@ -3,8 +3,6 @@ project(maestro_chai3d)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_CXX_STANDARD 14)
-
 if(WIN32)
     set(OS "win32")
     include_directories(include/soem_include/oshw/win32/wpcap/Include)
@@ -100,13 +98,11 @@ INCLUDE_DIRECTORIES (
         ${CHAI3D_INCLUDE_DIRS}
 )
 
-#LINK_DIRECTORIES(/home/herolab/chai3d-3.2.0/build/modules/BULLET)
-#FIND_PACKAGE(CHAI3D-BULLET REQUIRED)
-#ADD_DEFINITIONS(${CHAI3D-BULLET_DEFINITIONS})
-#LINK_DIRECTORIES(${CHAI3D-BULLET_LIBRARY_DIRS})
-#INCLUDE_DIRECTORIES (
-#        ${CHAI3D-BULLET_INCLUDE_DIRS}}
-#)
+ADD_DEFINITIONS(${CHAI3D-BULLET_DEFINITIONS})
+LINK_DIRECTORIES(${CHAI3D-BULLET_LIBRARY_DIRS})
+INCLUDE_DIRECTORIES (
+        ${CHAI3D-BULLET_INCLUDE_DIRS}}
+)
 
 FIND_PACKAGE(CHAI3D-GEL REQUIRED)
 ADD_DEFINITIONS(${CHAI3D-GEL_DEFINITIONS})
@@ -114,17 +110,6 @@ LINK_DIRECTORIES(${CHAI3D-GEL_LIBRARY_DIRS})
 INCLUDE_DIRECTORIES (
         ${CHAI3D-GEL_INCLUDE_DIRS}}
 )
-
-#LINK_DIRECTORIES(/home/herolab/chai3d-3.2.0/build/modules/ODE)
-#FIND_PACKAGE(CHAI3D-ODE REQUIRED)
-#ADD_DEFINITIONS(${CHAI3D-ODE_DEFINITIONS})
-#LINK_DIRECTORIES(${CHAI3D-ODE_LIBRARY_DIRS})
-#INCLUDE_DIRECTORIES (
-#        ${CHAI3D-ODE_INCLUDE_DIRS}}
-#)
-#
-
-
 
 
 #include eigen
@@ -155,9 +140,9 @@ add_library (maestro_chai3d STATIC ${MAESTRO_HAPTICS_SOURCES} include/mr/mr.cpp)
 # ${catkin_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS}
 
 # Link to libraries
-target_link_libraries(maestro_chai3d PUBLIC maestro3 ${catkin_LIBRARIES} ${CHAI3D-GEL_LIBRARIES} ${CHAI3D-ODE_LIBRARIES} ${CHAI3D-BULLET_LIBRARIES} ${CHAI3D_LIBRARIES} Eigen3::Eigen glfw)
+target_link_libraries(maestro_chai3d PUBLIC maestro3 Eigen3::Eigen ${CHAI3D_LIBRARIES} glfw)
 
-target_include_directories(maestro_chai3d PUBLIC ${PROJECT_SOURCE_DIR}/include/alglib-cpp ${PROJECT_SOURCE_DIR}/include/mr ${CHAI3D-ODE_INCLUDE_DIRS} ${CHAI3D-BULLET_INCLUDE_DIRS} ${CHAI3D-GEL_INCLUDE_DIRS})
+target_include_directories(maestro_chai3d PUBLIC ${PROJECT_SOURCE_DIR}/include/mr)
 
 # build examples
 add_subdirectory(examples)

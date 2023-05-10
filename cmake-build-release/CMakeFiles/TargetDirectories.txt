@@ -8,7 +8,6 @@
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-gripping.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-friction.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-multidigit.dir
-/home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-deformable.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/example-dynamic.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/edit_cache.dir
 /home/herolab/maestro_chai3d/cmake-build-release/examples/CMakeFiles/rebuild_cache.dir

@@ -123,11 +123,7 @@ public:
     // this function computes the jacobian in body frame
     MatrixXd computeBodyJacobian(VectorXd a_theta);
 
-    // this method commands a new joint torque
-    double* commandJointTorqueProxy(double K , double B , double dt);
 
-    // this method computes a joint torque with the jacobian
-    double* commandJointTorqueInverseDynamics(double K ,  double B);
 
     // return the vector of actual finger angles
     VectorXd getJointAngles(void);
@@ -154,6 +150,13 @@ public:
 
     // Function Declarations
     static void Jacobian_RobotToFinger_toCpp(const double q_vec[2], const double L_vec[3], const double F_vec[6], double J[8]);
+
+    // this function computes the joint torques
+    void computeJointTorque(const double K, const double B, double* torque);
+
+
+    //this function returns the joint torque
+    void getJointTorque(double* digit_torque);
 
 public:
 

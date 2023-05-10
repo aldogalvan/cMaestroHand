@@ -17,21 +17,14 @@ using namespace mr;
 Vector3d cMaestroDigit::computeHandProxy(const Vector3d a_pos, bool collision)
 {
 
-    if (1)
+    if (collision)
     {
         VectorXd theta_temp;
-        if (counter == 0)
-        {
-             theta_temp = theta.tail(4);
-             counter ++;
-        }
-        else
-        {
-             theta_temp = theta_proxy.tail(4);
-        }
+        theta_temp = theta_proxy.tail(4);
 
         MatrixXd T_des = T_body;
         T_des.block<3, 1>(0, 3) = a_pos;
+
         auto flag = computeIKBodyFrame(T_des, T_body, theta_temp);
         if(flag)
         {
@@ -41,8 +34,6 @@ Vector3d cMaestroDigit::computeHandProxy(const Vector3d a_pos, bool collision)
         }
         else
         {
-            T_proxy_body = T_body;
-            theta_proxy = theta;
             theta_proxy.tail(4) = theta_temp;
             return a_pos;
         }
@@ -158,41 +149,20 @@ VectorXd cMaestroDigit::getProxyJointAngles(void)
 
 // -----------------------------------------------------------------//
 
-double* cMaestroDigit::commandJointTorqueProxy(double K ,  double B , double dt)
-{
-
-    auto joint_torque = K*(theta_proxy - theta);
-
-    double pjoint_torque[2];
-    pjoint_torque[0] = joint_torque(0);
-    pjoint_torque[1] = joint_torque(1);
-
-    return pjoint_torque;
-}
-
-// -----------------------------------------------------------------//
-
-double* cMaestroDigit::commandJointTorqueInverseDynamics(double K ,  double B)
-{
-
-    auto joint_torque = K*(theta_proxy - theta);
-
-    double pjoint_torque[2];
-    pjoint_torque[0] = 0;
-    pjoint_torque[1] = 0;
-
-    return pjoint_torque;
-}
-
-
-// -----------------------------------------------------------------//
-
 bool cMaestroDigit::computeIKBodyFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd& a_theta,
                                             double eomg, double ev)
 {
     MatrixXd B = B_body.block<6,4>(0,3);
     MatrixXd Tstart = computeFKToJointBodyFrame(theta_proxy.head(3));
-    return IKinBody(B,M,T,Tstart,Tsb,a_theta, theta.tail(4), lb, ub,eomg,ev);
+    MatrixXd joint_limits(4,3);
+    joint_limits << pi/2, 0, pi,
+                    pi/2, 0, pi,
+                    pi/2, 0, pi,
+                    pi/2, 0, pi;
+    double coupling_coefficient = 0.67;
+//    return IKinBody(B, M, T, a_theta, joint_limits, coupling_coefficient, eomg,ev);
+    return IKinBodyDigit(B, M, T, a_theta, 0.01, joint_limits, 0, coupling_coefficient, 0);
+
 }
 
 // -----------------------------------------------------------------//
@@ -203,10 +173,11 @@ bool cMaestroDigit::computeIKSpaceFrame(const MatrixXd& T, MatrixXd& Tsb,  Vecto
 
     // compute the forward kinematics for first three
     MatrixXd S = S_space.block<6,4>(0,3);
-    // fuck it solve analytically for now
-    MatrixXd Tstart = computeFKToJointSpaceFrame(theta_proxy.head(3));
-    VectorXd theta_finger = theta.tail(4);
-    return IKinSpace( S, M , T , Tstart , Tsb, a_theta, theta_finger, lb, ub, eomg, ev);
+    MatrixXd joint_limits(4,2);
+    joint_limits << 0, pi, 0 , pi, 0 , pi, 0, pi;
+    double coupling_coefficient = 0.67;
+//    return IKinSpace( S, M, T, a_theta, joint_limits, coupling_coefficient, eomg, ev);
+    return IKinSpaceDigit( S, M, T, a_theta, 0.01, joint_limits, 0, coupling_coefficient, 0);
 }
 
 // -----------------------------------------------------------------//
@@ -519,4 +490,16 @@ void cMaestroDigit::Jacobian_RobotToFinger_toCpp(const double q_vec[2], const do
                                                                                                        a_tmp_tmp * a_tmp_tmp)) / 2.0)) * (m_a_tmp - b_J_tmp / std::sqrt(c_x_tmp +
                                                                                                                                                                         a_tmp_tmp * a_tmp_tmp)) / (h_a_tmp * h_a_tmp)) / (q_a_tmp * q_a_tmp /
                                                                                                                                                                                                                           (h_a_tmp * h_a_tmp) + 1.0);
+}
+
+void cMaestroDigit::computeJointTorque(const double K, const double B, double* torque)
+{
+    torque[0] = exo_desired_torque_MCP = (theta_proxy(4) - theta(4))*K;
+    torque[1]  = exo_desired_torque_PIP = (theta_proxy(5) - theta(5))*K;
+}
+
+void cMaestroDigit::getJointTorque(double *digit_torque)
+{
+    digit_torque[0] = exo_desired_torque_MCP;
+    digit_torque[1] = exo_desired_torque_PIP;
 }

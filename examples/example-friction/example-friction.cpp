@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < 3; i++)
     {
         haptic_points[i] = new cToolCursor(world);
-        //world->addChild(haptic_points[i]);
+        world->addChild(haptic_points[i]);
         haptic_points[i]->setRadius(hand->h_hand->radius() - 0.001);
         haptic_points[i]->m_material->setTransparencyLevel(1.0);
         haptic_points[i]->setTransparencyLevel(0.0,true,true,true);
@@ -349,8 +349,8 @@ int main(int argc, char* argv[])
     radius = hand->h_hand->radius();
 
     // insert cursor inside world
-    //world->addChild(hand->h_hand);
-    world->addChild(hand->h_ghost_hand);
+    world->addChild(hand->h_hand);
+    //world->addChild(hand->h_ghost_hand);
 
     // create a mesh
     plane = new cMesh();
@@ -365,8 +365,8 @@ int main(int argc, char* argv[])
 
     plane->m_material->setYellowMoccasin();
     plane->m_material->setStiffness(0.5 * 1000);
-    plane->m_material->setDynamicFriction(0);
-    plane->m_material->setStaticFriction(0);
+    plane->m_material->setDynamicFriction(1);
+    plane->m_material->setStaticFriction(1);
     // plane->setTransparencyLevel(0.5,1,1,1);
 
 
@@ -641,6 +641,9 @@ void updateHaptics(void)
     cVector3d idx_pos(1,0,0);
     cVector3d mid_pos;
 
+    std::ofstream myfile;
+    myfile.open ("torque_friction.csv");
+
     hand->updateJointAngles(thumb_pos,idx_pos,mid_pos,global_pos.eigen(),global_rot.eigen());
 
     cPrecisionClock clock;
@@ -651,11 +654,6 @@ void updateHaptics(void)
     {
 
         double t = clock.getCurrentTimeSeconds();
-
-        if (t > 5)
-        {
-            clock.reset();
-        }
 
         world->computeGlobalPositions();
         /////////////////////////////////////////////////////////////////////
@@ -688,7 +686,16 @@ void updateHaptics(void)
                                    false,false,false);
         }
 
-        hand->renderGhostHand();
+        //hand->renderGhostHand();
+
+        hand->computeTorque(10,0);
+        double torque_thumb[4] = {0,0,0,0};
+        double torque_index[2] = {0,0,};
+        double torque_middle[2] = {0,0,};
+        hand->getJointTorque(torque_thumb,torque_index,torque_middle);
+
+        myfile << t << "," << torque_thumb[0] << "," << torque_thumb[1] << "," << torque_thumb[2] << "," << torque_thumb[3]  << "," << torque_index[0] << "," << torque_index[1] << "," << torque_middle[0] << "," << torque_middle[1] << endl;
+
 
         /////////////////////////////////////////////////////////////////////
         // COMMAND A NEW FORCE USING SOME ALGORITHM
@@ -698,6 +705,9 @@ void updateHaptics(void)
         freqCounterHaptics.signal(1);
 
     }
+
+    myfile.close();
+
 
     // exit haptics thread
     simulationFinished = true;

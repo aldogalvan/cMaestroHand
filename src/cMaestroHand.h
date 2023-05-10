@@ -70,7 +70,10 @@ using namespace Eigen;
 
         // Commands the desired joint torque to the Maestro using the proxy algorithm
         // the stiffnesses are angular stiffness to be used for joint control
-        bool torqueControlProxy(double a_stiffness, double a_damping);
+        void computeTorque(double a_stiffness, double a_damping);
+
+        // this function gets the commanded joint torque
+        void getJointTorque(double* thumb, double* index, double* middle);
 
         // commands the desired joint position
         bool positionalControl();

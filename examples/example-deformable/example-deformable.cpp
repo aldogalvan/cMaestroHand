@@ -379,7 +379,7 @@ int main(int argc, char* argv[])
 
     // insert cursor inside world
     world->addChild(hand->h_hand);
-    world->addChild(hand->h_ghost_hand);
+    //world->addChild(hand->h_ghost_hand);
 
 
 

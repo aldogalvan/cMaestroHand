@@ -88,10 +88,6 @@ public:
     // this function computes the forward kinematics and returns fingertip pos
     Vector3d updateJointAngles(double* robot_angles , Vector3d a_global_pos, Vector3d a_globalRot);
 
-    // this function computes the forward kinematics using homogeneous transformation matrices
-    // DEPRECATED
-    Matrix4d computeFK(VectorXd a_theta);
-
     // this function computes the forward kinematic to the joint
     Matrix4d computeFKToJointSpaceFrame(VectorXd a_theta);
 
@@ -135,6 +131,12 @@ public:
 
     //  this function computes the forward kinematics (pulley to joint)
     void computeForwardKinematics(double phi3, double psy2);
+
+    // this function computes the joint torque
+    void computeJointTorque(const double K, const double B, double* torque);
+
+    // this function returns the joint torque
+    void getJointTorque(double* thumb_torque);
 
 
 public:

@@ -22,15 +22,8 @@ Vector3d cMaestroThumb::computeHandProxy(const Vector3d a_pos, bool collision)
     if (collision)
     {
         VectorXd theta_temp;
-        if (counter == 0)
-        {
-            theta_temp = theta.tail(4);
-            counter ++;
-        }
-        else
-        {
-            theta_temp = theta_proxy.tail(4);
-        }
+        theta_temp = theta_proxy.tail(4);
+
         MatrixXd T_des = T_body;
         T_des.block<3, 1>(0, 3) = a_pos;
         auto flag = computeIKBodyFrame(T_des, T_body, theta_temp);
@@ -102,7 +95,18 @@ bool cMaestroThumb::computeIKBodyFrame(const MatrixXd T, MatrixXd& Tsb, VectorXd
 {
     MatrixXd B = B_body.block<6,4>(0,3);
     MatrixXd Tstart = computeFKToJointBodyFrame(a_theta.head(3));
-    return IKinBody(B,M,T,Tstart,Tsb,a_theta,theta.tail(4),lb,ub,eomg,ev);
+    return 1; //IKinBody(B,M,T,a_theta,lb,ub,eomg,ev);
+}
+
+// -----------------------------------------------------------------//
+
+bool cMaestroThumb::computeIKSpaceFrame(const MatrixXd T, MatrixXd& Tsb,  VectorXd& a_theta,
+                                        double eomg, double ev)
+{
+    MatrixXd S = S_space.block<6,4>(0,3);
+    VectorXd theta_opt(4);
+    MatrixXd Tstart = computeFKToJointSpaceFrame(a_theta.head(3));
+    return 1;//IKinSpace( S, M, T, Tstart, Tsb,a_theta,theta_opt,eomg,ev);
 }
 
 // -----------------------------------------------------------------//
@@ -122,16 +126,6 @@ Matrix4d cMaestroThumb::computeFKToJointBodyFrame(VectorXd a_theta)
     return ret;
 }
 
-// -----------------------------------------------------------------//
-
-bool cMaestroThumb::computeIKSpaceFrame(const MatrixXd T, MatrixXd& Tsb,  VectorXd& a_theta,
-                                         double eomg, double ev)
-{
-    MatrixXd S = S_space.block<6,4>(0,3);
-    VectorXd theta_opt(4);
-    MatrixXd Tstart = computeFKToJointSpaceFrame(a_theta.head(3));
-    return 1;//IKinSpace( S, M, T, Tstart, Tsb,a_theta,theta_opt,eomg,ev);
-}
 
 // -----------------------------------------------------------------//
 
@@ -178,4 +172,18 @@ double* cMaestroThumb::commandJointTorqueProxy(double K ,  double B)
     return pjoint_torque;
 }
 
+void cMaestroThumb::computeJointTorque(const double K, const double B, double* torque)
+{
+    torque[0] = exo_desired_torque_CMC_fe = (theta_proxy(3) - theta(3))*K;
+    torque[1] = exo_desired_torque_CMC_abad = (theta_proxy(4) - theta(4))*K;
+    torque[2] = exo_desired_torque_MCP = (theta_proxy(5) - theta(5))*K;
+    torque[3] = exo_desired_torque_IP = (theta_proxy(6) - theta(6))*K;
+
+}
 // -----------------------------------------------------------------//
+
+void cMaestroThumb::getJointTorque(double *thumb_torque)
+{
+    thumb_torque[0] = exo_desired_torque_CMC_fe; thumb_torque[1] = exo_desired_torque_CMC_abad;
+    thumb_torque[2] = exo_desired_torque_MCP; thumb_torque[3] = exo_desired_torque_IP;
+}

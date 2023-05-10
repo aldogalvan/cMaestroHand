@@ -144,7 +144,7 @@ void cHand::initialize_graphics(cColorf joints_color, cColorf links_color, cColo
 
 		for (int fingerid = 0; fingerid < n_fingers; fingerid++)
 		{
-            if (fingerid == 10 || fingerid == 11 || fingerid == 12)
+            if (fingerid == 0 || fingerid == 1)
             {
                 links_color = cColorf(75.0 / 255.0, 00.0 / 255.0, 75.0 / 255.0, 1);
                 joints_color = cColorf(0.75, 0.01, 0.5, 0.05);

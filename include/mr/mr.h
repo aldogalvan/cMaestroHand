@@ -43,7 +43,7 @@ namespace mr {
  * Input: Vector3d 3x1 angular velocity vector
  * Returns: MatrixXd 3x3 skew symmetric matrix
  */
-    Matrix3d VecToso3(const Vector3d&);
+    Matrix3d VecToso3(const Vector3d &);
 
 
 /*
@@ -51,7 +51,7 @@ namespace mr {
  * Inputs: MatrixXd 3x3 skew symmetric matrix
  * Returns: Vector3d 3x1 angular velocity
  */
-    Vector3d so3ToVec(const MatrixXd&);
+    Vector3d so3ToVec(const MatrixXd &);
 
 
 /*
@@ -60,7 +60,7 @@ namespace mr {
  *				and the angle of rotation)
  * Returns: The axis and angle of rotation as [x, y, z, theta]
  */
-    Vector4d AxisAng3(const Vector3d&);
+    Vector4d AxisAng3(const Vector3d &);
 
 
 /*
@@ -68,14 +68,14 @@ namespace mr {
  * Inputs: exponenential representation of a rotation
  * Returns: Rotation matrix
  */
-    Matrix3d MatrixExp3(const Matrix3d&);
+    Matrix3d MatrixExp3(const Matrix3d &);
 
 
 /* Function: Computes the matrix logarithm of a rotation matrix
  * Inputs: Rotation matrix
  * Returns: matrix logarithm of a rotation
  */
-    Matrix3d MatrixLog3(const Matrix3d&);
+    Matrix3d MatrixLog3(const Matrix3d &);
 
 
 /*
@@ -85,7 +85,7 @@ namespace mr {
  * Returns: Matrix of T = [ [R, p],
  *						    [0, 1] ]
  */
-    MatrixXd RpToTrans(const Matrix3d&, const Vector3d&);
+    MatrixXd RpToTrans(const Matrix3d &, const Vector3d &);
 
 
 /*
@@ -94,7 +94,7 @@ namespace mr {
  * Inputs: Homogeneous transformation matrix
  * Returns: std::vector of [rotation matrix, position vector]
  */
-    std::vector<MatrixXd> TransToRp(const MatrixXd&);
+    std::vector<MatrixXd> TransToRp(const MatrixXd &);
 
 
 /*
@@ -102,14 +102,14 @@ namespace mr {
  * Inputs: Spatial velocity vector [angular velocity, linear velocity]
  * Returns: Transformation matrix
  */
-    MatrixXd VecTose3(const VectorXd&);
+    MatrixXd VecTose3(const VectorXd &);
 
 
 /* Function: Translates a transformation matrix into a spatial velocity vector
  * Inputs: Transformation matrix
  * Returns: Spatial velocity vector [angular velocity, linear velocity]
  */
-    VectorXd se3ToVec(const MatrixXd&);
+    VectorXd se3ToVec(const MatrixXd &);
 
 
 /*
@@ -118,7 +118,7 @@ namespace mr {
  * Inputs: 4x4 Transformation matrix SE(3)
  * Returns: 6x6 Adjoint Representation of the matrix
  */
-    MatrixXd Adjoint(const MatrixXd&);
+    MatrixXd Adjoint(const MatrixXd &);
 
 
 /*
@@ -126,7 +126,7 @@ namespace mr {
  * Inputs: se3 matrix representation of exponential coordinates (transformation matrix)
  * Returns: 6x6 Matrix representing the rotation
  */
-    MatrixXd MatrixExp6(const MatrixXd&);
+    MatrixXd MatrixExp6(const MatrixXd &);
 
 
 /*
@@ -134,7 +134,7 @@ namespace mr {
  * Inputs: R: Transformation matrix in SE3
  * Returns: The matrix logarithm of R
  */
-    MatrixXd MatrixLog6(const MatrixXd&);
+    MatrixXd MatrixLog6(const MatrixXd &);
 
 
 /*
@@ -147,7 +147,7 @@ namespace mr {
  *				at the specified coordinates
  * Notes: FK means Forward Kinematics
  */
-    MatrixXd FKinSpace(const MatrixXd&, const MatrixXd&, const VectorXd&);
+    MatrixXd FKinSpace(const MatrixXd &, const MatrixXd &, const VectorXd &);
 
 /*
  * Function: Compute end effector frame (used for current body position calculation)
@@ -159,7 +159,7 @@ namespace mr {
  *				at the specified coordinates
  * Notes: FK means Forward Kinematics
  */
-    MatrixXd FKinBody(const MatrixXd&, const MatrixXd&, const VectorXd&);
+    MatrixXd FKinBody(const MatrixXd &, const MatrixXd &, const VectorXd &);
 
 
 /*
@@ -167,7 +167,7 @@ namespace mr {
  * Inputs: Screw axis in home position, joint configuration
  * Returns: 6xn Spatial Jacobian
  */
-    MatrixXd JacobianSpace(const MatrixXd&, const MatrixXd&);
+    MatrixXd JacobianSpace(const MatrixXd &, const MatrixXd &);
 
 
 /*
@@ -175,7 +175,7 @@ namespace mr {
  * Inputs: Screw axis in BODY position, joint configuration
  * Returns: 6xn Bobdy Jacobian
  */
-    MatrixXd JacobianBody(const MatrixXd&, const MatrixXd&);
+    MatrixXd JacobianBody(const MatrixXd &, const MatrixXd &);
 
 
 /*
@@ -183,14 +183,14 @@ namespace mr {
  * Inputs: A homogeneous transformation Matrix T
  * Returns: The inverse of T
  */
-    MatrixXd TransInv(const MatrixXd&);
+    MatrixXd TransInv(const MatrixXd &);
 
 /*
  * Inverts a rotation matrix
  * Inputs: A rotation matrix  R
  * Returns: The inverse of R
  */
-    MatrixXd RotInv(const MatrixXd&);
+    MatrixXd RotInv(const MatrixXd &);
 
 /*
  * Takes a parametric description of a screw axis and converts it to a
@@ -214,7 +214,7 @@ namespace mr {
  * along/about S in form [S, theta]
  * Note: Is it better to return std::map<S, theta>?
  */
-    VectorXd AxisAng6(const VectorXd&);
+    VectorXd AxisAng6(const VectorXd &);
 
 
 /*
@@ -226,7 +226,7 @@ namespace mr {
  * (see http://hades.mech.northwestern.edu/index.php/Modern_Robotics_Linear_Algebra_Review).
  * This function is only appropriate for matrices close to SO(3).
  */
-    MatrixXd ProjectToSO3(const MatrixXd&);
+    MatrixXd ProjectToSO3(const MatrixXd &);
 
 
 /*
@@ -238,7 +238,7 @@ namespace mr {
  * (see http://hades.mech.northwestern.edu/index.php/Modern_Robotics_Linear_Algebra_Review).
  * This function is only appropriate for matrices close to SE(3).
  */
-    MatrixXd ProjectToSE3(const MatrixXd&);
+    MatrixXd ProjectToSE3(const MatrixXd &);
 
 
 /*
@@ -251,7 +251,7 @@ namespace mr {
  *  If det(M) <= 0, return a large number.
  *  If det(M) > 0, return norm(M^T*M - I).
  */
-    double DistanceToSO3(const Matrix3d&);
+    double DistanceToSO3(const Matrix3d &);
 
 
 /*
@@ -267,7 +267,7 @@ namespace mr {
  *  and set the first three entries of the fourth column of mat to zero. Then
  *  return norm(T - I).
  */
-    double DistanceToSE3(const Matrix4d&);
+    double DistanceToSE3(const Matrix4d &);
 
 
 /*
@@ -277,7 +277,7 @@ namespace mr {
  * Outputs:
  *	 true if M is very close to or in SO(3), false otherwise
  */
-    bool TestIfSO3(const Matrix3d&);
+    bool TestIfSO3(const Matrix3d &);
 
 
 /*
@@ -287,7 +287,7 @@ namespace mr {
  * Outputs:
  *	 true if T is very close to or in SE(3), false otherwise
  */
-    bool TestIfSE3(const Matrix4d&);
+    bool TestIfSE3(const Matrix4d &);
 
 
 /*
@@ -313,8 +313,11 @@ namespace mr {
  *           within the tolerances eomg and ev.
  *	thetalist[in][out]: Joint angles that achieve T within the specified tolerances,
  */
-    bool IKinBody(const MatrixXd&, const MatrixXd&, const MatrixXd&, const MatrixXd&, MatrixXd&, VectorXd&,
-                  const VectorXd&, const VectorXd&, const VectorXd&, double, double);
+    bool IKinBody(const MatrixXd&, const MatrixXd &, const MatrixXd &, VectorXd &, const MatrixXd&,
+                  const Eigen::VectorXd&, double, double);
+
+    bool IKinBodyDigit(const MatrixXd &, const MatrixXd &, const MatrixXd &, VectorXd &, double ,
+                       const MatrixXd& , double , double , double );
 
 
 /*
@@ -340,355 +343,12 @@ namespace mr {
  *           within the tolerances eomg and ev.
  *	thetalist[in][out]: Joint angles that achieve T within the specified tolerances,
  */
-    bool IKinSpace(const MatrixXd&, const MatrixXd&, const MatrixXd&, const MatrixXd&, MatrixXd&, VectorXd&,
-                   const VectorXd&, const VectorXd&, const VectorXd&, double, double);
 
-/*
- * Function: This function uses forward-backward Newton-Euler iterations to solve the
- * equation:
- * taulist = Mlist(thetalist) * ddthetalist + c(thetalist, dthetalist) ...
- *           + g(thetalist) + Jtr(thetalist) * Ftip
- * Inputs:
- *  thetalist: n-vector of joint variables
- *  dthetalist: n-vector of joint rates
- *  ddthetalist: n-vector of joint accelerations
- *  g: Gravity vector g
- *  Ftip: Spatial force applied by the end-effector expressed in frame {n+1}
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *
- * Outputs:
- *  taulist: The n-vector of required joint forces/torques
- *
- */
-    VectorXd InverseDynamics(const VectorXd&, const VectorXd&, const VectorXd&,
-                                    const VectorXd&, const VectorXd&, const std::vector<MatrixXd>&,
-                                    const std::vector<MatrixXd>&, const MatrixXd&);
+    bool IKinSpace(const MatrixXd &, const MatrixXd &, const MatrixXd &, VectorXd &, const MatrixXd&,
+                         const Eigen::VectorXd&, double, double);
 
-/*
- * Function: This function calls InverseDynamics with Ftip = 0, dthetalist = 0, and
- *   ddthetalist = 0. The purpose is to calculate one important term in the dynamics equation
- * Inputs:
- *  thetalist: n-vector of joint variables
- *  g: Gravity vector g
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *
- * Outputs:
- *  grav: The 3-vector showing the effect force of gravity to the dynamics
- *
- */
-    VectorXd GravityForces(const VectorXd&, const VectorXd&,
-                                  const std::vector<MatrixXd>&, const std::vector<MatrixXd>&, const MatrixXd&);
-
-/*
- * Function: This function calls InverseDynamics n times, each time passing a
- * ddthetalist vector with a single element equal to one and all other
- * inputs set to zero. Each call of InverseDynamics generates a single
- * column, and these columns are assembled to create the inertia matrix.
- *
- * Inputs:
- *  thetalist: n-vector of joint variables
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *
- * Outputs:
- *  M: The numerical inertia matrix M(thetalist) of an n-joint serial
- *     chain at the given configuration thetalist.
- */
-    MatrixXd MassMatrix(const VectorXd&,
-                               const std::vector<MatrixXd>&, const std::vector<MatrixXd>&, const MatrixXd&);
-
-/*
- * Function: This function calls InverseDynamics with g = 0, Ftip = 0, and
- * ddthetalist = 0.
- *
- * Inputs:
- *  thetalist: n-vector of joint variables
- *  dthetalist: A list of joint rates
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *
- * Outputs:
- *  c: The vector c(thetalist,dthetalist) of Coriolis and centripetal
- *     terms for a given thetalist and dthetalist.
- */
-    VectorXd VelQuadraticForces(const VectorXd&, const VectorXd&,
-                                       const std::vector<MatrixXd>&, const std::vector<MatrixXd>&, const MatrixXd&);
-
-/*
- * Function: This function calls InverseDynamics with g = 0, dthetalist = 0, and
- * ddthetalist = 0.
- *
- * Inputs:
- *  thetalist: n-vector of joint variables
- *  Ftip: Spatial force applied by the end-effector expressed in frame {n+1}
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *
- * Outputs:
- *  JTFtip: The joint forces and torques required only to create the
- *     end-effector force Ftip.
- */
-    VectorXd EndEffectorForces(const VectorXd&, const VectorXd&,
-                                      const std::vector<MatrixXd>&, const std::vector<MatrixXd>&, const MatrixXd&);
-
-/*
- * Function: This function computes ddthetalist by solving:
- * Mlist(thetalist) * ddthetalist = taulist - c(thetalist,dthetalist)
- *                                  - g(thetalist) - Jtr(thetalist) * Ftip
- * Inputs:
- *  thetalist: n-vector of joint variables
- *  dthetalist: n-vector of joint rates
- *  taulist: An n-vector of joint forces/torques
- *  g: Gravity vector g
- *  Ftip: Spatial force applied by the end-effector expressed in frame {n+1}
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *
- * Outputs:
- *  ddthetalist: The resulting joint accelerations
- *
- */
-    VectorXd ForwardDynamics(const VectorXd&, const VectorXd&, const VectorXd&,
-                                    const VectorXd&, const VectorXd&, const std::vector<MatrixXd>&,
-                                    const std::vector<MatrixXd>&, const MatrixXd&);
-
-
-/*
- * Function: Compute the joint angles and velocities at the next timestep using
-    first order Euler integration
- * Inputs:
- *  thetalist[in]: n-vector of joint variables
- *  dthetalist[in]: n-vector of joint rates
- *	ddthetalist: n-vector of joint accelerations
- *  dt: The timestep delta t
- *
- * Outputs:
- *  thetalist[out]: Vector of joint variables after dt from first order Euler integration
- *  dthetalist[out]: Vector of joint rates after dt from first order Euler integration
- */
-    void EulerStep(VectorXd&, VectorXd&, const VectorXd&, double);
-
-
-/*
- * Function: Compute the joint forces/torques required to move the serial chain along the given
- *	trajectory using inverse dynamics
- * Inputs:
- *  thetamat: An N x n matrix of robot joint variables (N: no. of trajecoty time step points; n: no. of robot joints
- *  dthetamat: An N x n matrix of robot joint velocities
- *  ddthetamat: An N x n matrix of robot joint accelerations
- *	g: Gravity vector g
- *	Ftipmat: An N x 6 matrix of spatial forces applied by the end-effector (if there are no tip forces
- *			 the user should input a zero matrix)
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *
- * Outputs:
- *  taumat: The N x n matrix of joint forces/torques for the specified trajectory, where each of the N rows is the vector
- *			of joint forces/torques at each time step
- */
-    MatrixXd InverseDynamicsTrajectory(const MatrixXd&, const MatrixXd&, const MatrixXd&,
-                                              const VectorXd&, const MatrixXd&, const std::vector<MatrixXd>&, const std::vector<MatrixXd>&,
-                                              const MatrixXd&);
-
-
-/*
- * Function: Compute the motion of a serial chain given an open-loop history of joint forces/torques
- * Inputs:
- *  thetalist: n-vector of initial joint variables
- *  dthetalist: n-vector of initial joint rates
- *  taumat: An N x n matrix of joint forces/torques, where each row is is the joint effort at any time step
- *	g: Gravity vector g
- *	Ftipmat: An N x 6 matrix of spatial forces applied by the end-effector (if there are no tip forces
- *			 the user should input a zero matrix)
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *	dt: The timestep between consecutive joint forces/torques
- *	intRes: Integration resolution is the number of times integration (Euler) takes places between each time step.
- *			Must be an integer value greater than or equal to 1
- *
- * Outputs: std::vector of [thetamat, dthetamat]
- *  thetamat: The N x n matrix of joint angles resulting from the specified joint forces/torques
- *  dthetamat: The N x n matrix of joint velocities
- */
-    std::vector<MatrixXd> ForwardDynamicsTrajectory(const VectorXd&, const VectorXd&, const MatrixXd&,
-                                                           const VectorXd&, const MatrixXd&, const std::vector<MatrixXd>&, const std::vector<MatrixXd>&,
-                                                           const MatrixXd&, double, int);
-
-
-/*
- * Function: Compute the joint control torques at a particular time instant
- * Inputs:
- *  thetalist: n-vector of joint variables
- *  dthetalist: n-vector of joint rates
- *	eint: n-vector of the time-integral of joint errors
- *	g: Gravity vector g
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *  thetalistd: n-vector of reference joint variables
- *  dthetalistd: n-vector of reference joint rates
- *  ddthetalistd: n-vector of reference joint accelerations
- *	Kp: The feedback proportional gain (identical for each joint)
- *	Ki: The feedback integral gain (identical for each joint)
- *	Kd: The feedback derivative gain (identical for each joint)
- *
- * Outputs:
- *  tau_computed: The vector of joint forces/torques computed by the feedback
- *				  linearizing controller at the current instant
- */
-    VectorXd ComputedTorque(const VectorXd&, const VectorXd&, const VectorXd&,
-                                   const VectorXd&, const std::vector<MatrixXd>&, const std::vector<MatrixXd>&,
-                                   const MatrixXd&, const VectorXd&, const VectorXd&, const VectorXd&, double, double, double);
-
-
-/*
- * Function: Compute s(t) for a cubic time scaling
- * Inputs:
- *  Tf: Total time of the motion in seconds from rest to rest
- *  t: The current time t satisfying 0 < t < Tf
- *
- * Outputs:
- *  st: The path parameter corresponding to a third-order
- *      polynomial motion that begins and ends at zero velocity
- */
-    double CubicTimeScaling(double, double);
-
-
-/*
- * Function: Compute s(t) for a quintic time scaling
- * Inputs:
- *  Tf: Total time of the motion in seconds from rest to rest
- *  t: The current time t satisfying 0 < t < Tf
- *
- * Outputs:
- *  st: The path parameter corresponding to a fifth-order
- *      polynomial motion that begins and ends at zero velocity
- *	    and zero acceleration
- */
-    double QuinticTimeScaling(double, double);
-
-
-/*
- * Function: Compute a straight-line trajectory in joint space
- * Inputs:
- *  thetastart: The initial joint variables
- *  thetaend: The final joint variables
- *  Tf: Total time of the motion in seconds from rest to rest
- *	N: The number of points N > 1 (Start and stop) in the discrete
- *     representation of the trajectory
- *  method: The time-scaling method, where 3 indicates cubic (third-
- *          order polynomial) time scaling and 5 indicates quintic
- *          (fifth-order polynomial) time scaling
- *
- * Outputs:
- *  traj: A trajectory as an N x n matrix, where each row is an n-vector
- *        of joint variables at an instant in time. The first row is
- *        thetastart and the Nth row is thetaend . The elapsed time
- *        between each row is Tf / (N - 1)
- */
-    MatrixXd JointTrajectory(const VectorXd&, const VectorXd&, double, int, int);
-
-
-/*
- * Function: Compute a trajectory as a list of N SE(3) matrices corresponding to
- *			 the screw motion about a space screw axis
- * Inputs:
- *  Xstart: The initial end-effector configuration
- *  Xend: The final end-effector configuration
- *  Tf: Total time of the motion in seconds from rest to rest
- *	N: The number of points N > 1 (Start and stop) in the discrete
- *     representation of the trajectory
- *  method: The time-scaling method, where 3 indicates cubic (third-
- *          order polynomial) time scaling and 5 indicates quintic
- *          (fifth-order polynomial) time scaling
- *
- * Outputs:
- *  traj: The discretized trajectory as a list of N matrices in SE(3)
- *        separated in time by Tf/(N-1). The first in the list is Xstart
- *        and the Nth is Xend
- */
-    std::vector<MatrixXd> ScrewTrajectory(const MatrixXd&, const MatrixXd&, double, int, int);
-
-
-/*
- * Function: Compute a trajectory as a list of N SE(3) matrices corresponding to
- *			 the origin of the end-effector frame following a straight line
- * Inputs:
- *  Xstart: The initial end-effector configuration
- *  Xend: The final end-effector configuration
- *  Tf: Total time of the motion in seconds from rest to rest
- *	N: The number of points N > 1 (Start and stop) in the discrete
- *     representation of the trajectory
- *  method: The time-scaling method, where 3 indicates cubic (third-
- *          order polynomial) time scaling and 5 indicates quintic
- *          (fifth-order polynomial) time scaling
- *
- * Outputs:
- *  traj: The discretized trajectory as a list of N matrices in SE(3)
- *        separated in time by Tf/(N-1). The first in the list is Xstart
- *        and the Nth is Xend
- * Notes:
- *	This function is similar to ScrewTrajectory, except the origin of the
- *  end-effector frame follows a straight line, decoupled from the rotational
- *  motion.
- */
-    std::vector<MatrixXd> CartesianTrajectory(const MatrixXd&, const MatrixXd&, double, int, int);
-
-
-/*
- * Function: Compute the motion of a serial chain given an open-loop history of joint forces/torques
- * Inputs:
- *  thetalist: n-vector of initial joint variables
- *  dthetalist: n-vector of initial joint rates
- *	g: Gravity vector g
- *	Ftipmat: An N x 6 matrix of spatial forces applied by the end-effector (if there are no tip forces
- *			 the user should input a zero matrix)
- *  Mlist: List of link frames {i} relative to {i-1} at the home position
- *  Glist: Spatial inertia matrices Gi of the links
- *  Slist: Screw axes Si of the joints in a space frame, in the format
- *         of a matrix with the screw axes as the columns.
- *  thetamatd: An Nxn matrix of desired joint variables from the reference trajectory
- *  dthetamatd: An Nxn matrix of desired joint velocities
- *  ddthetamatd: An Nxn matrix of desired joint accelerations
- *	gtilde: The gravity vector based on the model of the actual robot (actual values given above)
- *  Mtildelist: The link frame locations based on the model of the actual robot (actual values given above)
- *  Gtildelist: The link spatial inertias based on the model of the actual robot (actual values given above)
- *	Kp: The feedback proportional gain (identical for each joint)
- *	Ki: The feedback integral gain (identical for each joint)
- *	Kd: The feedback derivative gain (identical for each joint)
- *	dt: The timestep between points on the reference trajectory
- *	intRes: Integration resolution is the number of times integration (Euler) takes places between each time step.
- *			Must be an integer value greater than or equal to 1
- *
- * Outputs: std::vector of [taumat, thetamat]
- *  taumat: An Nxn matrix of the controllers commanded joint forces/ torques, where each row of n forces/torques
- *			  corresponds to a single time instant
- *  thetamat: The N x n matrix of actual joint angles
- */
-    std::vector<MatrixXd> SimulateControl(const VectorXd&, const VectorXd&, const VectorXd&,
-                                                 const MatrixXd&, const std::vector<MatrixXd>&, const std::vector<MatrixXd>&,
-                                                 const MatrixXd&, const MatrixXd&, const MatrixXd&, const MatrixXd&,
-                                                 const VectorXd&, const std::vector<MatrixXd>&, const std::vector<MatrixXd>&,
-                                                 double, double, double, double, int);
+    bool IKinSpaceDigit(const MatrixXd &, const MatrixXd &, const MatrixXd &, VectorXd &, double ,
+                       const MatrixXd& , double , double , double );
 
 }
 
